@@ -1,0 +1,2641 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="data:application/json,{
+  %22name%22: %22Sardor Trading Journal%22,
+  %22short_name%22: %22Sardor TJ%22,
+  %22description%22: %22Professional Trading Journal%22,
+  %22start_url%22: %22.%22,
+  %22display%22: %22standalone%22,
+  %22background_color%22: %22%23080e17%22,
+  %22theme_color%22: %22%23080e17%22,
+  %22orientation%22: %22portrait%22,
+  %22icons%22: [
+    {%22src%22: %22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='40' fill='%23080e17'/%3E%3Ctext x='96' y='130' font-size='110' text-anchor='middle' fill='%2322d3a5'%3E%D1%81%3C/text%3E%3C/svg%3E%22, %22sizes%22: %22192x192%22, %22type%22: %22image/svg+xml%22},
+    {%22src%22: %22data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23080e17'/%3E%3Ctext x='256' y='360' font-size='300' text-anchor='middle' fill='%2322d3a5'%3E%D1%81%3C/text%3E%3C/svg%3E%22, %22sizes%22: %22512x512%22, %22type%22: %22image/svg+xml%22}
+  ]
+}">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TJ Pro">
+<meta name="theme-color" content="#080e17">
+<title>Trading Journal Pro</title>
+
+<style>
+  :root {
+    --bg:#080e17;--bg2:#0a1118;--bg3:#0f1923;--bg4:#0a1520;
+    --border:#131e2d;--border2:#1a2535;
+    --green:#22d3a5;--red:#f87171;--gold:#fbbf24;--blue:#7ab3e0;
+    --muted:#4a6282;--text:#e2e8f0;--text2:#b8d4f0;--text3:#7a9bc0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;min-height:100vh;padding-bottom:80px}
+
+  .header{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 16px;position:sticky;top:0;z-index:100}
+  .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .logo{display:flex;align-items:center;gap:8px}
+  .logo-icon{width:30px;height:30px;background:linear-gradient(135deg,var(--green),#3b82f6);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+  .logo-text{font-weight:700;font-size:16px;letter-spacing:-0.5px}
+  .sardor-emblem{display:flex;align-items:center;gap:6px}
+  .sardor-name{
+    font-family:Georgia,serif;
+    font-size:0px;
+    letter-spacing:0;
+    background:linear-gradient(135deg,#22d3a5 0%,#7ab3e0 50%,#fbbf24 100%);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+    filter:drop-shadow(0 0 6px rgba(34,211,165,0.4));
+  }
+  .badge{font-size:10px;color:var(--green);background:rgba(34,211,165,0.1);padding:2px 7px;border-radius:20px;font-weight:700}
+  .add-btn{background:linear-gradient(135deg,var(--green),#14b8a6);color:#000;border:none;border-radius:10px;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer}
+
+  .tabs{display:flex;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:0 0 auto;padding:7px 10px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-weight:600;font-size:10px;cursor:pointer;text-align:center;transition:all 0.2s;white-space:nowrap}
+  .tab.active{border-bottom-color:var(--green);color:var(--green)}
+
+  .page{display:none;padding:14px 14px 0}
+  .page.active{display:block}
+
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .stat-card{background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:12px 14px}
+  .stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px}
+  .stat-value{font-size:20px;font-weight:700;font-family:monospace}
+  .stat-sub{font-size:10px;color:var(--muted);margin-top:2px}
+  .green{color:var(--green)}.red{color:var(--red)}.gold{color:var(--gold)}
+
+  .filter-row{display:flex;gap:8px;margin-bottom:12px}
+  .filter-select{background:var(--bg4);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:7px 10px;font-size:12px;flex:1;outline:none}
+
+  .trade-card{background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+  .trade-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .trade-inst{font-weight:700;font-size:15px;color:var(--text2)}
+  .trade-date{font-size:11px;color:var(--muted)}
+  .type-badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:5px}
+  .type-buy{background:rgba(34,211,165,0.1);color:var(--green)}
+  .type-sell{background:rgba(248,113,113,0.1);color:var(--red)}
+  .trade-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+  .trade-item{font-size:12px}
+  .trade-item span{color:var(--muted);font-size:10px;display:block}
+  .trade-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+  .pnl-big{font-size:18px;font-weight:700;font-family:monospace}
+  .nat-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+  .nat-win{background:rgba(34,211,165,0.1);color:var(--green)}
+  .nat-loss{background:rgba(248,113,113,0.1);color:var(--red)}
+  .trade-actions{display:flex;gap:6px}
+  .action-btn{background:var(--bg4);border:1px solid var(--border);border-radius:7px;padding:5px 9px;font-size:13px;cursor:pointer}
+
+  .empty{text-align:center;padding:50px 20px;color:var(--muted)}
+  .empty-icon{font-size:44px;margin-bottom:12px}
+  .empty-title{font-size:15px;font-weight:600;margin-bottom:4px}
+  .empty-sub{font-size:12px}
+
+  .chart-box{background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:16px;margin-bottom:12px}
+  .chart-title{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:12px}
+  .chart-svg{width:100%;display:block}
+
+  .win-bar-wrap{height:10px;background:var(--bg4);border-radius:10px;overflow:hidden;margin:8px 0}
+  .win-bar-inner{display:flex;height:100%}
+  .win-seg{background:var(--green);transition:flex 0.5s}
+  .loss-seg{background:var(--red);transition:flex 0.5s}
+
+  .inst-row{margin-bottom:14px}
+  .inst-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+  .inst-name{font-weight:700;font-size:14px;color:var(--text2)}
+  .inst-meta{display:flex;gap:10px;font-size:12px}
+  .inst-bar{height:5px;background:var(--bg4);border-radius:4px;overflow:hidden}
+  .inst-fill{height:100%;border-radius:4px;transition:width 0.5s}
+
+  .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:flex-end}
+  .overlay.open{display:flex}
+  .modal{background:var(--bg2);border-radius:20px 20px 0 0;padding:20px 16px;width:100%;max-height:92vh;overflow-y:auto;border-top:1px solid var(--border2)}
+  .modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px}
+  .modal-title{font-size:16px;font-weight:700;margin-bottom:16px}
+  .live-box{background:var(--bg4);border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;gap:20px}
+  .live-item label{font-size:10px;color:var(--muted);display:block;margin-bottom:2px}
+  .live-val{font-size:18px;font-weight:700;font-family:monospace}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .form-group{display:flex;flex-direction:column;gap:5px}
+  .form-group.full{grid-column:1/-1}
+  .form-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px}
+  .form-input,.form-select{background:var(--bg4);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 12px;font-size:14px;width:100%;outline:none;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;appearance:none}
+  .form-input:focus,.form-select:focus{border-color:#1e4a6e}
+  textarea.form-input{resize:none}
+  .segment{display:flex;background:var(--bg4);border-radius:8px;overflow:hidden}
+  .seg-btn{flex:1;padding:10px;text-align:center;font-weight:700;font-size:13px;border:none;background:none;color:var(--muted);cursor:pointer;transition:all 0.2s}
+  .seg-btn.active-buy{background:rgba(34,211,165,0.15);color:var(--green)}
+  .seg-btn.active-sell{background:rgba(248,113,113,0.15);color:var(--red)}
+  .modal-btns{display:flex;gap:10px;margin-top:18px;padding-bottom:8px}
+  .btn-cancel{flex:1;background:var(--bg4);border:1px solid var(--border);color:var(--text3);border-radius:10px;padding:12px;font-weight:600;font-size:14px;cursor:pointer}
+  .btn-save{flex:2;background:linear-gradient(135deg,var(--green),#14b8a6);color:#000;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:14px;cursor:pointer}
+  .del-modal{text-align:center;padding:8px 0 16px}
+  .del-icon{font-size:40px;margin-bottom:10px}
+  .analiz-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)}
+  .analiz-name{color:var(--text3);font-size:13px}
+  .analiz-meta{display:flex;gap:10px;font-size:12px;align-items:center}
+
+  /* ===== KALENDAR ===== */
+  .cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  .cal-nav-btn{background:var(--bg4);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:6px 14px;font-size:18px;cursor:pointer;font-weight:700;line-height:1}
+  .cal-title-wrap{text-align:center}
+  .cal-month-title{font-size:17px;font-weight:700;color:var(--text)}
+  .cal-year-title{font-size:11px;color:var(--muted);margin-top:2px}
+  .cal-summary{display:flex;gap:6px;margin-bottom:12px}
+  .cal-sum-card{flex:1;background:var(--bg4);border:1px solid var(--border);border-radius:10px;padding:9px 8px;text-align:center}
+  .cal-sum-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:3px}
+  .cal-sum-val{font-size:14px;font-weight:700;font-family:monospace}
+  .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px}
+  .cal-wd{text-align:center;font-size:9px;font-weight:700;color:var(--muted);padding:5px 0;text-transform:uppercase;letter-spacing:0.3px}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+  .cal-day{background:var(--bg4);border:1px solid var(--border);border-radius:6px;min-height:52px;padding:3px 2px;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;align-items:center;overflow:hidden}
+  .cal-day:hover{border-color:var(--muted)}
+  .cal-day.empty{background:transparent;border-color:transparent;cursor:default;min-height:52px}
+  .cal-day.today{border-color:var(--blue)!important;background:rgba(122,179,224,0.06)}
+  .cal-day.win-day{background:rgba(34,211,165,0.09);border-color:rgba(34,211,165,0.35)}
+  .cal-day.loss-day{background:rgba(248,113,113,0.18);border-color:rgba(248,113,113,0.45)}
+  .cal-day-num{font-size:10px;font-weight:700;color:var(--text3);margin-bottom:1px;align-self:flex-start;line-height:1}
+  .cal-day.today .cal-day-num{color:var(--blue)}
+  .cal-pnl{font-size:8px;font-weight:700;font-family:monospace;text-align:center;line-height:1.2;margin-top:2px;word-break:break-all;width:100%}
+  .cal-trades-count{font-size:7px;color:var(--muted);margin-top:1px}
+
+  .year-box{background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:12px}
+  .year-box-title{font-size:11px;color:var(--muted);font-weight:600;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:10px}
+  .year-months{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+  .ym-card{background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:8px 4px;text-align:center}
+  .ym-name{font-size:9px;color:var(--muted);margin-bottom:3px;font-weight:700;text-transform:uppercase}
+  .ym-val{font-size:11px;font-weight:700;font-family:monospace}
+
+  /* ===== SOZLAMA ===== */
+  .settings-info{background:rgba(34,211,165,0.05);border:1px solid rgba(34,211,165,0.2);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--text3);line-height:1.65;margin-bottom:12px}
+  .settings-info b{color:var(--green)}
+  .settings-section{background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:16px;margin-bottom:12px}
+  .settings-section-title{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px}
+  .pip-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border)}
+  .pip-row:last-child{border-bottom:none}
+  .pip-inst{font-weight:700;font-size:14px;color:var(--text2)}
+  .pip-desc{font-size:10px;color:var(--muted);margin-top:2px}
+  .pip-input{background:var(--bg4);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 10px;font-size:14px;width:88px;text-align:right;outline:none;font-family:monospace}
+  .pip-input:focus{border-color:var(--green)}
+  .save-pip-btn{width:100%;background:linear-gradient(135deg,var(--green),#14b8a6);color:#000;border:none;border-radius:10px;padding:13px;font-weight:700;font-size:14px;cursor:pointer;margin-top:4px}
+  .pip-saved{text-align:center;color:var(--green);font-size:13px;font-weight:600;margin-top:10px;display:none}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">
+      <div class="sardor-emblem">
+        <!-- Gerb SVG -->
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="g1" x1="0" y1="0" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#22d3a5"/>
+              <stop offset="50%" stop-color="#7ab3e0"/>
+              <stop offset="100%" stop-color="#fbbf24"/>
+            </linearGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="1.5" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Qalqon asosi -->
+          <path d="M18 2 L32 7 L32 20 Q32 30 18 35 Q4 30 4 20 L4 7 Z" fill="url(#g1)" opacity="0.15" stroke="url(#g1)" stroke-width="1.2" filter="url(#glow)"/>
+          <!-- Ichki qalqon -->
+          <path d="M18 5 L29 9.5 L29 19.5 Q29 27 18 31.5 Q7 27 7 19.5 L7 9.5 Z" fill="none" stroke="url(#g1)" stroke-width="0.8" opacity="0.6"/>
+          <!-- Yuqori chiziq bezak -->
+          <path d="M11 13 L18 10 L25 13" stroke="url(#g1)" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+          <!-- S harfi gerb markazida -->
+          <text x="18" y="16" text-anchor="middle" dominant-baseline="central" font-family="Georgia, serif" font-size="14" font-weight="700" fill="url(#g1)" filter="url(#glow)">س</text>
+          <!-- Pastki bezak uchburchak -->
+          <path d="M13 28 L18 31 L23 28" stroke="url(#g1)" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.7"/>
+          <!-- Burchak yulduzchalar -->
+          <circle cx="11" cy="11" r="1" fill="#fbbf24" opacity="0.8"/>
+          <circle cx="25" cy="11" r="1" fill="#fbbf24" opacity="0.8"/>
+        </svg>
+        <!-- Sardor nomi SVG bilan -->
+        <svg viewBox="0 0 175 36" width="175" height="36" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="textGrad" x1="0" y1="0" x2="130" y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#22d3a5"/>
+              <stop offset="45%" stop-color="#7ab3e0"/>
+              <stop offset="100%" stop-color="#fbbf24"/>
+            </linearGradient>
+            <filter id="textGlow">
+              <feGaussianBlur stdDeviation="1" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <!-- Bismillah — Trading Journal ornida -->
+          <text x="0" y="11" font-family="Georgia, serif" font-size="8" font-weight="400" fill="#7ab3e0" letter-spacing="0.8" opacity="0.85">Bismillahir Rohmanir Rohim</text>
+          <!-- Sardor asosiy yozuv -->
+          <text x="0" y="26" font-family="Georgia, serif" font-size="17" font-weight="900" fill="url(#textGrad)" filter="url(#textGlow)" letter-spacing="1">Sardor</text>
+          <!-- Trading Journal — pastda kichik -->
+          <text x="0" y="34" font-family="system-ui, sans-serif" font-size="6" font-weight="400" fill="#4a6282" letter-spacing="1.5" opacity="0.6">Trading Journal</text>
+        </svg>
+      </div>
+    </div>
+    <button class="add-btn" onclick="openModal()">+ Savdo</button>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('jurnal',this)">📋 Jurnal</button>
+    <button class="tab" onclick="switchTab('dashboard',this)">📊 Dash</button>
+    <button class="tab" onclick="switchTab('analiz',this)">🔬 Analiz</button>
+    <button class="tab" onclick="switchTab('kalendar',this)">📅 Kalendar</button>
+    <button class="tab" onclick="switchTab('sozlama',this)">⚙️ Sozlama</button>
+  </div>
+</div>
+
+<!-- JURNAL -->
+<div id="page-jurnal" class="page active">
+  <div id="jurnal-balans-bar" style="display:none;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:none;align-items:center;justify-content:space-between">
+    <div style="font-size:11px;color:var(--muted)">Joriy Balans</div>
+    <div id="jb-val" style="font-size:16px;font-weight:700;font-family:monospace"></div>
+  </div>
+  <div class="stat-grid" id="quick-stats"></div>
+  <div class="filter-row">
+    <select class="filter-select" id="filter-inst" onchange="renderTrades()">
+      <option value="">Barcha instrument</option>
+      <option>XAUUSD</option><option>EURUSD</option><option>GBPUSD</option>
+      <option>USDJPY</option><option>BTCUSD</option><option>ETHUSD</option>
+      <option>US30</option><option>NAS100</option><option>SP500</option><option>USOIL</option>
+    </select>
+    <select class="filter-select" id="filter-nat" onchange="renderTrades()">
+      <option value="">Barcha natija</option>
+      <option>Win</option><option>Loss</option>
+    </select>
+  </div>
+  <div id="trades-list"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page">
+  <!-- Balans banner -->
+  <div id="balans-banner" style="display:none;background:linear-gradient(135deg,#0d2a1a,#0a1f2e);border:1px solid rgba(34,211,165,0.25);border-radius:14px;padding:16px;margin-bottom:12px">
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Joriy Balans</div>
+    <div id="bb-balans" style="font-size:30px;font-weight:700;font-family:monospace;color:var(--green)"></div>
+    <div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap">
+      <div><div style="font-size:9px;color:var(--muted)">DEPOZIT</div><div id="bb-depozit" style="font-size:13px;font-weight:700;color:var(--text3)"></div></div>
+      <div><div style="font-size:9px;color:var(--muted)">FOYDA/ZARAR</div><div id="bb-pnl" style="font-size:13px;font-weight:700"></div></div>
+      <div><div style="font-size:9px;color:var(--muted)">ROI</div><div id="bb-roi" style="font-size:13px;font-weight:700"></div></div>
+      <div><div style="font-size:9px;color:var(--muted)">DRAWDOWN</div><div id="bb-dd" style="font-size:13px;font-weight:700;color:var(--red)"></div></div>
+    </div>
+  </div>
+  <div class="stat-grid" id="dash-stats"></div>
+  <div class="chart-box">
+    <div class="chart-title">Equity Curve</div>
+    <svg class="chart-svg" id="equity-chart" viewBox="0 0 320 90"></svg>
+  </div>
+  <div class="chart-box">
+    <div class="chart-title">Win / Loss Nisbati</div>
+    <div class="win-bar-wrap"><div class="win-bar-inner" id="win-bar"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px">
+      <span id="wl-wins" class="green"></span>
+      <span id="wl-losses" class="red"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ANALIZ -->
+<div id="page-analiz" class="page">
+  <div class="chart-box">
+    <div class="chart-title">Foyda / Zarar Grafigi</div>
+    <svg id="pnl-graph" width="100%" viewBox="0 0 320 120" style="display:block;overflow:visible"></svg>
+    <div id="pnl-graph-legend" style="display:flex;gap:12px;margin-top:8px;font-size:11px;flex-wrap:wrap"></div>
+  </div>
+  <div class="chart-box">
+    <div class="chart-title">Instrument bo'yicha</div>
+    <div id="inst-list"></div>
+  </div>
+  <div class="chart-box">
+    <div class="chart-title">Sabab bo'yicha</div>
+    <div id="sabab-list"></div>
+  </div>
+</div>
+
+<!-- KALENDAR -->
+<div id="page-kalendar" class="page">
+  <div class="chart-box" style="padding:14px">
+    <div class="cal-header">
+      <button class="cal-nav-btn" onclick="calPrev()">&#8249;</button>
+      <div class="cal-title-wrap">
+        <div class="cal-month-title" id="cal-month-title"></div>
+        <div class="cal-year-title" id="cal-year-title"></div>
+      </div>
+      <button class="cal-nav-btn" onclick="calNext()">&#8250;</button>
+    </div>
+    <div class="cal-summary">
+      <div class="cal-sum-card">
+        <div class="cal-sum-label">Oylik P&L</div>
+        <div class="cal-sum-val" id="cal-monthly-pnl">$0.00</div>
+      </div>
+      <div class="cal-sum-card">
+        <div class="cal-sum-label">Savdolar</div>
+        <div class="cal-sum-val" id="cal-monthly-count">0</div>
+      </div>
+      <div class="cal-sum-card">
+        <div class="cal-sum-label">Win Rate</div>
+        <div class="cal-sum-val" id="cal-monthly-wr">0%</div>
+      </div>
+    </div>
+    <div class="cal-weekdays">
+      <div class="cal-wd">Du</div>
+      <div class="cal-wd">Se</div>
+      <div class="cal-wd">Ch</div>
+      <div class="cal-wd">Pa</div>
+      <div class="cal-wd">Ju</div>
+      <div class="cal-wd" style="color:var(--gold)">Sh</div>
+      <div class="cal-wd" style="color:var(--red)">Ya</div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+  <div class="year-box">
+    <div class="year-box-title">&#128198; Yillik Xulosa &mdash; <span id="year-label"></span></div>
+    <div class="year-months" id="year-months"></div>
+  </div>
+</div>
+
+<!-- SOZLAMA -->
+<div id="page-sozlama" class="page">
+  <!-- DEPOZIT SECTION -->
+  <div class="settings-section" style="margin-bottom:12px">
+    <div class="settings-section-title">💰 Depozit (Boshlang'ich Balans)</div>
+    <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+      <div style="flex:1">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Brokeringizga qo'ygan boshlang'ich summangiz</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:16px;color:var(--muted);font-weight:700">$</span>
+          <input type="number" id="depozit-input" class="form-input" placeholder="1000" step="100" min="0" style="flex:1;font-size:16px;font-weight:700;font-family:monospace">
+        </div>
+      </div>
+    </div>
+    <button onclick="saveDepozit()" class="save-pip-btn">✓ Depozitni Saqlash</button>
+    <div id="depozit-saved" style="text-align:center;color:var(--green);font-size:13px;font-weight:600;margin-top:10px;display:none">✓ Saqlandi!</div>
+    <!-- Live balans preview -->
+    <div id="depozit-preview" style="margin-top:14px;display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="stat-card">
+          <div class="stat-label">Boshlang'ich</div>
+          <div class="stat-value" style="font-size:16px;color:var(--muted)" id="dep-start"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Joriy Balans</div>
+          <div class="stat-value" style="font-size:16px" id="dep-current"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Jami Foyda/Zarar</div>
+          <div class="stat-value" style="font-size:16px" id="dep-pnl"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">O'sish (ROI)</div>
+          <div class="stat-value" style="font-size:16px" id="dep-roi"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="settings-info">
+    <b>Pip qiymati nima?</b><br>
+    Har bir instrument uchun 1 ta to'liq punkt harakatida <b>1 lot</b> uchun necha dollar o'zgarishini belgilang.<br><br>
+    <b>Misol (XAUUSD):</b> Narx 4550.00 &rarr; 4551.00 = 1 punkt.<br>
+    Ko'pchilik brokerlar: 1 lot = <b>$100/punkt</b><br>
+    Siz 0.01 lot savdo qilsangiz: 0.01 &times; $100 = <b>$1/punkt</b> hisoblanadi.
+  </div>
+  <div class="settings-section">
+    <div class="settings-section-title">&#128176; Har Punkt Dollari (1 lot uchun)</div>
+    <div id="pip-rows"></div>
+    <button class="save-pip-btn" onclick="savePipSettings()">&#10003; Saqlash va Qayta Hisoblash</button>
+    <div class="pip-saved" id="pip-saved">&#10003; Saqlandi! Barcha savdolar qayta hisoblandi.</div>
+  </div>
+</div>
+
+<!-- TRADE MODAL -->
+<div class="overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div style="display:flex;align-items:center;margin-bottom:14px;gap:10px">
+      <button onclick="tryCloseModal()" style="background:rgba(34,211,165,0.12);border:2px solid rgba(34,211,165,0.4);border-radius:10px;color:var(--green);font-size:20px;font-weight:900;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;line-height:1">‹</button>
+      <div class="modal-title" id="modal-title" style="margin-bottom:0">Yangi Savdo</div>
+    </div>
+    <div class="live-box">
+      <div class="live-item"><label>HISOBLANGAN P&L</label><div class="live-val" id="live-pnl">$0.00</div></div>
+      <div class="live-item"><label>RISK:REWARD</label><div class="live-val gold" id="live-rr">&#8212;</div></div>
+      <div class="live-item"><label>NATIJA</label><div class="live-val" id="live-nat">&#8212;</div></div>
+    </div>
+    <!-- risk-warn-box olib tashlandi -->
+    <!-- SL zarar ko'rsatgich -->
+    <div id="sl-pnl-box" style="display:none;margin-bottom:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <!-- SL zarar -->
+        <div id="sl-card" style="background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);border-radius:8px;padding:6px 10px;position:relative;overflow:visible">
+          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">🔴 SL zarar</div>
+          <div style="display:flex;align-items:center;gap:3px;flex-wrap:wrap;line-height:1.3;overflow:visible">
+            <div id="sl-pnl-val" style="font-size:13px;font-weight:700;font-family:monospace;color:var(--red);flex-shrink:0">—</div>
+            <div id="sl-pct-badge" style="font-size:10px;font-weight:700;background:rgba(248,113,113,0.2);color:var(--red);border-radius:4px;padding:1px 5px;display:none;flex-shrink:0"></div>
+            <div id="sl-pips-badge" style="display:none;font-size:9px;font-weight:600;color:rgba(248,113,113,0.7);font-family:monospace;flex-shrink:0"></div>
+          </div>
+          <div id="sl-warn-stripe" style="display:none;position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#f87171,#dc2626)"></div>
+        </div>
+        <!-- TP foyda -->
+        <div style="background:rgba(34,211,165,0.07);border:1px solid rgba(34,211,165,0.2);border-radius:8px;padding:6px 10px">
+          <div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">🟢 TP foyda</div>
+          <div style="display:flex;align-items:center;gap:3px;flex-wrap:wrap;line-height:1.3;overflow:visible">
+            <div id="tp-pnl-val" style="font-size:13px;font-weight:700;font-family:monospace;color:var(--green);flex-shrink:0">—</div>
+            <div id="tp-pct-badge" style="font-size:10px;font-weight:700;background:rgba(34,211,165,0.15);color:var(--green);border-radius:4px;padding:1px 5px;display:none;flex-shrink:0"></div>
+            <div id="tp-pips-badge" style="display:none;font-size:9px;font-weight:600;color:rgba(34,211,165,0.6);font-family:monospace;flex-shrink:0"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">Sana</label>
+        <input type="date" id="f-sana" class="form-input" oninput="calcLive()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Instrument</label>
+        <select id="f-inst" class="form-select" oninput="calcLive()">
+          <option>XAUUSD</option><option>EURUSD</option><option>GBPUSD</option>
+          <option>USDJPY</option><option>BTCUSD</option><option>ETHUSD</option>
+          <option>US30</option><option>NAS100</option><option>SP500</option><option>USOIL</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label class="form-label" style="text-align:center;display:block">Turi</label>
+        <div class="segment">
+          <button class="seg-btn active-buy" id="btn-buy" onclick="setTuri('buy')">&#128200; BUY</button>
+          <button class="seg-btn" id="btn-sell" onclick="setTuri('sell')">&#128201; SELL</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Lot</label>
+        <input type="number" id="f-lot" class="form-input" placeholder="0.10" step="0.01" oninput="buStopApplied=false;calcLive();calcBezubitka()" style="text-align:center">
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="display:flex;align-items:center;gap:4px">
+          ATR
+          <span style="font-size:9px;color:var(--muted);font-weight:400">(ixtiyoriy)</span>
+        </label>
+        <input type="number" id="f-atr" class="form-input" placeholder="9.018" step="0.001" oninput="calcAtrStop()" style="text-align:center">
+      </div>
+      <!-- ATR Multiplier va natija -->
+      <div class="form-group full" id="atr-block" style="display:none">
+        <div style="background:rgba(251,191,36,0.07);border:1px solid rgba(251,191,36,0.25);border-radius:10px;overflow:hidden">
+          <!-- Header -->
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;user-select:none">
+            <span onclick="toggleAtrBody()" style="font-size:11px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:0.7px;cursor:pointer;flex:1">📐 ATR — TP &amp; STOP</span>
+            <div style="display:flex;align-items:center;gap:4px">
+              <!-- Hi/Low tugmachalar -->
+              <button id="btn-high" onclick="selectHiLow('high')"
+                style="font-size:10px;font-weight:700;padding:3px 7px;border-radius:5px;border:1px solid rgba(248,113,113,0.4);background:transparent;color:var(--muted);cursor:pointer">H</button>
+              <button id="btn-low" onclick="selectHiLow('low')"
+                style="font-size:10px;font-weight:700;padding:3px 7px;border-radius:5px;border:1px solid rgba(34,211,165,0.4);background:transparent;color:var(--muted);cursor:pointer">L</button>
+              <input type="number" id="f-hilow-val" placeholder="narx" step="0.001"
+                oninput="calcHiLowStop()"
+                style="width:68px;background:var(--bg4);border:1px solid var(--border);color:var(--text2);border-radius:5px;padding:3px 6px;font-size:11px;outline:none;font-family:monospace;display:none">
+              <button id="btn-hilow-clear" onclick="clearHiLow()" style="display:none;font-size:10px;padding:3px 6px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer">✕</button>
+              <!-- Toggle -->
+              <span onclick="toggleAtrBody()" id="atr-toggle-icon" style="font-size:16px;color:var(--gold);font-weight:700;line-height:1;margin-left:4px;cursor:pointer;padding:0 4px">−</span>
+            </div>
+          </div>
+          <!-- Body -->
+          <div id="atr-body" style="padding:0 10px 10px">
+            <!-- SL va TP bir qatorda -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;border-top:1px solid rgba(251,191,36,0.15);padding-top:8px;margin-bottom:8px">
+              <!-- SL -->
+              <div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                  <span style="font-size:9px;color:var(--red);font-weight:700;text-transform:uppercase">🔴 SL</span>
+                  <select id="f-atr-multi-sl" onchange="calcAtrStop()" style="background:var(--bg4);border:1px solid var(--border);color:var(--red);border-radius:5px;padding:2px 5px;font-size:11px;font-weight:700;outline:none">
+                    <option value="0.5">×0.5</option>
+                    <option value="1.0">×1.0</option>
+                    <option value="1.5" selected>×1.5</option>
+                    <option value="2.0">×2.0</option>
+                    <option value="2.5">×2.5</option>
+                    <option value="3.0">×3.0</option>
+                  </select>
+                </div>
+                <div style="background:var(--bg4);border-radius:7px;padding:6px 8px;margin-bottom:4px">
+                  <div style="font-size:8px;color:var(--muted);margin-bottom:1px">Tavsiya SL</div>
+                  <div id="atr-sl-val" style="font-size:13px;font-weight:700;font-family:monospace;color:var(--red)">—</div>
+                </div>
+                <button onclick="applyAtrSL()" style="width:100%;background:linear-gradient(135deg,#f87171,#dc2626);color:#fff;border:none;border-radius:7px;padding:7px;font-size:11px;font-weight:700;cursor:pointer">✓ SL qo'llash</button>
+              </div>
+              <!-- TP -->
+              <div>
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                  <span style="font-size:9px;color:var(--green);font-weight:700;text-transform:uppercase">🟢 TP</span>
+                  <select id="f-atr-multi-tp" onchange="calcAtrStop()" style="background:var(--bg4);border:1px solid var(--border);color:var(--green);border-radius:5px;padding:2px 5px;font-size:11px;font-weight:700;outline:none">
+                    <option value="0.5">×0.5</option>
+                    <option value="1.0">×1.0</option>
+                    <option value="1.5">×1.5</option>
+                    <option value="2.0">×2.0</option>
+                    <option value="3.0" selected>×3.0</option>
+                    <option value="4.0">×4.0</option>
+                    <option value="4.5">×4.5</option>
+                    <option value="5.0">×5.0</option>
+                  </select>
+                </div>
+                <div style="background:var(--bg4);border-radius:7px;padding:6px 8px;margin-bottom:4px">
+                  <div style="font-size:8px;color:var(--muted);margin-bottom:1px">Tavsiya TP</div>
+                  <div id="atr-tp-val" style="font-size:13px;font-weight:700;font-family:monospace;color:var(--green)">—</div>
+                </div>
+                <button onclick="applyAtrTP()" style="width:100%;background:linear-gradient(135deg,#22d3a5,#14b8a6);color:#000;border:none;border-radius:7px;padding:7px;font-size:11px;font-weight:700;cursor:pointer">✓ TP qo'llash</button>
+              </div>
+            </div>
+            <!-- Ikkalasini birga -->
+            <button onclick="applyAtrBoth()" style="width:100%;background:linear-gradient(135deg,#1e3a5f,#1e4a6e);color:var(--text2);border:1px solid var(--border2);border-radius:7px;padding:8px;font-size:11px;font-weight:700;cursor:pointer">
+              ✓ SL + TP ikkalasini qo'llash
+            </button>
+
+            <!-- 1:1 R:R HIMOYALANGAN STOP KALKULYATOR -->
+            <div style="border-top:1px solid rgba(122,179,224,0.15);margin-top:8px;padding-top:7px">
+              <!-- Sarlavha -->
+              <div style="font-size:9px;color:var(--blue);font-weight:700;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px">
+                🛡 1:1 R:R Himoyalangan Stop
+              </div>
+              <div id="bu-lot-info" style="display:none;font-size:9px;color:var(--muted);margin-bottom:4px;font-weight:600"></div>
+
+              <!-- Asosiy natija bloki -->
+              <div id="bu-calc-result" style="display:none;border-radius:8px;padding:7px 9px;margin-bottom:5px;border:2px solid rgba(122,179,224,0.2);background:rgba(122,179,224,0.05)">
+
+                <!-- Qator 1: 1-TP narxi | 1:1 Stop | 1:2 Stop -->
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-bottom:5px">
+                  <div style="text-align:center">
+                    <div class="bu-col-label" style="font-size:8px;color:var(--muted);margin-bottom:1px">1-TP narx</div>
+                    <div id="bu-partial-profit" style="font-size:12px;font-weight:700;font-family:monospace;color:var(--text2)">—</div>
+                  </div>
+                  <div style="text-align:center">
+                    <div class="bu-col-label" style="font-size:8px;color:var(--muted);margin-bottom:1px">🛡 1:1 Stop</div>
+                    <div id="bu-remain-loss" style="font-size:12px;font-weight:700;font-family:monospace;color:var(--green)">—</div>
+                  </div>
+                  <div style="text-align:center">
+                    <div class="bu-col-label" style="font-size:8px;color:var(--muted);margin-bottom:1px">🎯 1:2 Stop</div>
+                    <div id="bu-stop-price" style="font-size:13px;font-weight:700;font-family:monospace;color:var(--blue)">—</div>
+                  </div>
+                </div>
+
+                <!-- Qator 2: Xulosa satri -->
+                <div id="bu-check" style="font-size:10px;font-weight:700;padding:5px 7px;border-radius:6px;margin-bottom:4px;text-align:center"></div>
+
+                <!-- Qator 3: Ogohlantirish (stop > 1-TP bo'lsa) -->
+                <div id="bu-warn" style="display:none;font-size:10px;font-weight:700;padding:5px 7px;border-radius:6px;background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.4);color:var(--red);margin-bottom:4px;text-align:center"></div>
+
+                <!-- Qator 4: Minimum kirish sharti -->
+                <div id="bu-min-rr" style="display:none;font-size:9px;padding:4px 7px;border-radius:5px;background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);color:var(--gold);margin-bottom:3px"></div>
+
+                <div id="bu-stop-pips" style="display:none"></div>
+              </div>
+
+              <div id="bu-calc-hint" style="font-size:10px;color:var(--muted);padding:3px 0;text-align:center">📋 Chiqish narxini kiriting</div>
+              <button onclick="applyBuStop()" id="bu-apply-btn" style="display:none;width:100%;background:linear-gradient(135deg,#1e3a5f,#3b82f6);color:#fff;border:none;border-radius:7px;padding:7px;font-size:11px;font-weight:700;cursor:pointer;margin-top:3px">🛡 1:1 Stop + 🎯 1:2 TP qo'llash</button>
+            </div>
+
+            <!-- SVECHA FILTRI — kichik, SL+TP pastida -->
+            <div style="border-top:1px solid rgba(251,191,36,0.12);margin-top:8px;padding-top:7px">
+              <div style="display:flex;align-items:center;gap:6px">
+                <span style="font-size:9px;color:var(--gold);font-weight:700;text-transform:uppercase;white-space:nowrap">🕯 ATR oxirgi svecha pipsi:</span>
+                <input type="number" id="f-svecha-hajm" placeholder="pip hajmi" step="0.1"
+                  oninput="calcSvechaFilter()"
+                  style="flex:1;background:var(--bg4);border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:5px 8px;font-size:12px;outline:none;font-family:monospace;min-width:0">
+                <button onclick="document.getElementById('f-svecha-hajm').value='';calcSvechaFilter()"
+                  style="background:var(--bg4);border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:5px 8px;font-size:11px;cursor:pointer;flex-shrink:0">✕</button>
+              </div>
+              <div id="svecha-filter-result" style="display:none;border-radius:7px;padding:5px 10px;margin-top:5px">
+                <div style="display:flex;align-items:center;gap:6px">
+                  <span id="svecha-filter-icon" style="font-size:14px"></span>
+                  <span id="svecha-filter-text" style="font-size:11px;font-weight:700"></span>
+                  <span id="svecha-filter-sub" style="font-size:10px;opacity:0.75;margin-left:auto"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kirish narxi <span style="color:var(--muted);font-weight:400">/ Zona</span></label>
+        <div style="position:relative">
+          <input type="text" id="f-kirish" class="form-input" placeholder="0.00  |  0-0" inputmode="text" oninput="autoDetectZona();calcLive();calcAtrStop()" style="width:100%;padding-right:36px;box-sizing:border-box">
+          <span id="zona-indicator" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:800;color:var(--green);pointer-events:none;background:rgba(34,211,165,0.15);border:1px solid rgba(34,211,165,0.4);border-radius:4px;padding:1px 4px;line-height:1.4">Z</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="display:flex;gap:6px">
+          <span style="flex:7">Chiqish narxi</span>
+          <span style="flex:3;text-align:center">Lot</span>
+        </label>
+        <div style="display:flex;gap:6px;align-items:stretch">
+          <input type="number" id="f-chiqish" class="form-input" placeholder="0.00" step="0.001" oninput="buStopApplied=false;clearPartialOnExit();calcLive()" style="flex:7;min-width:0">
+          <input type="number" id="f-partial-lot" class="form-input" placeholder="0.00" step="0.01" oninput="buStopApplied=false;calcPartial();calcBezubitka()" style="flex:3;min-width:0;font-size:13px;text-align:center">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Stop Loss</label>
+        <input type="number" id="f-sl" class="form-input" placeholder="0.00" step="0.001" oninput="buStopApplied=false;calcBezubitka();calcLive()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Take Profit</label>
+        <div style="display:flex;gap:6px;align-items:stretch">
+          <input type="number" id="f-tp" class="form-input" placeholder="0.00" step="0.001" oninput="calcLive()" style="flex:7;min-width:0">
+          <button id="tp-bu-btn" onclick="applyBU_TP()" title="B/U: Savdo nolda yopiladi — foyda ham zarar ham yo'q"
+            style="flex:3;min-width:0;font-size:13px;font-weight:700;text-align:center;background:var(--bg4);border:1px solid var(--border);color:var(--text2);border-radius:8px;padding:0;cursor:pointer;letter-spacing:0.5px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;transition:all 0.2s"
+            onmousedown="this.style.background='rgba(255,255,255,0.06)'" onmouseup="this.style.background='var(--bg4)'">B/U</button>
+        </div>
+      </div>
+      <div class="form-group full">
+        <label class="form-label" style="display:flex;justify-content:space-between;align-items:center">
+          <span>Sabab</span>
+          <span id="sabab-counter" style="font-size:11px;font-weight:700;color:var(--red)">0/3 ✗</span>
+        </label>
+        <!-- Tanlangan sabablar -->
+        <div id="selected-sabablar" style="display:flex;flex-wrap:wrap;gap:5px;min-height:32px;margin-bottom:8px"></div>
+        <!-- Select -->
+        <select id="f-sabab" class="form-select" onchange="onSababChange(this)">
+          <option value="">— Sabab tanlang —</option>
+        </select>
+        <div id="sabab-hint" style="font-size:11px;color:var(--red);margin-top:5px;display:none">⚠️ Kamida 3 ta sabab tanlang!</div>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Izoh (ixtiyoriy)</label>
+        <textarea id="f-izoh" class="form-input" rows="2" placeholder="Bu savdo haqida eslatma..."></textarea>
+      </div>
+    </div>
+    <!-- Risk ogohlantrish bloki -->
+    <div id="save-block-risk" style="display:none;margin:0 0 6px 0;padding:9px 12px;border-radius:10px;border:1px solid rgba(248,113,113,0.4);background:rgba(248,113,113,0.08)">
+      <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:2px">⚠️ Risk juda yuqori</div>
+      <div id="save-block-risk-reason" style="font-size:11px;color:rgba(248,113,113,0.75)"></div>
+    </div>
+    <!-- Sabab ogohlantrish bloki -->
+    <div id="save-block-sabab" style="display:none;margin:0 0 6px 0;padding:9px 12px;border-radius:10px;border:1px solid rgba(251,191,36,0.4);background:rgba(251,191,36,0.07)">
+      <div style="font-size:12px;font-weight:700;color:var(--gold);margin-bottom:2px">📋 Sabablar ko'rsatilmagan</div>
+      <div id="save-block-sabab-reason" style="font-size:11px;color:rgba(251,191,36,0.8)"></div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Bekor</button>
+      <button class="btn-save" onclick="saveTrade()" id="save-btn">Qo'shish &#10003;</button>
+    </div>
+  </div>
+</div>
+
+<!-- SABAB MODAL -->
+<div class="overlay" id="sabab-overlay" onclick="closeSababModal(event)">
+  <div class="modal" style="max-height:80vh">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Sabab tanlang yoki qo'shing</div>
+    <div id="sabab-modal-list" style="margin-bottom:14px"></div>
+    <div style="border-top:1px solid var(--border);padding-top:14px">
+      <div class="form-label" style="margin-bottom:6px">+ Yangi sabab qo'shish</div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="new-sabab-input" class="form-input" placeholder="Masalan: OB, FVG, Imbalance..." style="flex:1">
+        <button onclick="addNewSabab()" style="background:linear-gradient(135deg,var(--green),#14b8a6);color:#000;border:none;border-radius:8px;padding:10px 16px;font-weight:700;font-size:14px;cursor:pointer">+</button>
+      </div>
+    </div>
+    <div class="modal-btns" style="margin-top:14px">
+      <button class="btn-cancel" onclick="closeSababModal()">Yopish</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<!-- Chiqish tasdiq modali -->
+<div class="overlay" id="exit-overlay">
+  <div class="modal" style="max-height:45vh">
+    <div class="modal-handle"></div>
+    <div style="text-align:center;padding:8px 0 20px">
+      <div id="exit-icon" style="font-size:28px;margin-bottom:10px">⚠️</div>
+      <div id="exit-title" style="font-size:15px;font-weight:700;margin-bottom:8px">O'zgarishlar saqlansizmi?</div>
+      <div id="exit-subtitle" style="font-size:12px;color:var(--muted);margin-bottom:20px">Siz kiritgan ma'lumotlar saqlanmagan</div>
+      <div id="exit-save-btns" style="display:flex;gap:8px">
+        <button onclick="exitWithoutSave()" style="flex:1;padding:12px;border-radius:10px;border:1px solid var(--border2);background:rgba(248,113,113,0.15);color:var(--red);font-size:13px;font-weight:600;cursor:pointer">Saqlamasdan chiq</button>
+        <button onclick="saveAndExit()" style="flex:1;padding:12px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--green),#14b8a6);color:#fff;font-size:13px;font-weight:600;cursor:pointer">Saqlash</button>
+      </div>
+      <button id="exit-only-btn" onclick="exitWithoutSave()" style="display:none;width:100%;padding:12px;border-radius:10px;border:1px solid var(--border2);background:rgba(248,113,113,0.15);color:var(--red);font-size:13px;font-weight:600;cursor:pointer">Saqlamasdan chiqish</button>
+      <button onclick="document.getElementById('exit-overlay').classList.remove('open')" style="margin-top:10px;width:100%;padding:10px;border-radius:10px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:13px;cursor:pointer">Bekor qilish</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="del-overlay" onclick="closeDelModal(event)">
+  <div class="modal" style="max-height:50vh">
+    <div class="modal-handle"></div>
+    <div class="del-modal">
+      <div class="del-icon">&#128465;&#65039;</div>
+      <h3 style="font-size:15px;margin-bottom:6px">Savdoni o'chirmoqchimisiz?</h3>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:18px">Bu amalni qaytarib bo'lmaydi.</p>
+      <div class="modal-btns">
+        <button class="btn-cancel" onclick="closeDelModal()">Bekor</button>
+        <button style="flex:1;background:#7f1d1d;color:#fca5a5;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:14px;cursor:pointer" onclick="confirmDelete()">O'chirish</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// PIP SOZLAMASI — 1 lot uchun 1 punkt = necha dollar
+// ============================================================
+const DEFAULT_PIP = {
+  XAUUSD: 100,  // Oltin: 1 lot = 100oz, $1 narx harakat = $100
+  EURUSD: 10,
+  GBPUSD: 10,
+  USDJPY: 9.1,
+  BTCUSD: 1,
+  ETHUSD: 1,
+  US30: 1,
+  NAS100: 1,
+  SP500: 1,
+  USOIL: 10
+};
+
+let pipSettings = JSON.parse(localStorage.getItem('tj_pip') || 'null') || {...DEFAULT_PIP};
+let trades = JSON.parse(localStorage.getItem('tj_trades') || '[]');
+let depozit = parseFloat(localStorage.getItem('tj_depozit') || '0');
+let editId = null;
+let deleteId = null;
+let currentTuri = 'buy';
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+
+const MONTHS_UZ = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'];
+
+function save() { localStorage.setItem('tj_trades', JSON.stringify(trades)); }
+function pnlColor(v) { return v > 0 ? 'var(--green)' : v < 0 ? 'var(--red)' : 'var(--muted)'; }
+
+// B/U — Break-Even: chiqish narxini kirish narxiga tenglashtiradi
+// Global flaglar
+let buActive = false;
+let buPartialChiqish = 0; // B/U bosilgandagi avvalgi chiqish narxi
+
+function applyBreakEven() {
+  const kirish = document.getElementById('f-kirish').value.trim();
+  const btn = document.querySelector('button[onclick="applyBreakEven()"]');
+
+  function resetBtn() {
+    if (!btn) return;
+    btn.style.color = 'var(--text2)';
+    btn.style.borderColor = 'var(--border)';
+    btn.style.background = 'var(--bg4)';
+  }
+
+  if (!kirish) {
+    if (btn) {
+      btn.textContent = '⚠️';
+      btn.style.color = 'var(--red)';
+      btn.style.borderColor = 'rgba(248,113,113,0.5)';
+      btn.style.background = 'rgba(248,113,113,0.1)';
+      setTimeout(() => { btn.textContent = 'B/U'; resetBtn(); }, 1500);
+    }
+    return;
+  }
+
+  // Avvalgi chiqish narxini saqlash (partial foyda uchun)
+  const prevChiqish = parseFloat(document.getElementById('f-chiqish').value) || 0;
+  buPartialChiqish = prevChiqish;
+
+  // Zona formatini tekshirish
+  const zonaMatch = kirish.match(/(\d+[\.,]?\d*)\s*[-–—]\s*(\d+[\.,]?\d*)/);
+  let kirishVal;
+  if (zonaMatch) {
+    kirishVal = (parseFloat(zonaMatch[1]) + parseFloat(zonaMatch[2])) / 2;
+  } else {
+    kirishVal = parseFloat(kirish.replace(',', '.'));
+  }
+  if (isNaN(kirishVal)) return;
+
+  const decLen = kirish.includes('.') ? kirish.split('.')[1].length : 2;
+  document.getElementById('f-chiqish').value = kirishVal.toFixed(decLen);
+
+  buActive = true;
+  calcLive();
+
+  if (btn) {
+    btn.textContent = '✓ B/U';
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'rgba(34,211,165,0.5)';
+    btn.style.background = 'rgba(34,211,165,0.1)';
+    setTimeout(() => { btn.textContent = 'B/U'; resetBtn(); }, 1500);
+  }
+}
+
+// TP yonidagi B/U tugmasi — savdoni nolda yopish
+// Chiqish = kirish, qisman lot = tozalanadi, PnL = 0
+let tpBuActive = false;
+
+function applyBU_TP() {
+  const kirish = document.getElementById('f-kirish').value.trim();
+  const btn = document.getElementById('tp-bu-btn');
+
+  function resetBtn() {
+    if (!btn) return;
+    btn.style.color = 'var(--text2)';
+    btn.style.borderColor = 'var(--border)';
+    btn.style.background = 'var(--bg4)';
+  }
+
+  if (!kirish) {
+    if (btn) {
+      btn.textContent = '⚠️';
+      btn.style.color = 'var(--red)';
+      btn.style.borderColor = 'rgba(248,113,113,0.5)';
+      btn.style.background = 'rgba(248,113,113,0.1)';
+      setTimeout(() => { btn.textContent = 'B/U'; resetBtn(); }, 1500);
+    }
+    return;
+  }
+
+  // Kirish narxini olish
+  const zonaMatch = kirish.match(/(\d+[\.,]?\d*)\s*[-–—]\s*(\d+[\.,]?\d*)/);
+  let kirishVal;
+  if (zonaMatch) {
+    kirishVal = (parseFloat(zonaMatch[1]) + parseFloat(zonaMatch[2])) / 2;
+  } else {
+    kirishVal = parseFloat(kirish.replace(',', '.'));
+  }
+  if (isNaN(kirishVal)) return;
+
+  const decLen = kirish.includes('.') ? kirish.split('.')[1].length : 2;
+
+  // Chiqish = Kirish (nol PnL)
+  document.getElementById('f-chiqish').value = kirishVal.toFixed(decLen);
+
+  // Qisman lot tozalansin
+  document.getElementById('f-partial-lot').value = '';
+
+  // buActive flagini ham o'rnatish (savdolash logikasi uchun)
+  buActive = true;
+  tpBuActive = true;
+  buPartialChiqish = 0;
+
+  calcLive();
+
+  if (btn) {
+    btn.textContent = '✓ B/U';
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'rgba(34,211,165,0.5)';
+    btn.style.background = 'rgba(34,211,165,0.1)';
+  }
+}
+
+// Chiqish narxi qo'lda o'zgartirilsa B/U flagini o'chirish
+document.addEventListener('DOMContentLoaded', function() {
+  const chiqishEl = document.getElementById('f-chiqish');
+  if (chiqishEl) {
+    chiqishEl.addEventListener('input', function() {
+      buActive = false;
+      tpBuActive = false;
+      const btn = document.getElementById('tp-bu-btn');
+      if (btn) {
+        btn.textContent = 'B/U';
+        btn.style.color = 'var(--text2)';
+        btn.style.borderColor = 'var(--border)';
+        btn.style.background = 'var(--bg4)';
+      }
+    });
+  }
+});
+
+// ============================================================
+// DEPOZIT
+// ============================================================
+function getBalansInfo() {
+  const totalPnL = trades.reduce((s,t) => s+t.pnl, 0);
+  const currentBalans = depozit + totalPnL;
+  const roi = depozit > 0 ? ((totalPnL / depozit) * 100) : 0;
+  // Drawdown hisoblash
+  const sorted = [...trades].sort((a,b) => new Date(a.sana)-new Date(b.sana));
+  let peak = depozit, maxDD = 0, cum = depozit;
+  sorted.forEach(t => {
+    cum += t.pnl;
+    if (cum > peak) peak = cum;
+    const dd = peak - cum;
+    if (dd > maxDD) maxDD = dd;
+  });
+  const ddPct = peak > 0 ? ((maxDD / peak) * 100) : 0;
+  return { depozit, currentBalans, totalPnL, roi, maxDD, ddPct };
+}
+
+function saveDepozit() {
+  const val = parseFloat(document.getElementById('depozit-input').value);
+  if (!val || val <= 0) return;
+  depozit = val;
+  localStorage.setItem('tj_depozit', val.toString());
+  renderDepozitSozlama();
+  renderDash();
+  renderQuickStats();
+  const msg = document.getElementById('depozit-saved');
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 2000);
+}
+
+function renderDepozitSozlama() {
+  document.getElementById('depozit-input').value = depozit || '';
+  const preview = document.getElementById('depozit-preview');
+  if (!depozit) { preview.style.display = 'none'; return; }
+  preview.style.display = 'block';
+  const b = getBalansInfo();
+  document.getElementById('dep-start').textContent = '$' + b.depozit.toLocaleString();
+  const curEl = document.getElementById('dep-current');
+  curEl.textContent = '$' + b.currentBalans.toFixed(2);
+  curEl.style.color = pnlColor(b.totalPnL);
+  const pnlEl = document.getElementById('dep-pnl');
+  pnlEl.textContent = (b.totalPnL >= 0 ? '+' : '') + '$' + b.totalPnL.toFixed(2);
+  pnlEl.style.color = pnlColor(b.totalPnL);
+  const roiEl = document.getElementById('dep-roi');
+  roiEl.textContent = (b.roi >= 0 ? '+' : '') + b.roi.toFixed(2) + '%';
+  roiEl.style.color = pnlColor(b.roi);
+}
+
+function renderBalansBanner() {
+  const banner = document.getElementById('balans-banner');
+  const jBar = document.getElementById('jurnal-balans-bar');
+  if (!depozit) { banner.style.display = 'none'; if(jBar) jBar.style.display = 'none'; return; }
+  const b = getBalansInfo();
+  banner.style.display = 'block';
+  const balEl = document.getElementById('bb-balans');
+  balEl.textContent = '$' + b.currentBalans.toFixed(2);
+  balEl.style.color = b.totalPnL >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('bb-depozit').textContent = '$' + b.depozit.toLocaleString();
+  const pnlEl2 = document.getElementById('bb-pnl');
+  pnlEl2.textContent = (b.totalPnL >= 0 ? '+' : '') + '$' + b.totalPnL.toFixed(2);
+  pnlEl2.style.color = pnlColor(b.totalPnL);
+  const roiEl2 = document.getElementById('bb-roi');
+  roiEl2.textContent = (b.roi >= 0 ? '+' : '') + b.roi.toFixed(2) + '%';
+  roiEl2.style.color = pnlColor(b.roi);
+  document.getElementById('bb-dd').textContent = '-$' + b.maxDD.toFixed(2) + ' (' + b.ddPct.toFixed(1) + '%)';
+  // Jurnal bar
+  if (jBar) {
+    jBar.style.display = 'flex';
+    const jbVal = document.getElementById('jb-val');
+    jbVal.textContent = '$' + b.currentBalans.toFixed(2);
+    jbVal.style.color = pnlColor(b.totalPnL);
+  }
+}
+
+// P&L hisoblash
+function calcPnL(inst, turi, kirish, chiqish, lot) {
+  const k = parseFloat(kirish), c = parseFloat(chiqish), l = parseFloat(lot);
+  if (!k || !c || !l) return 0;
+  const pipVal = (pipSettings[inst?.toUpperCase()] !== undefined) ? pipSettings[inst.toUpperCase()] : 1;
+  const diff = turi === 'buy' ? c - k : k - c;
+  return parseFloat((diff * l * pipVal).toFixed(2));
+}
+
+function autoFitText(elId, baseSize, minSize) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const text = el.textContent || '';
+  const len = text.length;
+  // 7 belgigacha to\'liq, undan keyin har belgi uchun 1.5px kamaytirish
+  let size = baseSize;
+  if (len > 7) size = Math.max(minSize, baseSize - (len - 7) * 1.5);
+  el.style.fontSize = size + 'px';
+  el.style.lineHeight = '1.1';
+}
+
+function calcPips(inst, price1, price2) {
+  if (!price1 || !price2) return 0;
+  // Punkt: narx farqi to\'g\'ridan (4580-4579=1 punkt)
+  return Math.abs(price1 - price2);
+}
+
+function calcRR(kirish, sl, tp, turi) {
+  const k = parseFloat(kirish), s = parseFloat(sl), t = parseFloat(tp);
+  if (!k || !s || !t) return null;
+  const risk = Math.abs(k - s), reward = Math.abs(t - k);
+  return risk === 0 ? null : (reward / risk).toFixed(2);
+}
+
+// ============================================================
+// ATR STOP-LOSS KALKULYATOR
+// ============================================================
+
+function toggleAtrBody() {
+  const body = document.getElementById('atr-body');
+  const icon = document.getElementById('atr-toggle-icon');
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  icon.textContent = isOpen ? '+' : '−';
+}
+
+
+
+// Hi/Low Stop kalkulyator
+let currentHiLow = null; // 'high' yoki 'low'
+
+function selectHiLow(type) {
+  currentHiLow = type;
+  const btnH = document.getElementById('btn-high');
+  const btnL = document.getElementById('btn-low');
+  const input = document.getElementById('f-hilow-val');
+  const clearBtn = document.getElementById('btn-hilow-clear');
+
+  if (type === 'high') {
+    btnH.style.background = 'rgba(248,113,113,0.25)';
+    btnH.style.color = 'var(--red)';
+    btnH.style.borderColor = 'rgba(248,113,113,0.7)';
+    btnL.style.background = 'transparent';
+    btnL.style.color = 'var(--muted)';
+    btnL.style.borderColor = 'rgba(34,211,165,0.4)';
+    input.placeholder = 'High narxi';
+    input.style.borderColor = 'rgba(248,113,113,0.5)';
+  } else {
+    btnL.style.background = 'rgba(34,211,165,0.2)';
+    btnL.style.color = 'var(--green)';
+    btnL.style.borderColor = 'rgba(34,211,165,0.7)';
+    btnH.style.background = 'transparent';
+    btnH.style.color = 'var(--muted)';
+    btnH.style.borderColor = 'rgba(248,113,113,0.4)';
+    input.placeholder = 'Low narxi';
+    input.style.borderColor = 'rgba(34,211,165,0.5)';
+  }
+  input.style.display = 'block';
+  clearBtn.style.display = 'block';
+  input.focus();
+}
+
+function clearHiLow() {
+  currentHiLow = null;
+  document.getElementById('f-hilow-val').value = '';
+  document.getElementById('f-hilow-val').style.display = 'none';
+  document.getElementById('btn-hilow-clear').style.display = 'none';
+  const btnH = document.getElementById('btn-high');
+  const btnL = document.getElementById('btn-low');
+  btnH.style.background = 'transparent';
+  btnH.style.color = 'var(--muted)';
+  btnL.style.background = 'transparent';
+  btnL.style.color = 'var(--muted)';
+  // ATR stop ni qayta hisoblash
+  calcAtrStop();
+}
+
+function calcHiLowStop() {
+  const hilowVal = parseFloat(document.getElementById('f-hilow-val').value);
+  const atr = parseFloat(document.getElementById('f-atr').value);
+  const multiSL = parseFloat(document.getElementById('f-atr-multi-sl').value);
+
+  if (!hilowVal || !atr || !currentHiLow) return;
+
+  // calcAtrStop orqali barcha hisoblash — u Hi/Low ni ko'radi
+  calcAtrStop();
+
+  // SL ni avtomatik qo\'llash
+  const slVal = document.getElementById('atr-sl-val').dataset.val;
+  if (slVal) {
+    document.getElementById('f-sl').value = slVal;
+  }
+
+  calcLive();
+}
+
+function calcSvechaFilter() {
+  const hajm = parseFloat(document.getElementById('f-svecha-hajm').value);
+  const atr = parseFloat(document.getElementById('f-atr').value);
+  const res = document.getElementById('svecha-filter-result');
+  const icon = document.getElementById('svecha-filter-icon');
+  const text = document.getElementById('svecha-filter-text');
+  const sub = document.getElementById('svecha-filter-sub');
+
+  if (!hajm || hajm <= 0 || !atr || atr <= 0) {
+    res.style.display = 'none';
+    return;
+  }
+
+  res.style.display = 'flex';
+  const ratio = hajm / atr;
+  const min1atr = atr * 1;
+  const max2atr = atr * 2;
+  const ratioTxt = ratio.toFixed(2) + 'x';
+
+  if (ratio < 1) {
+    res.style.background = 'rgba(99,102,241,0.12)';
+    res.style.border = '1px solid rgba(99,102,241,0.3)';
+    icon.textContent = '⬇';
+    text.style.color = '#818cf8';
+    text.textContent = 'Juda kichik';
+    sub.style.color = '#818cf8';
+    sub.textContent = ratioTxt + ' ATR';
+  } else if (ratio > 2) {
+    res.style.background = 'rgba(251,146,60,0.12)';
+    res.style.border = '1px solid rgba(251,146,60,0.35)';
+    icon.textContent = '⬆';
+    text.style.color = '#fb923c';
+    text.textContent = 'Juda katta';
+    sub.style.color = '#fb923c';
+    sub.textContent = ratioTxt + ' ATR';
+  } else if (ratio >= 1 && ratio <= 1.3) {
+    res.style.background = 'rgba(34,197,94,0.1)';
+    res.style.border = '1px solid rgba(34,197,94,0.35)';
+    icon.textContent = '✅';
+    text.style.color = 'var(--green)';
+    text.textContent = 'Ideal';
+    sub.style.color = 'var(--green)';
+    sub.textContent = ratioTxt + ' ATR';
+  } else if (ratio > 1.3 && ratio <= 1.7) {
+    res.style.background = 'rgba(34,197,94,0.15)';
+    res.style.border = '1px solid rgba(34,197,94,0.45)';
+    icon.textContent = '🎯';
+    text.style.color = 'var(--green)';
+    text.textContent = 'Perfect!';
+    sub.style.color = 'var(--green)';
+    sub.textContent = ratioTxt + ' ATR';
+  } else {
+    res.style.background = 'rgba(251,191,36,0.1)';
+    res.style.border = '1px solid rgba(251,191,36,0.35)';
+    icon.textContent = '⚠';
+    text.style.color = 'var(--gold)';
+    text.textContent = 'Chegarada';
+    sub.style.color = 'var(--gold)';
+    sub.textContent = ratioTxt + ' ATR';
+  }
+}
+
+function calcAtrStop() {
+  const atr = parseFloat(document.getElementById('f-atr').value);
+  const kirish = parseFloat(getKirish());
+  const multiSL = parseFloat(document.getElementById('f-atr-multi-sl').value) || 1.5;
+  const multiTP = parseFloat(document.getElementById('f-atr-multi-tp').value) || 3.0;
+  const block = document.getElementById('atr-block');
+  if (!atr || atr <= 0) { block.style.display = 'none'; return; }
+  block.style.display = 'block';
+  const slEl = document.getElementById('atr-sl-val');
+  const tpEl = document.getElementById('atr-tp-val');
+
+  // Hi/Low kiritilgan bo\'lsa, SL ni o'sha narxdan hisoblash
+  const hilowVal = parseFloat(document.getElementById('f-hilow-val').value);
+  const hasHiLow = currentHiLow && hilowVal && hilowVal > 0;
+
+  if (hasHiLow) {
+    // SL: Hi/Low narxidan ATR * multiplier
+    const buffer = atr * multiSL;
+    let slVal;
+    if (currentHiLow === 'high') {
+      // SELL uchun — High + buffer
+      slVal = (hilowVal + buffer).toFixed(3);
+    } else {
+      // BUY uchun — Low - buffer
+      slVal = (hilowVal - buffer).toFixed(3);
+    }
+    slEl.textContent = slVal;
+    slEl.dataset.val = slVal;
+    // TP esa kirish narxidan (agar kiritilgan bo\'lsa)
+    if (kirish && kirish > 0) {
+      const tpVal = currentTuri === 'buy'
+        ? (kirish + atr * multiTP).toFixed(3)
+        : (kirish - atr * multiTP).toFixed(3);
+      tpEl.textContent = tpVal;
+      tpEl.dataset.val = tpVal;
+    } else {
+      tpEl.textContent = '— kirish narxi kiriting';
+      tpEl.dataset.val = '';
+    }
+  } else if (kirish && kirish > 0) {
+    // Hi/Low yo\'q — kirish narxidan hisoblash
+    const slVal = currentTuri === 'buy'
+      ? (kirish - atr * multiSL).toFixed(3)
+      : (kirish + atr * multiSL).toFixed(3);
+    const tpVal = currentTuri === 'buy'
+      ? (kirish + atr * multiTP).toFixed(3)
+      : (kirish - atr * multiTP).toFixed(3);
+    slEl.textContent = slVal;
+    slEl.dataset.val = slVal;
+    tpEl.textContent = tpVal;
+    tpEl.dataset.val = tpVal;
+  } else {
+    slEl.textContent = '— kirish narxi kiriting';
+    slEl.dataset.val = '';
+    tpEl.textContent = '— kirish narxi kiriting';
+    tpEl.dataset.val = '';
+  }
+  calcLive();
+  calcBezubitka();
+}
+
+function applyAtrSL() {
+  const val = document.getElementById('atr-sl-val').dataset.val;
+  if (!val) { document.getElementById('f-kirish').focus(); return; }
+  document.getElementById('f-sl').value = val;
+  const el = document.getElementById('f-sl');
+  el.style.borderColor = 'var(--red)';
+  el.style.background = 'rgba(248,113,113,0.08)';
+  setTimeout(() => { el.style.borderColor = ''; el.style.background = ''; }, 1200);
+  calcLive();
+}
+
+function applyAtrTP() {
+  const val = document.getElementById('atr-tp-val').dataset.val;
+  if (!val) { document.getElementById('f-kirish').focus(); return; }
+  document.getElementById('f-tp').value = val;
+  const el = document.getElementById('f-tp');
+  el.style.borderColor = 'var(--green)';
+  el.style.background = 'rgba(34,211,165,0.08)';
+  setTimeout(() => { el.style.borderColor = ''; el.style.background = ''; }, 1200);
+  calcLive();
+}
+
+function applyAtrBoth() {
+  applyAtrSL();
+  applyAtrTP();
+}
+
+let zonaMode = false;
+
+function autoDetectZona() {
+  const val = document.getElementById('f-kirish').value.trim();
+  const hasRange = /\d[-–—]\d/.test(val);
+  const ind = document.getElementById('zona-indicator');
+  zonaMode = hasRange;
+  if (ind) ind.style.display = hasRange ? 'block' : 'none';
+}
+
+
+
+
+function calcPartial() {
+  // Faqat saqlashda ishlatiladi
+}
+
+function clearPartialOnExit() {
+  // Chiqish narxi qo'lda kiritilganda partial lot maydonini tozalash
+  const partial = document.getElementById('f-partial-lot');
+  if (partial && partial.value) {
+    partial.value = '';
+  }
+}
+
+function toggleZona() {
+  // Z belgisini bosish — maydalni tozalab zona rejimini o'chirish
+  zonaMode = false;
+  const ind = document.getElementById('zona-indicator');
+  const inp = document.getElementById('f-kirish');
+  inp.value = '';
+  if (ind) ind.style.display = 'none';
+  inp.focus();
+  calcLive();
+  calcAtrStop();
+}
+
+function getKirish() {
+  const raw = document.getElementById('f-kirish').value.trim();
+  const parts = raw.split(/[-–—]/).map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+  if (parts.length === 2) return ((parts[0] + parts[1]) / 2).toString();
+  return raw;
+}
+
+function getKirishDisplay() {
+  return document.getElementById('f-kirish').value.trim();
+}
+
+function calcLive() {
+  const inst = document.getElementById('f-inst').value;
+  const kirish = getKirish();
+  const chiqish = document.getElementById('f-chiqish').value;
+  const lot = document.getElementById('f-lot').value;
+  const sl = document.getElementById('f-sl').value;
+  const tp = document.getElementById('f-tp').value;
+
+  // Chiqish narxi bo'yicha P&L
+  const pnl = calcPnL(inst, currentTuri, kirish, chiqish, lot);
+  const rr = calcRR(kirish, sl, tp, currentTuri);
+  const pnlEl = document.getElementById('live-pnl');
+  pnlEl.textContent = (pnl >= 0 ? '+' : '') + '$' + pnl.toFixed(2);
+  pnlEl.style.color = pnlColor(pnl);
+  document.getElementById('live-rr').textContent = rr ? '1:' + rr : '—';
+  const natEl = document.getElementById('live-nat');
+  if (chiqish) { natEl.textContent = pnl >= 0 ? '✓ WIN' : '✗ LOSS'; natEl.style.color = pnl >= 0 ? 'var(--green)' : 'var(--red)'; }
+  else { natEl.textContent = '—'; natEl.style.color = 'var(--muted)'; }
+
+  // SL bo'yicha zarar hisoblash
+  const slBox = document.getElementById('sl-pnl-box');
+  const saveBtn = document.getElementById('save-btn');
+
+  const hasSL = sl && parseFloat(sl) > 0 && kirish && parseFloat(kirish) > 0 && lot && parseFloat(lot) > 0;
+  const hasTP = tp && parseFloat(tp) > 0 && kirish && parseFloat(kirish) > 0 && lot && parseFloat(lot) > 0;
+
+  if (hasSL || hasTP) {
+    slBox.style.display = 'block';
+
+    // SL zarar
+    if (hasSL) {
+      const slPnl = calcPnL(inst, currentTuri, kirish, sl, lot);
+      const slLoss = Math.abs(slPnl);
+      document.getElementById('sl-pnl-val').textContent = '-$' + slLoss.toFixed(2);
+      autoFitText('sl-pnl-val', 13, 8);
+      // SL pips hisoblash
+      const slPips = calcPips(inst, parseFloat(kirish), parseFloat(sl));
+      const slPipsEl = document.getElementById('sl-pips-badge');
+      const slPctCalc = depozit > 0 ? (slLoss / depozit) * 100 : 0;
+      if (slPips > 0) {
+        slPipsEl.textContent = '▸' + Math.round(slPips) + 'p';
+        slPipsEl.style.display = 'inline-block';
+        // Foiz 1000%+ bo\'lsa (4 xonali) punkt yangi qatorga tushsin, aks holda 1 qatorda
+        const slPctBig = slPctCalc >= 1000;
+        slPipsEl.style.width = slPctBig ? '100%' : 'auto';
+        slPipsEl.style.marginTop = slPctBig ? '1px' : '0';
+        slPipsEl.style.display = slPctBig ? 'block' : 'inline-block';
+      } else { slPipsEl.style.display = 'none'; }
+      const slBadge = document.getElementById('sl-pct-badge');
+      const slCard = document.getElementById('sl-card');
+      const slStripe = document.getElementById('sl-warn-stripe');
+      if (depozit > 0) {
+        const pct = (slLoss / depozit) * 100;
+        slBadge.textContent = pct.toFixed(0) + '%';
+        slBadge.style.display = 'block';
+        if (pct > 30) {
+          // Xavfli — qizil badge, chiziq, tugma bloklash
+          slBadge.style.background = 'rgba(248,113,113,0.35)';
+          slBadge.style.color = 'var(--red)';
+          slBadge.textContent = '⚠ ' + pct.toFixed(0) + '%';
+          slCard.style.borderColor = 'rgba(248,113,113,0.7)';
+          slStripe.style.display = 'block';
+          showSaveBlock("⚠️ Risk juda yuqori!", "Depozitingizning 30% dan ko\'pi xavf ostida. Stop loss yoki lotingizni kamaytiring, yoki o\'tkazib yuboring.", 'risk');
+          updateSaveBtn();
+        } else if (pct > 15) {
+          // Ogohlik — sariq
+          slBadge.style.background = 'rgba(251,191,36,0.2)';
+          slBadge.style.color = 'var(--gold)';
+          slCard.style.borderColor = 'rgba(251,191,36,0.4)';
+          slStripe.style.display = 'none';
+          document.getElementById('save-block-risk').style.display = 'none';
+          updateSaveBtn();
+        } else {
+          // Normal — oddiy
+          slBadge.style.background = 'rgba(248,113,113,0.15)';
+          slBadge.style.color = 'var(--red)';
+          slCard.style.borderColor = 'rgba(248,113,113,0.25)';
+          slStripe.style.display = 'none';
+          document.getElementById('save-block-risk').style.display = 'none';
+          updateSaveBtn();
+        }
+      } else {
+        slBadge.style.display = 'none';
+        slStripe.style.display = 'none';
+      }
+    } else {
+      document.getElementById('sl-pnl-val').textContent = '—';
+      document.getElementById('sl-pnl-val').style.fontSize = '13px';
+      document.getElementById('sl-pct-badge').style.display = 'none';
+      document.getElementById('sl-pips-badge').style.display = 'none';
+    }
+
+    // TP foyda
+    if (hasTP) {
+      const tpPnl = calcPnL(inst, currentTuri, kirish, tp, lot);
+      const tpProfit = Math.abs(tpPnl);
+      document.getElementById('tp-pnl-val').textContent = '+$' + tpProfit.toFixed(2);
+      autoFitText('tp-pnl-val', 13, 8);
+      // TP pips hisoblash
+      const tpPips = calcPips(inst, parseFloat(kirish), parseFloat(tp));
+      const tpPipsEl = document.getElementById('tp-pips-badge');
+      const tpBadge = document.getElementById('tp-pct-badge');
+      if (tpPips > 0) {
+        tpPipsEl.textContent = '▸' + Math.round(tpPips) + 'p';
+        tpPipsEl.style.display = 'inline-block';
+        // Foiz 1000%+ bo\'lsa (4 xonali) punkt yangi qatorga tushsin, aks holda 1 qatorda
+        const tpPctCalc = depozit > 0 ? (Math.abs(tpPnl) / depozit) * 100 : 0;
+        const tpPctBig = tpPctCalc >= 1000;
+        tpPipsEl.style.width = tpPctBig ? '100%' : 'auto';
+        tpPipsEl.style.marginTop = tpPctBig ? '1px' : '0';
+        tpPipsEl.style.display = tpPctBig ? 'block' : 'inline-block';
+      } else { tpPipsEl.style.display = 'none'; }
+      if (depozit > 0) {
+        const tpPct = (tpProfit / depozit) * 100;
+        tpBadge.textContent = '+' + tpPct.toFixed(0) + '%';
+        tpBadge.style.display = 'block';
+      } else {
+        tpBadge.style.display = 'none';
+      }
+    } else {
+      document.getElementById('tp-pnl-val').textContent = '—';
+      document.getElementById('tp-pnl-val').style.fontSize = '13px';
+      document.getElementById('tp-pct-badge').style.display = 'none';
+      document.getElementById('tp-pips-badge').style.display = 'none';
+    }
+
+  } else {
+    slBox.style.display = 'none';
+  }
+
+  // BEZUBITKA KALKULYATOR
+  calcBezubitka();
+}
+
+// ============================================================
+// 1:1 R:R FOYDA STOP KALKULYATOR
+//
+// MANTIQ:
+//   Siz qisman lot yopdingiz → partialProfit ($)
+//   Qolgan lot uchun shunday FOYDA stop qo'yamizki:
+//   → Stop urilganda JAMI natija = +fullRisk (1:1 foyda)
+//   → partialProfit + remainProfit = fullRisk
+//   → remainNeed = fullRisk - partialProfit
+//
+// MISOL (sizning savdo):
+//   fullRisk = $90 (0.10 lot, SL 4546)
+//   partialProfit = $40 (0.05 lot @ 4563)
+//   remainNeed = $90 - $40 = $50
+//   buStop (BUY) = 4555 + $50/(0.05*pip) → foyda zonasida ⬆
+// ============================================================
+function calcBezubitka() {
+  // Agar stop allaqachon qo'llangan bo'lsa — qayta hisoblama
+  if (buStopApplied) return;
+
+  const inst       = document.getElementById('f-inst').value;
+  const kirish     = getKirish();
+  const sl         = document.getElementById('f-sl').value;
+  const tp         = document.getElementById('f-tp').value;
+  const totalLot   = parseFloat(document.getElementById('f-lot').value) || 0;
+  const partialLot = parseFloat(document.getElementById('f-partial-lot').value) || 0;
+  const chiqishVal = document.getElementById('f-chiqish').value;
+  const chiqishNum = parseFloat(chiqishVal) || 0;
+
+  const k = parseFloat(kirish);
+  const s = parseFloat(sl);
+  const t = parseFloat(tp);
+
+  const resultDiv = document.getElementById('bu-calc-result');
+  const hintDiv   = document.getElementById('bu-calc-hint');
+  const applyBtn  = document.getElementById('bu-apply-btn');
+  const lotInfoEl = document.getElementById('bu-lot-info');
+
+  // Chiqish narxi VA lot ikkalasi majburiy
+  if (!chiqishNum || chiqishNum <= 0) {
+    resultDiv.style.display = 'none';
+    applyBtn.style.display  = 'none';
+    if (lotInfoEl) lotInfoEl.style.display = 'none';
+    hintDiv.style.display   = 'block';
+    hintDiv.textContent = '📋 Chiqish narxini kiriting';
+    return;
+  }
+  if (!partialLot || partialLot <= 0) {
+    resultDiv.style.display = 'none';
+    applyBtn.style.display  = 'none';
+    if (lotInfoEl) lotInfoEl.style.display = 'none';
+    hintDiv.style.display   = 'block';
+    hintDiv.textContent = '📋 Yopilgan lot miqdorini kiriting';
+    return;
+  }
+  if (!totalLot || totalLot <= 0) {
+    resultDiv.style.display = 'none';
+    applyBtn.style.display  = 'none';
+    if (lotInfoEl) lotInfoEl.style.display = 'none';
+    hintDiv.style.display   = 'block';
+    hintDiv.textContent = '📋 Umumiy lot (LOT maydoni) ni kiriting';
+    return;
+  }
+
+  // Lot bo'lmasa partial=0 deb hisoblaymiz, totalLot=partialLot bo'lsa xato
+  if (partialLot > 0 && totalLot > 0 && partialLot >= totalLot) {
+    resultDiv.style.display = 'none';
+    hintDiv.style.display   = 'block';
+    hintDiv.textContent     = "⚠️ Yopilgan lot umumiy lotdan kichik bo'lsin";
+    applyBtn.style.display  = 'none';
+    return;
+  }
+
+  if (!k || !s || k <= 0 || s <= 0) {
+    resultDiv.style.display = 'none';
+    hintDiv.style.display   = 'block';
+    hintDiv.textContent     = '📋 Kirish va SL narxlarini kiriting';
+    applyBtn.style.display  = 'none';
+    return;
+  }
+
+  const decLen = String(chiqishNum).includes('.') ? String(chiqishNum).split('.')[1].length : 3;
+
+  const pipVal = (pipSettings[inst?.toUpperCase()] !== undefined)
+    ? pipSettings[inst.toUpperCase()] : 1;
+
+  // SL masofasi (pip)
+  const dist_entry_to_sl  = Math.abs(s - k);
+  const dist_entry_to_tp1 = Math.abs(chiqishNum - k);
+  const rr_to_tp1 = dist_entry_to_sl > 0 ? dist_entry_to_tp1 / dist_entry_to_sl : 0;
+
+  // Lot bo'lsa: TO'G'RI hisob — yopilgan foyda + qolgan lot foydasi = original risk
+  // Lot bo'lmasa: oddiy kirish+SL masofa koʻrsatkich
+  let stop11Price, stop12Price;
+
+  if (partialLot > 0 && totalLot > 0) {
+    // ── LOT BILAN: Aqlli RR-ga asoslangan himoyalangan stop ──
+    const closingLot = partialLot;
+    const remainLot  = totalLot - partialLot;
+
+    // Yopilgan lot foydasi ($)
+    const partialProfitPnL = calcPnL(inst, currentTuri, kirish, String(chiqishNum), String(closingLot));
+    const partialProfit    = Math.abs(partialProfitPnL);
+
+    // To'liq risk ($) — original savdo riskidan kelib chiqib
+    const fullRiskPnL2 = calcPnL(inst, currentTuri, kirish, sl, String(totalLot));
+    const fullRisk2    = Math.abs(fullRiskPnL2);
+
+    // 1-TP da olingan foyda qancha R:R ga teng?
+    // partialRR = partialProfit / fullRisk2
+    const partialRR = fullRisk2 > 0 ? partialProfit / fullRisk2 : 0;
+
+    // ── AQLLI HIMOYA LOGIKASI ──
+    // partialRR < 1.0  → foyda riskdan kam → B/U (kirish narxi)
+    // partialRR >= 1.0 → 1:1 R:R → qolgan lot uchun stop 1:1 da (kirish narxi)
+    // partialRR >= 1.5 → 1:1.5 R:R → stop 1:0.5 foyda zonasida
+    // partialRR >= 2.0 → 1:2 R:R   → stop 1:1 foyda zonasida (eski SL masofa qadar foyda)
+
+    const pnlPerPip = remainLot * pipVal;
+    const riskPips  = dist_entry_to_sl; // SL masofasi (pip)
+
+    if (partialRR < 1.0) {
+      // Foyda riskdan kam → B/U (kirish narxi)
+      stop11Price = k;
+      stop12Price = (currentTuri === 'buy') ? k + riskPips * 2 : k - riskPips * 2;
+    } else if (partialRR >= 2.0) {
+      // 1:2 yoki undan yuqori → stop 1:1 foyda zonasida (kirish + 1x risk)
+      if (currentTuri === 'buy') {
+        stop11Price = k + riskPips;       // 1:1 foyda stop
+        stop12Price = k + riskPips * 2;   // 1:2 foyda stop
+      } else {
+        stop11Price = k - riskPips;
+        stop12Price = k - riskPips * 2;
+      }
+    } else if (partialRR >= 1.5) {
+      // 1:1.5 → stop 0.5x risk foyda zonasida
+      if (currentTuri === 'buy') {
+        stop11Price = k + riskPips * 0.5; // 1:0.5 foyda stop
+        stop12Price = k + riskPips * 2;   // 1:2 maqsad
+      } else {
+        stop11Price = k - riskPips * 0.5;
+        stop12Price = k - riskPips * 2;
+      }
+    } else {
+      // 1:1 yoki 1:1.5 orasida → B/U (kirish narxi)
+      stop11Price = k;
+      stop12Price = (currentTuri === 'buy') ? k + riskPips * 2 : k - riskPips * 2;
+    }
+
+    const rrLabel = partialRR >= 2.0 ? '1:2+ → 🔥 1:1 foyda stop'
+                  : partialRR >= 1.5 ? '1:1.5+ → ✨ 0.5x foyda stop'
+                  : partialRR >= 1.0 ? '1:1+ → 🛡 B/U stop'
+                  : '1:1 dan kam → ⚡ B/U stop';
+
+    const lotInfoText = `Yopildi: ${closingLot} lot @ ${chiqishNum} → Qoldi: ${remainLot.toFixed(2)} lot | RR: ${partialRR.toFixed(2)}x (${rrLabel})`;
+    if (lotInfoEl) { lotInfoEl.textContent = lotInfoText; lotInfoEl.style.display = 'block'; }
+  } else {
+    // ── LOTSIZ: Oddiy kirish±SL masofa ko'rsatkich ──
+    if (lotInfoEl) lotInfoEl.style.display = 'none';
+    if (currentTuri === 'buy') {
+      stop11Price = k + dist_entry_to_sl;
+      stop12Price = k + dist_entry_to_sl * 2;
+    } else {
+      stop11Price = k - dist_entry_to_sl;
+      stop12Price = k - dist_entry_to_sl * 2;
+    }
+  }
+
+  // Stop 1-TP dan yuqorida/pastdami?
+  const stopAbove1tp = (currentTuri === 'buy')
+    ? stop11Price > chiqishNum
+    : stop11Price < chiqishNum;
+
+  // ── Ekran elementlari ────────────────────────────────────────────
+  const checkEl   = document.getElementById('bu-check');
+  const warnEl    = document.getElementById('bu-warn');
+  const minRREl   = document.getElementById('bu-min-rr');
+  const stopPriceEl = document.getElementById('bu-stop-price');
+  const remainEl    = document.getElementById('bu-remain-loss');
+
+  // 1-TP narxini ko'rsatish
+  document.getElementById('bu-partial-profit').textContent = chiqishNum;
+
+  // ── AQLLI RR DISPLAY LOGIKASI ──────────────────────────────
+  // partialLot bor bo'lsa: RR ga qarab rang va label belgilanadi
+  // partialLot yo'q bo'lsa: eski oddiy logika
+
+  const needBU = (partialLot > 0 && totalLot > 0) ? false : (stopAbove1tp || rr_to_tp1 < 1.5);
+
+  if (partialLot > 0 && totalLot > 0) {
+    // Lot bilan: RR ga qarab aqlli ko'rsatish
+    const fullRiskPnLdisp = calcPnL(inst, currentTuri, kirish, sl, String(totalLot));
+    const fullRiskDisp    = Math.abs(fullRiskPnLdisp);
+    const partialProfitDisp = Math.abs(calcPnL(inst, currentTuri, kirish, String(chiqishNum), String(partialLot)));
+    const partialRRdisp   = fullRiskDisp > 0 ? partialProfitDisp / fullRiskDisp : 0;
+
+    // stop11Price = himoyalangan stop (SL ga o'rnatiladi)
+    // stop12Price = keyingi maqsad (TP ga o'rnatiladi)
+    stopPriceEl.dataset.val   = stop11Price.toFixed(decLen);
+    stopPriceEl.dataset.val12 = stop12Price.toFixed(decLen);
+
+    remainEl.textContent  = stop11Price.toFixed(decLen);
+    stopPriceEl.textContent = stop12Price.toFixed(decLen);
+
+    let checkColor, checkBg, checkBorder, checkIcon, checkMsg, btnText, btnBg;
+
+    if (partialRRdisp >= 2.0) {
+      // 🔥 1:2+ → stop foyda zonasida (kirish + 1x risk)
+      checkColor  = 'var(--green)';
+      checkBg     = 'rgba(34,211,165,0.12)';
+      checkBorder = 'rgba(34,211,165,0.45)';
+      checkIcon   = '🔥';
+      checkMsg    = '1:2+ foyda! Stop → <b style="color:#fbbf24">' + stop11Price.toFixed(decLen) + '</b> (1x foyda zona) | Maqsad → <b style="color:var(--green)">' + stop12Price.toFixed(decLen) + '</b>';
+      btnText     = '🔥 Stop→1:1 foyda zona + Maqsad→1:2 qo\'llash';
+      btnBg       = 'linear-gradient(135deg,#064e3b,#22d3a5)';
+      remainEl.style.color    = '#fbbf24';
+      stopPriceEl.style.color = 'var(--green)';
+      resultDiv.style.borderColor = 'rgba(34,211,165,0.4)';
+      resultDiv.style.background  = 'rgba(34,211,165,0.05)';
+    } else if (partialRRdisp >= 1.5) {
+      // ✨ 1:1.5+ → stop 0.5x foyda zonasida
+      checkColor  = '#7ab3e0';
+      checkBg     = 'rgba(122,179,224,0.12)';
+      checkBorder = 'rgba(122,179,224,0.45)';
+      checkIcon   = '✨';
+      checkMsg    = '1:1.5+ foyda! Stop → <b style="color:#fbbf24">' + stop11Price.toFixed(decLen) + '</b> (0.5x foyda zona) | Maqsad → <b style="color:var(--green)">' + stop12Price.toFixed(decLen) + '</b>';
+      btnText     = '✨ Stop→0.5x foyda zona + Maqsad→1:2 qo\'llash';
+      btnBg       = 'linear-gradient(135deg,#1e3a5f,#3b82f6)';
+      remainEl.style.color    = '#fbbf24';
+      stopPriceEl.style.color = 'var(--green)';
+      resultDiv.style.borderColor = 'rgba(122,179,224,0.3)';
+      resultDiv.style.background  = 'rgba(122,179,224,0.05)';
+    } else {
+      // 🛡 1:1 yoki kam → B/U (kirish narxi)
+      checkColor  = 'var(--gold)';
+      checkBg     = 'rgba(251,191,36,0.1)';
+      checkBorder = 'rgba(251,191,36,0.4)';
+      checkIcon   = '🛡';
+      checkMsg    = '1:1 foyda → B/U Stop → <b style="color:var(--gold)">' + stop11Price.toFixed(decLen) + '</b> (kirish narxi) | Maqsad → <b style="color:var(--green)">' + stop12Price.toFixed(decLen) + '</b>';
+      btnText     = '🛡 B/U: Stop→Kirish + Maqsad→1:2 qo\'llash';
+      btnBg       = 'linear-gradient(135deg,#78350f,#d97706)';
+      remainEl.style.color    = 'var(--gold)';
+      stopPriceEl.style.color = 'var(--green)';
+      resultDiv.style.borderColor = 'rgba(251,191,36,0.35)';
+      resultDiv.style.background  = 'rgba(251,191,36,0.04)';
+    }
+
+    checkEl.style.cssText = `font-size:10px;font-weight:700;padding:4px 7px;border-radius:6px;margin-bottom:3px;text-align:center;background:${checkBg};border:1px solid ${checkBorder};color:${checkColor}`;
+    checkEl.innerHTML = checkIcon + ' ' + checkMsg;
+    warnEl.style.display  = 'none';
+    minRREl.style.display = 'none';
+    applyBtn.style.display    = 'block';
+    applyBtn.style.background = btnBg;
+    applyBtn.textContent      = btnText;
+
+    // Labels yangilash
+    const labels = document.querySelectorAll('#bu-calc-result .bu-col-label');
+    if (labels[0]) labels[0].textContent = '1-TP narx';
+    if (labels[1]) labels[1].textContent = '🛡 Himoya Stop';
+    if (labels[2]) labels[2].textContent = '🎯 Keyingi Maqsad';
+
+  } else if (needBU) {
+    // Lot yo'q + B/U kerak
+    const tp12Price = (currentTuri === 'buy') ? (k + dist_entry_to_sl * 2) : (k - dist_entry_to_sl * 2);
+    stopPriceEl.dataset.val   = k.toFixed(decLen);
+    stopPriceEl.dataset.val12 = tp12Price.toFixed(decLen);
+    remainEl.textContent = k.toFixed(decLen);
+    remainEl.style.color = 'var(--gold)';
+    stopPriceEl.textContent = tp12Price.toFixed(decLen);
+    stopPriceEl.style.color = 'var(--green)';
+    checkEl.style.cssText = 'font-size:10px;font-weight:700;padding:4px 7px;border-radius:6px;margin-bottom:3px;text-align:center;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.35);color:var(--red)';
+    checkEl.innerHTML = '🚫 1:1 himoya mumkin emas &nbsp;→&nbsp; <span style="color:var(--gold);font-weight:900">B/U</span> tavsiya: SL→<b style="color:var(--gold)">' + k.toFixed(decLen) + '</b> | TP→<b style="color:var(--green)">' + tp12Price.toFixed(decLen) + '</b>';
+    warnEl.style.display = 'none';
+    minRREl.style.display = 'none';
+    applyBtn.style.display = 'block';
+    applyBtn.style.background = 'linear-gradient(135deg,#78350f,#d97706)';
+    applyBtn.textContent = '⚡ B/U: SL→Kirish + TP→1:2 qo\'llash';
+    resultDiv.style.borderColor = 'rgba(251,191,36,0.4)';
+    resultDiv.style.background  = 'rgba(251,191,36,0.04)';
+  } else {
+    // Lot yo'q + oddiy 1:1 stop
+    stopPriceEl.dataset.val   = stop11Price.toFixed(decLen);
+    stopPriceEl.dataset.val12 = stop12Price.toFixed(decLen);
+    checkEl.style.cssText = 'font-size:10px;font-weight:700;padding:4px 7px;border-radius:6px;margin-bottom:3px;text-align:center;background:rgba(34,211,165,0.08);border:1px solid rgba(34,211,165,0.3);color:var(--green)';
+    checkEl.innerHTML = '✅ 1-TP R:R: <b>' + rr_to_tp1.toFixed(2) + 'x</b> &nbsp;|&nbsp; 1:1 Stop: <b>' + stop11Price.toFixed(decLen) + '</b> &nbsp;|&nbsp; 1:2 TP: <b>' + stop12Price.toFixed(decLen) + '</b>';
+    warnEl.style.display = 'none';
+    minRREl.style.display = 'none';
+    resultDiv.style.borderColor = 'rgba(122,179,224,0.2)';
+    resultDiv.style.background  = 'rgba(122,179,224,0.05)';
+    applyBtn.style.display = 'block';
+    applyBtn.style.background = 'linear-gradient(135deg,#1e3a5f,#3b82f6)';
+    applyBtn.textContent = '🛡 1:1 Stop + 🎯 1:2 TP qo\'llash';
+  }
+
+  resultDiv.style.display = 'block';
+  hintDiv.style.display   = 'none';
+}
+
+let buStopApplied = false;
+
+function applyBuStop() {
+  const stop11Val = document.getElementById('bu-stop-price').dataset.val;
+  const stop12Val = document.getElementById('bu-stop-price').dataset.val12;
+  if (!stop11Val) return;
+
+  // SL ga 1:1 stop qo'yish
+  const slEl = document.getElementById('f-sl');
+  slEl.value = stop11Val;
+  slEl.style.borderColor = 'var(--blue)';
+  slEl.style.background  = 'rgba(122,179,224,0.1)';
+  setTimeout(() => { slEl.style.borderColor = ''; slEl.style.background = ''; }, 1400);
+
+  // TP ga 1:2 stop qo'yish
+  if (stop12Val) {
+    const tpEl = document.getElementById('f-tp');
+    tpEl.value = stop12Val;
+    tpEl.style.borderColor = 'var(--green)';
+    tpEl.style.background  = 'rgba(34,211,165,0.08)';
+    setTimeout(() => { tpEl.style.borderColor = ''; tpEl.style.background = ''; }, 1400);
+  }
+
+  // Bo'limni qulflash
+  buStopApplied = true;
+  buActive = true; // B/U belgisi jurnalda ko'rinishi uchun
+  // Qisman chiqish narxini saqlash (savdo saqlananda PnL to'g'ri hisoblash uchun)
+  const chiqishNum2 = parseFloat(document.getElementById('f-chiqish').value) || 0;
+  if (chiqishNum2 > 0) buPartialChiqish = chiqishNum2;
+  document.getElementById('bu-apply-btn').style.display = 'none';
+  const checkEl = document.getElementById('bu-check');
+  checkEl.style.cssText = 'font-size:10px;font-weight:700;padding:4px 7px;border-radius:6px;margin-bottom:3px;text-align:center;background:rgba(34,211,165,0.12);border:1px solid rgba(34,211,165,0.4);color:var(--green)';
+  checkEl.innerHTML = '🔒 Qo\'llandi! &nbsp; Himoya SL: <b>' + stop11Val + '</b> &nbsp;|&nbsp; Maqsad TP: <b>' + (stop12Val || '—') + '</b>';
+
+  calcLive();
+}
+
+function setTuri(t) {
+  currentTuri = t;
+  document.getElementById('btn-buy').className = 'seg-btn' + (t === 'buy' ? ' active-buy' : '');
+  document.getElementById('btn-sell').className = 'seg-btn' + (t === 'sell' ? ' active-sell' : '');
+  calcAtrStop();
+  calcLive();
+}
+
+function openModal(id) {
+  editId = id || null;
+  const t = id ? trades.find(x => x.id === id) : null;
+  document.getElementById('modal-title').textContent = id ? "Savdoni Tahrirlash" : "Yangi Savdo";
+  document.getElementById('save-btn').textContent = id ? "Saqlash ✓" : "Qo'shish ✓";
+  document.getElementById('f-sana').value = t ? t.sana : new Date().toISOString().split('T')[0];
+  document.getElementById('f-inst').value = t ? t.instrument : 'XAUUSD';
+  document.getElementById('f-lot').value = t ? t.lot : '';
+  document.getElementById('f-kirish').value = t ? t.kirish : '';
+  // Zona rejimini tiklash
+  if (t && t.kirishZona) {
+    if (!zonaMode) toggleZona();
+    document.getElementById('f-kirish').value = t.kirishZona;
+  } else {
+    if (zonaMode) toggleZona();
+  }
+  document.getElementById('f-chiqish').value = t ? t.chiqish : '';
+  document.getElementById('f-partial-lot').value = t && t.partialLot ? t.partialLot : '';
+  // B/U flagini tiklash
+  buActive = (t && t.isBU) ? true : false;
+  buPartialChiqish = (t && t.partialChiqish) ? t.partialChiqish : 0;
+  document.getElementById('f-sl').value = t ? t.sl : '';
+  document.getElementById('f-tp').value = t ? t.tp : '';
+  selectedSabablar = t ? (Array.isArray(t.sabab) ? t.sabab : [t.sabab]) : [];
+  refreshSababSelect();
+  renderSelectedSabablar();
+  updateSababCounter();
+  document.getElementById('f-izoh').value = t ? t.izoh : '';
+  setTuri(t ? t.turi : 'buy');
+
+  // ATR maydonlarini tozalash (default)
+  document.getElementById('f-atr').value = '';
+  document.getElementById('f-svecha-hajm').value = '';
+  document.getElementById('svecha-filter-result').style.display = 'none';
+  clearHiLow();
+
+  // Tahrirlash paytida: saqlangan ATR ma'lumotlarini qayta yuklash
+  // ATR ko\'rinadi: ochiq savdo YOKI qisman yopilgan savdo (partialLot bor)
+  const isOpenTrade = t && (!t.chiqish || t.chiqish === 0);
+  const isPartialTrade = t && t.chiqish && t.chiqish > 0 && t.partialLot && t.partialLot > 0;
+  if ((isOpenTrade || isPartialTrade) && t) {
+    // ATR qiymatini yuklash
+    if (t.atr && t.atr > 0) {
+      document.getElementById('f-atr').value = t.atr;
+      document.getElementById('atr-block').style.display = 'block';
+
+      // Multiplierlarni yuklash
+      if (t.atrMultiSL) document.getElementById('f-atr-multi-sl').value = t.atrMultiSL;
+      if (t.atrMultiTP) document.getElementById('f-atr-multi-tp').value = t.atrMultiTP;
+
+      // Hi/Low ni yuklash
+      if (t.hilowType && t.hilowVal && t.hilowVal > 0) {
+        currentHiLow = t.hilowType;
+        const btnH = document.getElementById('btn-high');
+        const btnL = document.getElementById('btn-low');
+        const input = document.getElementById('f-hilow-val');
+        const clearBtn = document.getElementById('btn-hilow-clear');
+        input.value = t.hilowVal;
+        input.style.display = 'block';
+        clearBtn.style.display = 'block';
+        if (t.hilowType === 'high') {
+          btnH.style.background = 'rgba(248,113,113,0.2)';
+          btnH.style.color = 'var(--red)';
+          btnH.style.borderColor = 'rgba(248,113,113,0.7)';
+          btnL.style.background = 'transparent';
+          btnL.style.color = 'var(--muted)';
+          input.placeholder = 'High narxi';
+          input.style.borderColor = 'rgba(248,113,113,0.5)';
+        } else {
+          btnL.style.background = 'rgba(34,211,165,0.2)';
+          btnL.style.color = 'var(--green)';
+          btnL.style.borderColor = 'rgba(34,211,165,0.7)';
+          btnH.style.background = 'transparent';
+          btnH.style.color = 'var(--muted)';
+          input.placeholder = 'Low narxi';
+          input.style.borderColor = 'rgba(34,211,165,0.5)';
+        }
+      }
+
+      // Svecha hajmini yuklash
+      if (t.svechaHajm && t.svechaHajm > 0) {
+        document.getElementById('f-svecha-hajm').value = t.svechaHajm;
+      }
+
+      // ATR ni qayta hisoblab ko'rsatish
+      calcAtrStop();
+
+      // Svecha filterni ham yangilash
+      if (t.svechaHajm && t.svechaHajm > 0) calcSvechaFilter();
+
+    } else if (t.sl > 0 || t.tp > 0) {
+      // ATR yo\'q lekin SL/TP bor — ularni ko'rsatish
+      document.getElementById('atr-block').style.display = 'block';
+      const slEl = document.getElementById('atr-sl-val');
+      const tpEl = document.getElementById('atr-tp-val');
+      slEl.textContent = t.sl > 0 ? t.sl.toFixed(3) : '—';
+      slEl.dataset.val = t.sl > 0 ? t.sl.toFixed(3) : '';
+      tpEl.textContent = t.tp > 0 ? t.tp.toFixed(3) : '—';
+      tpEl.dataset.val = t.tp > 0 ? t.tp.toFixed(3) : '';
+    } else {
+      document.getElementById('atr-block').style.display = 'none';
+    }
+  } else {
+    document.getElementById('atr-block').style.display = 'none';
+  }
+
+  calcLive();
+  document.getElementById('modal-overlay').classList.add('open');
+  // Boshlang'ich holatni saqlaymiz
+  setTimeout(() => { _modalSnapshot = modalSnapshot(); }, 50);
+}
+
+function showSaveBlock(title, reason, type) {
+  // type: 'risk' yoki 'sabab'
+  if (type === 'risk') {
+    document.getElementById('save-block-risk').style.display = 'block';
+    document.getElementById('save-block-risk-reason').textContent = reason;
+  } else {
+    document.getElementById('save-block-sabab').style.display = 'block';
+    document.getElementById('save-block-sabab-reason').textContent = reason;
+  }
+}
+function hideSaveBlock() {
+  document.getElementById('save-block-risk').style.display = 'none';
+  document.getElementById('save-block-sabab').style.display = 'none';
+}
+
+// Modal ochilganda boshlang'ich holat saqlanadi
+let _modalSnapshot = '';
+function modalSnapshot() {
+  return [
+    document.getElementById('f-sana').value,
+    document.getElementById('f-inst').value,
+    getKirish(),
+    document.getElementById('f-chiqish').value,
+    document.getElementById('f-lot').value,
+    document.getElementById('f-sl').value,
+    document.getElementById('f-tp').value,
+    document.getElementById('f-izoh').value,
+    currentTuri
+  ].join('|');
+}
+function modalHasChanges() {
+  return modalSnapshot() !== _modalSnapshot;
+}
+function tryCloseModal() {
+  if (modalHasChanges()) {
+    const saveBtn = document.getElementById('save-btn');
+    const isBlocked = saveBtn.style.pointerEvents === 'none' || saveBtn.style.opacity === '0.35';
+
+    if (isBlocked) {
+      const riskVisible = document.getElementById('save-block-risk').style.display !== 'none';
+      const sababVisible = document.getElementById('save-block-sabab').style.display !== 'none';
+      let exitMsg = [];
+      if (riskVisible) exitMsg.push("Risk juda yuqori (30%+)");
+      if (sababVisible) exitMsg.push("Sabablar ko'rsatilmagan");
+      const isOnlyRisk = riskVisible && !sababVisible;
+      document.getElementById('exit-icon').textContent = '🚫';
+      document.getElementById('exit-title').textContent = isOnlyRisk ? "⚠️ Risk juda yuqori!" : "Savdoga tayyor emasiz!";
+      document.getElementById('exit-subtitle').style.color = 'var(--red)';
+      document.getElementById('exit-subtitle').style.opacity = '0.85';
+      document.getElementById('exit-subtitle').textContent = exitMsg.join(' • ') || "Saqlash imkoni yo\'q";
+      document.getElementById('exit-save-btns').style.display = 'none';
+      document.getElementById('exit-only-btn').style.display = 'block';
+    } else {
+      document.getElementById('exit-icon').textContent = '⚠️';
+      document.getElementById('exit-title').textContent = "O'zgarishlar saqlansizmi?";
+      document.getElementById('exit-subtitle').style.color = 'var(--muted)';
+      document.getElementById('exit-subtitle').style.opacity = '1';
+      document.getElementById('exit-subtitle').textContent = "Siz kiritgan ma'lumotlar saqlanmagan";
+      document.getElementById('exit-save-btns').style.display = 'flex';
+      document.getElementById('exit-only-btn').style.display = 'none';
+    }
+    document.getElementById('exit-overlay').classList.add('open');
+  } else {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+}
+function exitWithoutSave() {
+  document.getElementById('exit-overlay').classList.remove('open');
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+function saveAndExit() {
+  document.getElementById('exit-overlay').classList.remove('open');
+  const saveBtn = document.getElementById('save-btn');
+  // Saqlash bloki bormi tekshirish
+  if (saveBtn.style.pointerEvents === 'none') {
+    // Blok bor — oyna yopilmaydi, sabab ko'rsatiladi
+    const reason = document.getElementById('save-block-reason').textContent;
+    const title = document.getElementById('save-block-title').textContent;
+    if (!reason) showSaveBlock("Saqlash imkoni yo\'q", "Sabablarni to'ldiring yoki riskni kamaytiring");
+    return;
+  }
+  saveTrade();
+}
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  tryCloseModal();
+}
+
+function saveTrade() {
+  if (!editId && selectedSabablar.length < 3) {
+    document.getElementById('sabab-hint').style.display = 'block';
+    return;
+  }
+
+  const inst = document.getElementById('f-inst').value;
+  const kirishVal = getKirish();
+  const chiqishVal = document.getElementById('f-chiqish').value;
+  const lotVal = document.getElementById('f-lot').value;
+  const partialLotVal = parseFloat(document.getElementById('f-partial-lot').value) || 0;
+  const chiqishNum = parseFloat(chiqishVal) || 0;
+  const lotNum = parseFloat(lotVal) || 0;
+  const kirishNum = parseFloat(kirishVal) || 0;
+
+  // B/U holatini aniqlash: buActive flag YOKI chiqish = kirish
+  const isBU = buActive || (chiqishNum > 0 && kirishNum > 0 && Math.abs(chiqishNum - kirishNum) < 0.0001);
+
+  let pnl;
+
+  if (isBU && partialLotVal > 0 && partialLotVal < lotNum && buPartialChiqish > 0) {
+    // B/U + avval boshqa narxda qisman yopilgan:
+    // partial PnL = avvalgi chiqish narxi bo'yicha hisoblash
+    pnl = calcPnL(inst, currentTuri, kirishVal, String(buPartialChiqish), partialLotVal);
+  } else if (isBU) {
+    // Faqat B/U, partial yo\'q yoki avvalgi chiqish narxi yo\'q
+    pnl = 0;
+  } else if (partialLotVal > 0 && partialLotVal < lotNum && chiqishNum > 0) {
+    // Qisman savdo (B/U siz): yopilgan lot bo'yicha PnL
+    pnl = calcPnL(inst, currentTuri, kirishVal, chiqishVal, partialLotVal);
+  } else if (chiqishNum === 0) {
+    pnl = 0;
+  } else {
+    pnl = calcPnL(inst, currentTuri, kirishVal, chiqishVal, lotVal);
+  }
+
+  const trade = {
+    id: editId || Date.now(),
+    sana: document.getElementById('f-sana').value,
+    instrument: inst,
+    turi: currentTuri,
+    kirish: kirishNum,
+    kirishZona: zonaMode ? document.getElementById('f-kirish').value.trim() : '',
+    partialLot: partialLotVal,
+    chiqish: chiqishNum,
+    lot: lotNum,
+    sl: parseFloat(document.getElementById('f-sl').value) || 0,
+    tp: parseFloat(document.getElementById('f-tp').value) || 0,
+    sabab: selectedSabablar.join(', '),
+    izoh: document.getElementById('f-izoh').value,
+    isBU: isBU,
+    partialChiqish: isBU && buPartialChiqish > 0 ? buPartialChiqish : chiqishNum,
+    pnl,
+    natija: pnl > 0 ? 'Win' : pnl < 0 ? 'Loss' : 'Win', // B/U = Win (zarar yo\'q)
+    atr: parseFloat(document.getElementById('f-atr').value) || 0,
+    atrMultiSL: parseFloat(document.getElementById('f-atr-multi-sl').value) || 0.5,
+    atrMultiTP: parseFloat(document.getElementById('f-atr-multi-tp').value) || 3.0,
+    hilowType: currentHiLow || null,
+    hilowVal: parseFloat(document.getElementById('f-hilow-val').value) || 0,
+    svechaHajm: parseFloat(document.getElementById('f-svecha-hajm').value) || 0
+  };
+
+  if (editId) { trades = trades.map(t => t.id === editId ? trade : t); }
+  else { trades.unshift(trade); }
+
+  buActive = false;
+  buPartialChiqish = 0;
+  tpBuActive = false;
+  // TP B/U tugmasini reset qilish
+  const tpBuBtn = document.getElementById('tp-bu-btn');
+  if (tpBuBtn) {
+    tpBuBtn.textContent = 'B/U';
+    tpBuBtn.style.color = 'var(--text2)';
+    tpBuBtn.style.borderColor = 'var(--border)';
+    tpBuBtn.style.background = 'var(--bg4)';
+  }
+
+  save(); renderAll();
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function askDelete(id) { deleteId = id; document.getElementById('del-overlay').classList.add('open'); }
+function closeDelModal(e) { if (e && e.target !== document.getElementById('del-overlay')) return; document.getElementById('del-overlay').classList.remove('open'); }
+function confirmDelete() { trades = trades.filter(t => t.id !== deleteId); save(); renderAll(); document.getElementById('del-overlay').classList.remove('open'); }
+
+function getStats(list) {
+  list = list || trades;
+  const wins = list.filter(t => t.natija === 'Win');
+  const losses = list.filter(t => t.natija === 'Loss');
+  const totalPnL = list.reduce((s, t) => s + t.pnl, 0);
+  const winRate = list.length ? ((wins.length / list.length) * 100).toFixed(1) : 0;
+  const avgWin = wins.length ? (wins.reduce((s, t) => s + t.pnl, 0) / wins.length).toFixed(2) : 0;
+  const avgLoss = losses.length ? (losses.reduce((s, t) => s + t.pnl, 0) / losses.length).toFixed(2) : 0;
+  const best = list.length ? Math.max(...list.map(t => t.pnl)) : 0;
+  const worst = list.length ? Math.min(...list.map(t => t.pnl)) : 0;
+  return { totalPnL, winRate, wins: wins.length, losses: losses.length, total: list.length, avgWin, avgLoss, best, worst };
+}
+
+function sc(label, value, color, sub) {
+  return `<div class="stat-card"><div class="stat-label">${label}</div><div class="stat-value" style="color:${color || 'var(--text)'}">${value}</div>${sub ? `<div class="stat-sub">${sub}</div>` : ''}</div>`;
+}
+
+function renderQuickStats() {
+  const s = getStats();
+  let html = sc('Jami Savdolar', s.total, '') +
+    sc('Jami P&L', (s.totalPnL >= 0 ? '+' : '') + '$' + s.totalPnL.toFixed(2), pnlColor(s.totalPnL)) +
+    sc('Win Rate', s.winRate + '%', 'var(--green)') +
+    sc('Win / Loss', s.wins + ' / ' + s.losses, '');
+  document.getElementById('quick-stats').innerHTML = html;
+  renderBalansBanner();
+}
+
+function renderDash() {
+  const s = getStats();
+  const b = depozit ? getBalansInfo() : null;
+  let extraCards = '';
+  if (b) {
+    extraCards =
+      sc('Joriy Balans', '$' + b.currentBalans.toFixed(2), pnlColor(b.totalPnL)) +
+      sc('ROI', (b.roi >= 0 ? '+' : '') + b.roi.toFixed(2) + '%', pnlColor(b.roi), 'Depozitdan o\'sish') +
+      sc('Max Drawdown', '-$' + b.maxDD.toFixed(2), 'var(--red)', b.ddPct.toFixed(1) + '% yuqoridan');
+  }
+  document.getElementById('dash-stats').innerHTML =
+    sc('Jami P&L', (s.totalPnL >= 0 ? '+' : '') + '$' + s.totalPnL.toFixed(2), pnlColor(s.totalPnL)) +
+    sc('Win Rate', s.winRate + '%', 'var(--green)', s.wins + ' win / ' + s.losses + ' loss') +
+    sc("O'rtacha Win", '$' + s.avgWin, 'var(--green)') +
+    sc("O'rtacha Loss", '$' + s.avgLoss, 'var(--red)') +
+    sc('Eng Yaxshi', '$' + s.best.toFixed(2), 'var(--green)') +
+    sc('Eng Yomon', '$' + s.worst.toFixed(2), 'var(--red)') +
+    (b ? sc('Max Drawdown', '-$' + b.maxDD.toFixed(2), 'var(--red)', b.ddPct.toFixed(1) + '% yuqoridan') +
+         sc('ROI', (b.roi >= 0 ? '+' : '') + b.roi.toFixed(2) + '%', pnlColor(b.roi), 'Depozitdan o\'sish') : '');
+  renderBalansBanner();
+  const sorted = [...trades].sort((a, b) => new Date(a.sana) - new Date(b.sana));
+  let cum = depozit || 0;
+  const pts = [cum, ...sorted.map(t => { cum += t.pnl; return cum; })];
+  const W = 320, H = 90;
+  const max = Math.max(...pts), min = Math.min(...pts), range = max - min || 1;
+  if (pts.length > 1) {
+    const xs = pts.map((_, i) => i / (pts.length - 1) * W);
+    const ys = pts.map(p => H - ((p - min) / range) * H * 0.82 - H * 0.09);
+    const path = xs.map((x, i) => (i === 0 ? 'M' : 'L') + ' ' + x + ' ' + ys[i]).join(' ');
+    const fill = path + ' L ' + W + ' ' + H + ' L 0 ' + H + ' Z';
+    const last = pts[pts.length - 1];
+    const col = last >= 0 ? '#22d3a5' : '#f87171';
+    document.getElementById('equity-chart').innerHTML = `
+      <defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${col}" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="${col}" stop-opacity="0"/>
+      </linearGradient></defs>
+      <path d="${fill}" fill="url(#cg)"/>
+      <path d="${path}" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  } else {
+    document.getElementById('equity-chart').innerHTML = '<text x="160" y="50" text-anchor="middle" fill="#2a3f56" font-size="12">Ma\'lumot yo\'q</text>';
+  }
+  const wb = document.getElementById('win-bar');
+  wb.innerHTML = `<div class="win-seg" style="flex:${s.wins || 0}"></div><div class="loss-seg" style="flex:${s.losses || 0}"></div>`;
+  document.getElementById('wl-wins').textContent = 'Win: ' + s.wins;
+  document.getElementById('wl-losses').textContent = 'Loss: ' + s.losses;
+}
+
+function renderPnlGraph() {
+  const svg = document.getElementById('pnl-graph');
+  const legend = document.getElementById('pnl-graph-legend');
+  if (!trades.length) {
+    svg.innerHTML = '<text x="160" y="60" text-anchor="middle" fill="#2a3f56" font-size="12">Ma\'lumot yo\'q</text>';
+    legend.innerHTML = '';
+    return;
+  }
+  const sorted = [...trades].sort((a,b) => new Date(a.sana)-new Date(b.sana));
+  const W=320, H=120, PAD=8;
+  // Cumulative equity
+  let cum=0;
+  const cumPts = sorted.map(t => { cum += t.pnl; return cum; });
+  const allPts = [0, ...cumPts];
+  const wins = sorted.map(t => t.pnl > 0 ? t.pnl : 0);
+  const losses = sorted.map(t => t.pnl < 0 ? Math.abs(t.pnl) : 0);
+
+  const maxV = Math.max(...allPts, ...wins, ...losses, 1);
+  const minV = Math.min(...allPts, 0);
+  const range = maxV - minV || 1;
+  const n = allPts.length;
+
+  function scaleX(i) { return PAD + (i / (n-1)) * (W - PAD*2); }
+  function scaleY(v) { return H - PAD - ((v - minV) / range) * (H - PAD*2); }
+
+  // Zero line
+  const zeroY = scaleY(0);
+
+  // Equity smooth path
+  const eqPts = allPts.map((v,i) => [scaleX(i), scaleY(v)]);
+  let path = `M ${eqPts[0][0]} ${eqPts[0][1]}`;
+  for (let i=1; i<eqPts.length; i++) {
+    const cp1x = (eqPts[i-1][0] + eqPts[i][0]) / 2;
+    path += ` C ${cp1x} ${eqPts[i-1][1]}, ${cp1x} ${eqPts[i][1]}, ${eqPts[i][0]} ${eqPts[i][1]}`;
+  }
+  const fillPath = path + ` L ${eqPts[eqPts.length-1][0]} ${zeroY} L ${eqPts[0][0]} ${zeroY} Z`;
+  const lastVal = allPts[allPts.length-1];
+  const lineCol = lastVal >= 0 ? '#22d3a5' : '#f87171';
+
+  // Win/Loss bars
+  let bars = '';
+  const barW = Math.max(2, (W - PAD*2) / (sorted.length * 2.5));
+  sorted.forEach((t,i) => {
+    const x = scaleX(i+1) - barW/2;
+    if (t.pnl > 0) {
+      const bh = ((t.pnl) / range) * (H - PAD*2);
+      bars += `<rect x="${x}" y="${zeroY - bh}" width="${barW}" height="${bh}" fill="rgba(34,211,165,0.35)" rx="1"/>`;
+    } else if (t.pnl < 0) {
+      const bh = (Math.abs(t.pnl) / range) * (H - PAD*2);
+      bars += `<rect x="${x}" y="${zeroY}" width="${barW}" height="${bh}" fill="rgba(248,113,113,0.35)" rx="1"/>`;
+    }
+  });
+
+  svg.innerHTML = `
+    <defs>
+      <linearGradient id="eg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="${lineCol}" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="${lineCol}" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    ${bars}
+    <line x1="${PAD}" y1="${zeroY}" x2="${W-PAD}" y2="${zeroY}" stroke="#1f3248" stroke-width="1" stroke-dasharray="3,3"/>
+    <path d="${fillPath}" fill="url(#eg)"/>
+    <path d="${path}" fill="none" stroke="${lineCol}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="${W-PAD}" y="${zeroY-4}" text-anchor="end" fill="#2a4a6a" font-size="8">$0</text>
+    <text x="${W-PAD}" y="14" text-anchor="end" fill="${lineCol}" font-size="9" font-weight="bold">${lastVal>=0?'+':''}$${lastVal.toFixed(0)}</text>
+  `;
+
+  legend.innerHTML = `
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(34,211,165,0.5);border-radius:2px;display:inline-block"></span><span style="color:var(--muted)">Foyda</span></span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:rgba(248,113,113,0.5);border-radius:2px;display:inline-block"></span><span style="color:var(--muted)">Zarar</span></span>
+    <span style="display:flex;align-items:center;gap:4px"><span style="width:20px;height:2px;background:${lineCol};display:inline-block"></span><span style="color:var(--muted)">Equity</span></span>
+  `;
+}
+
+function renderAnaliz() {
+  renderPnlGraph();
+  const im = {};
+  trades.forEach(t => {
+    if (!im[t.instrument]) im[t.instrument] = { count: 0, pnl: 0, wins: 0 };
+    im[t.instrument].count++; im[t.instrument].pnl += t.pnl;
+    if (t.natija === 'Win') im[t.instrument].wins++;
+  });
+  const iArr = Object.entries(im).sort((a, b) => b[1].pnl - a[1].pnl);
+  const maxP = iArr.length ? Math.max(...iArr.map(x => Math.abs(x[1].pnl))) : 1;
+  document.getElementById('inst-list').innerHTML = iArr.length ? iArr.map(([name, s]) => `
+    <div class="inst-row">
+      <div class="inst-head">
+        <span class="inst-name">${name}</span>
+        <div class="inst-meta">
+          <span style="color:var(--muted)">${s.count}x</span>
+          <span class="green">${s.wins} win</span>
+          <span style="font-weight:700;color:${s.pnl >= 0 ? 'var(--green)' : 'var(--red)'}">${s.pnl >= 0 ? '+' : ''}$${s.pnl.toFixed(2)}</span>
+        </div>
+      </div>
+      <div class="inst-bar"><div class="inst-fill" style="background:${s.pnl >= 0 ? 'var(--green)' : 'var(--red)'};width:${(Math.abs(s.pnl) / maxP * 100).toFixed(1)}%"></div></div>
+    </div>`).join('') : '<div style="color:var(--muted);text-align:center;padding:20px;font-size:13px">Ma\'lumot yo\'q</div>';
+
+  const sm = {};
+  trades.forEach(t => {
+    if (!sm[t.sabab]) sm[t.sabab] = { count: 0, pnl: 0, wins: 0 };
+    sm[t.sabab].count++; sm[t.sabab].pnl += t.pnl;
+    if (t.natija === 'Win') sm[t.sabab].wins++;
+  });
+  const sArr = Object.entries(sm);
+  document.getElementById('sabab-list').innerHTML = sArr.length ? sArr.map(([name, s]) => `
+    <div class="analiz-row">
+      <span class="analiz-name">${name}</span>
+      <div class="analiz-meta">
+        <span style="color:var(--muted)">${s.count}x</span>
+        <span class="green">${s.count ? ((s.wins / s.count) * 100).toFixed(0) : 0}%</span>
+        <span style="font-weight:700;color:${s.pnl >= 0 ? 'var(--green)' : 'var(--red)'};min-width:60px;text-align:right">${s.pnl >= 0 ? '+' : ''}$${s.pnl.toFixed(2)}</span>
+      </div>
+    </div>`).join('') : '<div style="color:var(--muted);text-align:center;padding:20px;font-size:13px">Ma\'lumot yo\'q</div>';
+}
+
+function renderTrades() {
+  const fi = document.getElementById('filter-inst').value;
+  const fn = document.getElementById('filter-nat').value;
+  const filtered = trades.filter(t => (!fi || t.instrument === fi) && (!fn || t.natija === fn));
+  const list = document.getElementById('trades-list');
+  if (!filtered.length) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">📝</div><div class="empty-title">Hali savdo yo\'q</div><div class="empty-sub">+ Savdo tugmasi orqali qo'shing</div></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(t => {
+    const rr = calcRR(t.kirish, t.sl, t.tp, t.turi);
+    const pnlVal = (t.pnl >= 0 ? '+' : '') + '$' + t.pnl.toFixed(2);
+    const hasPartial = t.partialLot && t.partialLot > 0 && t.partialLot < t.lot;
+    const isFullBU_pnl = t.isBU && !hasPartial;
+    // PnL rangi: to'liq B/U → sariq (zarar ham emas, foyda ham emas) | qisman yopilgan → yashil | to'liq TP → yashil/qizil
+    const pnlColor2 = isFullBU_pnl
+      ? 'var(--muted)'
+      : (hasPartial ? 'var(--green)' : pnlColor(t.pnl));
+    // ½ badge: qisman yopilgan → sariq (B/U bo'lsa ham)
+    const partialBadge = hasPartial
+      ? `<span style="font-size:10px;font-weight:700;color:#fbbf24;background:rgba(251,191,36,0.13);border:1px solid rgba(251,191,36,0.4);border-radius:5px;padding:1px 6px">½${parseFloat(t.partialLot||0).toFixed(2)}/${parseFloat(t.lot).toFixed(2)}</span>`
+      : '';
+    // Badge logika:
+    // 1) B/U qilingan ochiq savdo → sariq "WIN · B/U"
+    // 2) Qisman yopilgan ochiq savdo (B/U siz) → sariq "✓ WIN"
+    // 3) To'liq yopilgan WIN → yashil "✓ WIN"
+    // 4) LOSS → qizil "✗ LOSS"
+    const isPartialOpen = hasPartial; // qisman yopilgan (ochiq qolgan bor)
+    // To'liq B/U: chiqish = kirish yoki isBU va partial yo'q
+    const isFullBU = t.isBU && !hasPartial;
+    // TP ga to'liq yetgan: chiqish bor, partial yo'q, isBU emas, pnl > 0
+    const isFullTP = !hasPartial && !t.isBU && t.chiqish > 0 && t.pnl > 0;
+    let natBadge;
+    if (isPartialOpen && t.isBU) {
+      // Qisman yopilgan + B/U — kichik, yashil WIN + qizil B/U
+      natBadge = `<span style="display:inline-flex;align-items:center;gap:2px;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(34,211,165,0.12);border:1px solid rgba(34,211,165,0.35);white-space:nowrap"><span style="color:var(--green)">WIN</span><span style="opacity:0.4;font-size:8px;color:var(--text)"> · </span><span style="color:var(--red)">B/U</span></span>`;
+    } else if (isPartialOpen) {
+      // Qisman yopilgan — kichik, yashil
+      natBadge = `<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;background:rgba(34,211,165,0.12);color:var(--green);border:1px solid rgba(34,211,165,0.35)">WIN</span>`;
+    } else if (isFullBU) {
+      // To'liq nolda yopilgan — katta, sariq/oltin rangda
+      natBadge = `<span style="font-size:15px;font-weight:900;padding:4px 14px;border-radius:8px;background:rgba(248,113,113,0.15);color:var(--red);border:1.5px solid rgba(248,113,113,0.55);letter-spacing:1px;display:inline-block">B/U</span>`;
+    } else if (isFullTP) {
+      // To'liq TP — katta WIN, yashil, qiya
+      natBadge = `<span style="font-size:13px;font-weight:900;padding:3px 11px;border-radius:6px;background:rgba(34,211,165,0.12);color:var(--green);border:1px solid rgba(34,211,165,0.45);font-style:italic;letter-spacing:0.5px">WIN</span>`;
+    } else if (t.natija === 'Loss') {
+      natBadge = `<span class="nat-badge nat-loss" style="font-size:12px;padding:3px 10px;border-radius:6px;font-weight:800">✗ LOSS</span>`;
+    } else {
+      natBadge = `<span class="nat-badge nat-win" style="font-size:13px;padding:3px 11px;border-radius:6px;font-weight:900;font-style:italic">WIN</span>`;
+    }
+
+    return `<div class="trade-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="trade-inst">${t.instrument}</span>
+          <span class="type-badge ${t.turi==='buy'?'type-buy':'type-sell'}">${t.turi.toUpperCase()}</span>
+          ${rr ? `<span style="font-size:11px;font-weight:700;color:var(--gold)">1:${rr}</span>` : ''}
+          ${!t.isBU && hasPartial ? `<span style="font-size:10px;color:#fbbf24;font-weight:600">📌${parseFloat(t.partialLot).toFixed(2)}L ochiq</span>` : ''}
+        </div>
+        <span class="trade-date">${t.sana}</span>
+      </div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;font-size:12px;margin-bottom:4px;row-gap:3px">
+        <span><span style="color:var(--muted);font-size:10px">Kirish </span>${t.kirishZona ? `<span style="font-size:11px">${t.kirishZona}</span>` : t.kirish}</span>
+        <span><span style="color:var(--muted);font-size:10px">Chiqish </span>${t.chiqish||'—'}</span>
+        <span><span style="color:var(--muted);font-size:10px">Lot </span>${t.lot}</span>
+        <span><span style="color:var(--muted);font-size:10px">SL </span><span style="color:var(--red)">${t.sl||'—'}</span></span>
+        <span><span style="color:var(--muted);font-size:10px">TP </span><span style="color:var(--green)">${t.tp||'—'}</span></span>
+      </div>
+
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+        <span style="font-size:10px;color:var(--muted)">Sabab </span>${t.sabab}
+      </div>
+
+      ${t.izoh ? `<div style="font-size:11px;color:var(--muted);margin-bottom:4px;font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${t.izoh}</div>` : ''}
+
+      <div style="display:flex;align-items:center;justify-content:space-between;padding-top:6px;border-top:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span class="pnl-big" style="color:${pnlColor2}">${pnlVal}</span>
+          ${natBadge}
+          ${partialBadge}
+        </div>
+        <div class="trade-actions">
+          <button class="action-btn" onclick="openModal(${t.id})">✏️</button>
+          <button class="action-btn" onclick="askDelete(${t.id})">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// KALENDAR
+// ============================================================
+function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderKalendar(); }
+function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderKalendar(); }
+
+function renderKalendar() {
+  document.getElementById('cal-month-title').textContent = MONTHS_UZ[calMonth];
+  document.getElementById('cal-year-title').textContent = calYear + ' yil';
+
+  const prefix = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`;
+  const monthTrades = trades.filter(t => t.sana && t.sana.startsWith(prefix));
+
+  // Kunlik ma'lumot
+  const dayMap = {};
+  monthTrades.forEach(t => {
+    const day = parseInt(t.sana.split('-')[2]);
+    if (!dayMap[day]) dayMap[day] = { pnl: 0, count: 0, wins: 0 };
+    dayMap[day].pnl += t.pnl;
+    dayMap[day].count++;
+    if (t.natija === 'Win') dayMap[day].wins++;
+  });
+
+  // Oylik xulosa
+  const mPnl = monthTrades.reduce((s, t) => s + t.pnl, 0);
+  const mWins = monthTrades.filter(t => t.natija === 'Win').length;
+  const mWr = monthTrades.length ? ((mWins / monthTrades.length) * 100).toFixed(0) : 0;
+  const mPnlEl = document.getElementById('cal-monthly-pnl');
+  mPnlEl.textContent = (mPnl >= 0 ? '+' : '') + '$' + mPnl.toFixed(2);
+  mPnlEl.style.color = pnlColor(mPnl);
+  document.getElementById('cal-monthly-count').textContent = monthTrades.length;
+  document.getElementById('cal-monthly-wr').textContent = mWr + '%';
+
+  // Grid
+  const firstDay = new Date(calYear, calMonth, 1).getDay(); // 0=Sun
+  const offset = firstDay === 0 ? 6 : firstDay - 1; // Du dan boshlash
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  let html = '';
+  for (let i = 0; i < offset; i++) html += `<div class="cal-day empty"></div>`;
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const isToday = dateStr === todayStr;
+    const dd = dayMap[d];
+    let cls = 'cal-day';
+    if (isToday) cls += ' today';
+    if (dd) cls += dd.pnl >= 0 ? ' win-day' : ' loss-day';
+
+    let pnlHtml = '';
+    if (dd) {
+      const abs = Math.abs(dd.pnl);
+      const sign = dd.pnl >= 0 ? '+' : '-';
+      const col = dd.pnl >= 0 ? 'var(--green)' : 'var(--red)';
+      // Very compact: $1.2k or $750
+      let valStr;
+      if (abs >= 10000) valStr = sign+'$'+(abs/1000).toFixed(0)+'k';
+      else if (abs >= 1000) valStr = sign+'$'+(abs/1000).toFixed(1)+'k';
+      else if (abs >= 100) valStr = sign+'$'+abs.toFixed(0);
+      else valStr = sign+'$'+abs.toFixed(1);
+      pnlHtml = `<div class="cal-pnl" style="color:${col}">${valStr}</div><div class="cal-trades-count">${dd.count}x</div>`;
+    }
+    html += `<div class="${cls}" onclick="showDayDetail('${dateStr}')"><div class="cal-day-num">${d}</div>${pnlHtml}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+  renderYearSummary();
+}
+
+function renderYearSummary() {
+  document.getElementById('year-label').textContent = calYear + ' yil';
+  let html = '';
+  for (let m = 0; m < 12; m++) {
+    const prefix = `${calYear}-${String(m + 1).padStart(2, '0')}`;
+    const mTrades = trades.filter(t => t.sana && t.sana.startsWith(prefix));
+    const mPnl = mTrades.reduce((s, t) => s + t.pnl, 0);
+    const col = mPnl > 0 ? 'var(--green)' : mPnl < 0 ? 'var(--red)' : 'var(--muted)';
+    const isCur = m === calMonth;
+    html += `<div class="ym-card" style="${isCur ? 'border-color:var(--green);' : ''}">
+      <div class="ym-name">${MONTHS_UZ[m].substring(0, 3)}</div>
+      <div class="ym-val" style="color:${col}">${mTrades.length ? (mPnl >= 0 ? '+' : '') + '$' + mPnl.toFixed(0) : '—'}</div>
+    </div>`;
+  }
+  document.getElementById('year-months').innerHTML = html;
+}
+
+function showDayDetail(dateStr) {
+  const dayTrades = trades.filter(t => t.sana === dateStr);
+  if (!dayTrades.length) return;
+  const pnl = dayTrades.reduce((s, t) => s + t.pnl, 0);
+  const lines = dayTrades.map(t => `${t.instrument} ${t.turi.toUpperCase()} ${t.lot}lot — ${t.pnl >= 0 ? '+' : ''}$${t.pnl.toFixed(2)}`).join('\n');
+  alert(`📅 ${dateStr}\nJami P&L: ${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}\n\n${lines}`);
+}
+
+// ============================================================
+// SOZLAMA
+// ============================================================
+const INST_DESC = {
+  XAUUSD: 'Oltin (Gold)', EURUSD: 'Evro / Dollar', GBPUSD: 'Funt / Dollar',
+  USDJPY: 'Dollar / Yen', BTCUSD: 'Bitcoin', ETHUSD: 'Ethereum',
+  US30: 'Dow Jones', NAS100: 'Nasdaq 100', SP500: 'S&P 500', USOIL: 'Neft (Oil)'
+};
+
+function renderSozlama() {
+  document.getElementById('pip-rows').innerHTML = Object.keys(DEFAULT_PIP).map(inst => `
+    <div class="pip-row">
+      <div>
+        <div class="pip-inst">${inst}</div>
+        <div class="pip-desc">${INST_DESC[inst] || ''}</div>
+      </div>
+      <input class="pip-input" type="number" id="pip-${inst}" value="${pipSettings[inst] !== undefined ? pipSettings[inst] : DEFAULT_PIP[inst]}" step="0.1" min="0.001">
+    </div>
+  `).join('');
+}
+
+function savePipSettings() {
+  Object.keys(DEFAULT_PIP).forEach(inst => {
+    const val = parseFloat(document.getElementById('pip-' + inst).value);
+    if (!isNaN(val) && val > 0) pipSettings[inst] = val;
+  });
+  localStorage.setItem('tj_pip', JSON.stringify(pipSettings));
+  // Barcha savdolarni qayta hisoblash
+  trades = trades.map(t => {
+    const newPnl = calcPnL(t.instrument, t.turi, t.kirish, t.chiqish, t.lot);
+    return { ...t, pnl: newPnl, natija: newPnl >= 0 ? 'Win' : 'Loss' };
+  });
+  save();
+  renderAll();
+  const msg = document.getElementById('pip-saved');
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 2500);
+}
+
+// ============================================================
+// SABAB (MULTI-SELECT, KAMIDA 3 TA)
+// ============================================================
+const DEFAULT_SABABLAR = ['Zona','Trend','Breakout','Reversal','News','Support/Resistance','Pattern'];
+let customSabablar = JSON.parse(localStorage.getItem('tj_sabablar') || '[]');
+let selectedSabablar = []; // joriy tanlangan sabablar
+
+function getAllSabablar() {
+  return [...DEFAULT_SABABLAR, ...customSabablar];
+}
+
+function refreshSababSelect() {
+  const sel = document.getElementById('f-sabab');
+  const all = getAllSabablar();
+  sel.innerHTML = '<option value="">— Sabab qo\'shing —</option>' +
+    all.filter(s => !selectedSabablar.includes(s))
+       .map(s => `<option value="${s}">${s}</option>`).join('') +
+    `<option value="__boshqa__">+ Boshqa (qo'shish)</option>`;
+}
+
+function onSababChange(sel) {
+  const val = sel.value;
+  if (!val) return;
+  if (val === '__boshqa__') {
+    sel.value = '';
+    openSababModal();
+    return;
+  }
+  addSabab(val);
+  sel.value = '';
+}
+
+function addSabab(val) {
+  if (!val || selectedSabablar.includes(val)) return;
+  selectedSabablar.push(val);
+  refreshSababSelect();
+  renderSelectedSabablar();
+  updateSababCounter();
+}
+
+function removeSabab(val) {
+  selectedSabablar = selectedSabablar.filter(s => s !== val);
+  refreshSababSelect();
+  renderSelectedSabablar();
+  updateSababCounter();
+}
+
+function renderSelectedSabablar() {
+  const wrap = document.getElementById('selected-sabablar');
+  if (!selectedSabablar.length) {
+    wrap.innerHTML = '<span style="font-size:12px;color:var(--muted);padding:4px 0">Hali sabab tanlanmagan</span>';
+    return;
+  }
+  wrap.innerHTML = selectedSabablar.map((s,i) => `
+    <span style="display:inline-flex;align-items:center;gap:4px;background:rgba(34,211,165,0.12);border:1px solid rgba(34,211,165,0.3);color:var(--green);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600">
+      ${i+1}. ${s}
+      <button onclick="removeSabab('${s}')" style="background:none;border:none;color:var(--green);cursor:pointer;font-size:13px;padding:0;line-height:1">✕</button>
+    </span>`).join('');
+}
+
+function updateSaveBtn() {
+  // Risk va sabab holatini birgalikda tekshirib tugmani boshqaradi
+  const riskVisible = document.getElementById('save-block-risk').style.display !== 'none';
+  const n = selectedSabablar.length;
+  const sababOk = editId ? n >= 1 : n >= 3;
+  const saveBtn = document.getElementById('save-btn');
+
+  if (riskVisible) {
+    // Risk bloki ochiq — hech narsa qilma, tugma o'chirilgan
+    saveBtn.style.opacity = '0.35';
+    saveBtn.style.pointerEvents = 'none';
+    saveBtn.style.background = '#4a1a1a';
+  } else if (!sababOk) {
+    // Risk yo\'q, lekin sabab yetmaydi
+    document.getElementById('save-block-sabab').style.display = 'block';
+    document.getElementById('save-block-sabab-reason').textContent = 'Kamida 3 ta sabab tanlanmagan';
+    saveBtn.style.opacity = '0.4';
+    saveBtn.style.pointerEvents = 'none';
+    saveBtn.style.background = '#2a3f56';
+  } else {
+    // Ikkalasi ham OK
+    document.getElementById('save-block-sabab').style.display = 'none';
+    saveBtn.style.opacity = '1';
+    saveBtn.style.pointerEvents = 'auto';
+    saveBtn.style.background = 'linear-gradient(135deg,var(--green),#14b8a6)';
+  }
+}
+
+function updateSababCounter() {
+  const n = selectedSabablar.length;
+  const counter = document.getElementById('sabab-counter');
+  const hint = document.getElementById('sabab-hint');
+  counter.textContent = n + '/3 ' + (n >= 3 ? '✓' : '✗');
+  counter.style.color = n >= 3 ? 'var(--green)' : n >= 1 ? 'var(--gold)' : 'var(--red)';
+  hint.style.display = n > 0 && n < 3 && !editId ? 'block' : 'none';
+  updateSaveBtn();
+}
+
+function openSababModal() {
+  renderSababModalList();
+  document.getElementById('new-sabab-input').value = '';
+  document.getElementById('sabab-overlay').classList.add('open');
+}
+function closeSababModal(e) {
+  if (e && e.target !== document.getElementById('sabab-overlay')) return;
+  document.getElementById('sabab-overlay').classList.remove('open');
+}
+function renderSababModalList() {
+  const all = getAllSabablar();
+  document.getElementById('sabab-modal-list').innerHTML = all.map(s => {
+    const isSelected = selectedSabablar.includes(s);
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:14px;color:${isSelected?'var(--green)':'var(--text2)'};font-weight:${isSelected?'700':'400'};cursor:pointer;flex:1" onclick="selectSababFromModal('${s}')">
+        ${isSelected ? '✓ ' : ''}${s}
+      </span>
+      ${!DEFAULT_SABABLAR.includes(s) ? `<button onclick="deleteCustomSabab('${s}')" style="background:#2a1010;border:none;color:var(--red);border-radius:6px;padding:4px 8px;font-size:12px;cursor:pointer">✕</button>` : ''}
+    </div>`;
+  }).join('');
+}
+function selectSababFromModal(val) {
+  if (selectedSabablar.includes(val)) {
+    removeSabab(val);
+  } else {
+    addSabab(val);
+  }
+  renderSababModalList();
+}
+function addNewSabab() {
+  const inp = document.getElementById('new-sabab-input');
+  const val = inp.value.trim();
+  if (!val) return;
+  if (!customSabablar.includes(val) && !DEFAULT_SABABLAR.includes(val)) {
+    customSabablar.push(val);
+    localStorage.setItem('tj_sabablar', JSON.stringify(customSabablar));
+  }
+  addSabab(val);
+  inp.value = '';
+  renderSababModalList();
+  refreshSababSelect();
+}
+function deleteCustomSabab(val) {
+  customSabablar = customSabablar.filter(s => s !== val);
+  localStorage.setItem('tj_sabablar', JSON.stringify(customSabablar));
+  removeSabab(val);
+  renderSababModalList();
+  refreshSababSelect();
+}
+
+// ============================================================
+function renderAll() {
+  renderQuickStats();
+  renderTrades();
+  renderDash();
+  renderAnaliz();
+  renderKalendar();
+  renderSozlama();
+  renderDepozitSozlama();
+}
+
+function switchTab(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  el.classList.add('active');
+}
+
+renderAll();
+refreshSababSelect();
+renderSelectedSabablar();
+updateSababCounter();
+</script>
+
+</body>
+</html>
