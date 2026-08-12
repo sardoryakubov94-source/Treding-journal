@@ -10,8 +10,11 @@
 CTrade trade;
 
 //--- SOZLAMALAR: shu joyni o'zingiznikiga moslang
+input group    "═════ ❗ MAJBURIY: FOYDALANUVCHI KODI ❗ ═════"
+input string   UserId           = "";                  // ⚠ Ilovada ko'rsatilgan kodni shu yerga yozing — BO'SH bo'lsa EA ISHLAMAYDI!
+
+input group    "───── Asosiy sozlamalar ─────"
 input string   ProjectId        = "treding-jurnal";   // Firebase loyiha ID (projectId)
-input string   UserId           = "";                  // Foydalanuvchi kodi (ilovada ko'rsatilgan raqam). BO'SH bo'lsa EA ishlamaydi!
 input int      PollSeconds      = 4;                   // Necha soniyada buyruq tekshirilsin
 input ulong    MagicNumber      = 778899;               // EA magic raqami
 input double   DefaultSlippage  = 20;                    // Slippage (pips emas, point)
