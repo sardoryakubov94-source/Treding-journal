@@ -11,6 +11,7 @@ CTrade trade;
 
 //--- SOZLAMALAR: shu joyni o'zingiznikiga moslang
 input string   ProjectId        = "treding-jurnal";   // Firebase loyiha ID (projectId)
+input string   UserId           = "";                  // Foydalanuvchi kodi (ilovada ko'rsatilgan raqam). BO'SH bo'lsa EA ishlamaydi!
 input int      PollSeconds      = 4;                   // Necha soniyada buyruq tekshirilsin
 input ulong    MagicNumber      = 778899;               // EA magic raqami
 input double   DefaultSlippage  = 20;                    // Slippage (pips emas, point)
@@ -18,6 +19,8 @@ input int      CommandMaxAgeSec = 70;                    // Buyruq shu soniyadan
 input int      HeartbeatSeconds = 10;                    // Har necha soniyada "tirikman" signali yuborilsin (jurnaldagi MT5 indikatori uchun)
 
 string BaseUrl;
+string UserBaseUrl;
+string UserIdClean;
 datetime lastPollTime = 0;
 datetime lastHeartbeatTime = 0;
 
@@ -29,11 +32,31 @@ string LastDealGVName;
 //+------------------------------------------------------------------+
 int OnInit()
 {
+   // TUZATISH: foydalanuvchi kodi kiritilmagan bo'lsa EA ishga tushmasin —
+   // aks holda uning ma'lumotlari qayerga yozilishini bilmay xato joyga
+   // (yoki umuman noto'g'ri) yuborib qo'yishi mumkin edi.
+   // Eslatma: `input` o'zgaruvchi o'zgarmas (const) bo'lgani uchun avval
+   // oddiy string'ga nusxalab olamiz, keyin uni tozalaymiz.
+   UserIdClean = UserId;
+   StringTrimLeft(UserIdClean); StringTrimRight(UserIdClean);
+   if(StringLen(UserIdClean) == 0)
+   {
+      Alert("DinoEdge EA: Foydalanuvchi kodi kiritilmagan!\n\nGrafikka o'ng tugma bosing -> Ekspertlar xususiyati -> Inputs bo'limida 'UserId' maydoniga ilovada ko'rsatilgan kodni yozing.");
+      Comment("⚠ DinoEdge EA TO'XTATILDI\nSabab: UserId (foydalanuvchi kodi) kiritilmagan.\nInputs bo'limidan kodni kiriting.");
+      return(INIT_PARAMETERS_INCORRECT);
+   }
    BaseUrl = "https://firestore.googleapis.com/v1/projects/" + ProjectId + "/databases/(default)/documents";
+   // TUZATISH: har bir foydalanuvchining ma'lumotlari umumiy (flat)
+   // mt5_commands/mt5_events collection'lariga emas, balki
+   // /users/{UserId}/mt5_commands va /users/{UserId}/mt5_events kabi
+   // ALOHIDA "papka"ga yozilishi uchun — barcha so'rovlarda shu manzil
+   // (UserBaseUrl) ishlatiladi, oddiy BaseUrl emas.
+   UserBaseUrl = BaseUrl + "/users/" + UserIdClean;
    trade.SetExpertMagicNumber(MagicNumber);
    EventSetTimer(PollSeconds);
    LastDealGVName = "DinoEdge_LastDealTicket_" + IntegerToString(MagicNumber);
-   Print("DinoEdge MT5 Bridge ishga tushdi. Base URL: ", BaseUrl);
+
+   Print("DinoEdge MT5 Bridge ishga tushdi. Foydalanuvchi manzili: ", UserBaseUrl);
 
    // Uzilib turgan vaqtda (EA o'chgan/telefon o'chgan paytda) SL/TP bilan yopilgan
    // yoki ochilgan, lekin bildirilmagan savdolarni tekshirib, jurnalga yuboramiz.
@@ -76,7 +99,7 @@ void OnTimer()
 void SendHeartbeat()
 {
    long nowMs = (long)TimeGMT() * 1000;
-   string url = BaseUrl + "/_ping/ea?updateMask.fieldPaths=t";
+   string url = UserBaseUrl + "/_ping/ea?updateMask.fieldPaths=t";
    string body = "{\"fields\":{\"t\":{\"integerValue\":\"" + IntegerToString(nowMs) + "\"}}}";
    HttpRequest("PATCH", url, body);
 }
@@ -180,7 +203,7 @@ string CompactJson(string s)
 //+------------------------------------------------------------------+
 void CheckPendingCommands()
 {
-   string url = BaseUrl + ":runQuery";
+   string url = UserBaseUrl + ":runQuery";
    string body =
       "{"
         "\"structuredQuery\":{"
@@ -361,7 +384,18 @@ void ProcessCloseCommand(string docId, string chunk)
    double ticketD = ExtractDoubleField(chunk, "ticket");
    ulong  ticket  = (ulong)ticketD;
 
-   Print("DEBUG: yopish buyrug'i qayta ishlanmoqda -> docId=", docId, " ticket=", ticket);
+   // TUZATISH: jurnal "qisman yopish" so'raganda (masalan lotning bir qismini
+   // yopish) buyruq bilan birga "lot" maydonini ham yuboradi (kod:
+   // closeOrderInMT5(ticket, lot) -> {"type":"close","ticket":...,"lot":...}).
+   // Avval bu yerda "lot" maydoni UMUMAN o'qilmas va PositionClose() doim
+   // pozitsiyani TO'LIQ yopar edi -- shu sabab qisman yopish ishlamas edi.
+   // Endi: agar so'ralgan lot pozitsiyaning haqiqiy hajmidan KICHIK bo'lsa,
+   // faqat SHU miqdorda qisman yopamiz (PositionClosePartial). Aks holda
+   // (lot berilmagan yoki pozitsiya hajmiga teng/undan katta bo'lsa) -- avval
+   // ishlab turgan TO'LIQ yopish yo'li o'zgarishsiz saqlanadi.
+   double reqLot = ExtractDoubleField(chunk, "lot");
+
+   Print("DEBUG: yopish buyrug'i qayta ishlanmoqda -> docId=", docId, " ticket=", ticket, " lot=", reqLot);
 
    if(ticket == 0)
    {
@@ -380,16 +414,47 @@ void ProcessCloseCommand(string docId, string chunk)
       return;
    }
 
-   bool ok = trade.PositionClose(ticket);
+   double posVolume = PositionGetDouble(POSITION_VOLUME);
+   double minLot     = SymbolInfoDouble(PositionGetString(POSITION_SYMBOL), SYMBOL_VOLUME_MIN);
+   double volumeStep = SymbolInfoDouble(PositionGetString(POSITION_SYMBOL), SYMBOL_VOLUME_STEP);
+
+   // Qisman yopish shartlari: lot berilgan, musbat, va pozitsiya hajmidan aniq
+   // kichik (bir necha nol o'nlik xato uchun kichik tolerantlik bilan).
+   bool isPartial = (reqLot > 0 && reqLot < posVolume - (volumeStep > 0 ? volumeStep / 2 : 0.0000001));
+
+   bool ok;
+   if(isPartial)
+   {
+      // Lotni sembol qadamiga (volume step) mos moslashtiramiz -- aks holda
+      // MT5 "noto'g'ri hajm" xatosi bilan rad etishi mumkin.
+      double vol = reqLot;
+      if(volumeStep > 0) vol = MathRound(vol / volumeStep) * volumeStep;
+      if(vol < minLot) vol = minLot;
+      if(vol > posVolume) vol = posVolume;
+
+      ok = trade.PositionClosePartial(ticket, vol);
+      if(ok)
+         Print("DEBUG: pozitsiya QISMAN yopildi. Ticket=", ticket, " yopilgan lot=", vol, " (qolgan=", (posVolume - vol), ")");
+      else
+         Print("DEBUG: pozitsiya QISMAN YOPILMADI. Retcode=", trade.ResultRetcode(), " ", trade.ResultRetcodeDescription());
+   }
+   else
+   {
+      ok = trade.PositionClose(ticket);
+      if(ok)
+         Print("DEBUG: pozitsiya MUVAFFAQIYATLI (TO'LIQ) yopildi. Ticket=", ticket);
+      else
+         Print("DEBUG: pozitsiya YOPILMADI. Retcode=", trade.ResultRetcode(), " ", trade.ResultRetcodeDescription());
+   }
+
    if(ok)
    {
-      Print("DEBUG: pozitsiya MUVAFFAQIYATLI yopildi. Ticket=", ticket);
       MarkCommandDone(docId, ticket);
    }
    else
    {
-      Print("DEBUG: pozitsiya YOPILMADI. Retcode=", trade.ResultRetcode(), " ", trade.ResultRetcodeDescription());
-      MarkCommandError(docId, "PositionClose xato: " + IntegerToString(trade.ResultRetcode()) + " " + trade.ResultRetcodeDescription());
+      MarkCommandError(docId, (isPartial ? "PositionClosePartial xato: " : "PositionClose xato: ") +
+                        IntegerToString(trade.ResultRetcode()) + " " + trade.ResultRetcodeDescription());
    }
 }
 
@@ -398,7 +463,7 @@ void ProcessCloseCommand(string docId, string chunk)
 //+------------------------------------------------------------------+
 void MarkCommandProcessing(string docId)
 {
-   string url = BaseUrl + "/mt5_commands/" + docId + "?updateMask.fieldPaths=status";
+   string url = UserBaseUrl + "/mt5_commands/" + docId + "?updateMask.fieldPaths=status";
    string body = "{\"fields\":{\"status\":{\"stringValue\":\"processing\"}}}";
    string resp = HttpRequest("PATCH", url, body);
    Print("DEBUG: MarkCommandProcessing javobi (docId=", docId, "): ", resp);
@@ -406,7 +471,7 @@ void MarkCommandProcessing(string docId)
 
 void MarkCommandDone(string docId, ulong ticket)
 {
-   string url = BaseUrl + "/mt5_commands/" + docId +
+   string url = UserBaseUrl + "/mt5_commands/" + docId +
                 "?updateMask.fieldPaths=status&updateMask.fieldPaths=ticket";
    string body = "{\"fields\":{"
                  "\"status\":{\"stringValue\":\"done\"},"
@@ -417,7 +482,7 @@ void MarkCommandDone(string docId, ulong ticket)
 
 void MarkCommandError(string docId, string errMsg)
 {
-   string url = BaseUrl + "/mt5_commands/" + docId +
+   string url = UserBaseUrl + "/mt5_commands/" + docId +
                 "?updateMask.fieldPaths=status&updateMask.fieldPaths=errorMsg";
    string body = "{\"fields\":{"
                  "\"status\":{\"stringValue\":\"error\"},"
@@ -445,7 +510,15 @@ void OnTradeTransaction(const MqlTradeTransaction &trans,
    string symbol = HistoryDealGetString(dealTicket, DEAL_SYMBOL);
    double volume = HistoryDealGetDouble(dealTicket, DEAL_VOLUME);
    double price  = HistoryDealGetDouble(dealTicket, DEAL_PRICE);
-   double profit = HistoryDealGetDouble(dealTicket, DEAL_PROFIT);
+   // TUZATISH: DEAL_PROFIT faqat sof narx harakatidan foydani beradi —
+   // swap va komissiyani o'z ichiga OLMAYDI. Shu sabab haqiqatda B/U
+   // (kirish = chiqish) qilingan savdo, agar komissiya yoki swap bo'lsa,
+   // jurnalda "BU" (pnl=0) deb noto'g'ri ko'rinar edi, holbuki hisobda
+   // haqiqiy zarar/foyda bor edi. Endi swap + komissiyani ham qo'shamiz —
+   // shunda jurnaldagi pnl MT5 terminaldagi haqiqiy "Net Profit"ga mos keladi.
+   double profit = HistoryDealGetDouble(dealTicket, DEAL_PROFIT)
+                  + HistoryDealGetDouble(dealTicket, DEAL_SWAP)
+                  + HistoryDealGetDouble(dealTicket, DEAL_COMMISSION);
    long   posId  = HistoryDealGetInteger(dealTicket, DEAL_POSITION_ID);
    ENUM_DEAL_TYPE dealType = (ENUM_DEAL_TYPE)HistoryDealGetInteger(dealTicket, DEAL_TYPE);
    string sideStr = (dealType == DEAL_TYPE_BUY) ? "buy" : "sell";
@@ -506,7 +579,13 @@ void ReconcileMissedDeals()
       string symbol = HistoryDealGetString(dealTicket, DEAL_SYMBOL);
       double volume = HistoryDealGetDouble(dealTicket, DEAL_VOLUME);
       double price  = HistoryDealGetDouble(dealTicket, DEAL_PRICE);
-      double profit = HistoryDealGetDouble(dealTicket, DEAL_PROFIT);
+      // TUZATISH: shu yerda ham swap + komissiyani qo'shamiz (yuqoridagi
+      // OnTradeTransaction'dagi izohga qarang) — aks holda EA o'chib/qayta
+      // ulanganda "o'tkazib yuborilgan" close hodisalari noto'g'ri (kam) pnl
+      // bilan yuborilib, jurnaldagi B/U klassifikatsiyasi xato chiqar edi.
+      double profit = HistoryDealGetDouble(dealTicket, DEAL_PROFIT)
+                     + HistoryDealGetDouble(dealTicket, DEAL_SWAP)
+                     + HistoryDealGetDouble(dealTicket, DEAL_COMMISSION);
       long   posId  = HistoryDealGetInteger(dealTicket, DEAL_POSITION_ID);
       ENUM_DEAL_TYPE dealType = (ENUM_DEAL_TYPE)HistoryDealGetInteger(dealTicket, DEAL_TYPE);
       string sideStr = (dealType == DEAL_TYPE_BUY) ? "buy" : "sell";
@@ -541,7 +620,7 @@ void SendMT5Event(string eventType, long ticket, string symbol, string side,
                    double lot, double openPrice, double closePrice, double profit,
                    long openMs, long closeMs)
 {
-   string url = BaseUrl + "/mt5_events";
+   string url = UserBaseUrl + "/mt5_events";
 
    string fields = "\"eventType\":{\"stringValue\":\"" + eventType + "\"},";
    fields += "\"ticket\":{\"stringValue\":\"" + IntegerToString(ticket) + "\"},";
