@@ -87,11 +87,11 @@
   .badge{font-size:10px;color:var(--green);background:rgba(34,211,165,0.1);padding:2px 7px;border-radius:20px;font-weight:700}
   .add-btn{background:linear-gradient(135deg,var(--green),#14b8a6);color:#000;border:none;border-radius:10px;padding:9px 20px;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}
 
-  .tabs{display:flex;gap:6px;width:100%}
+  .tabs{display:flex;gap:5px;width:100%}
   .tabs::-webkit-scrollbar{display:none}
-  .tab{flex:1 1 0;min-width:0;padding:8px 1px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-weight:700;font-size:11px;cursor:pointer;text-align:center;transition:all 0.2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .tab{flex:1 1 0;min-width:0;padding:9px 2px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-weight:700;font-size:10.8px;cursor:pointer;text-align:center;transition:all 0.2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
   .tab span{overflow:hidden;text-overflow:ellipsis;max-width:100%}
-  .tab svg{width:16px;height:16px;flex-shrink:0}
+  .tab svg{width:18px;height:18px;flex-shrink:0}
   .tab.active{border-bottom-color:var(--green);color:var(--green)}
 
   .page{display:none;padding:14px 14px 0}
@@ -706,6 +706,9 @@
         status: 'pending',
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
+      // To'lov oynasi FAQAT admin panelda kamida bitta karta kiritilgan
+      // bo'lsagina ochiladi (openPaymentModal ichida tekshiriladi).
+      // Karta kiritilmagan bo'lsa, oddiy "so'rov yuborildi" xabari chiqadi.
       openPaymentModal();
     } catch (e) {
       console.error('Pro so\'rovini yuborishda xato:', e);
@@ -716,12 +719,10 @@
   // ============================================================
   // TO'LOV KARTALARI — admin panelidan boshqariladigan (Firestore:
   // "paymentCards" to'plami), foydalanuvchiga Pro so'rovidan keyin
-  // ko'rsatiladigan to'lov ma'lumotlari oynasi
+  // ko'rsatiladigan to'lov ma'lumotlari oynasi.
+  // MUHIM: standart/fallback karta yo'q — agar admin panelda hech
+  // qanday karta kiritilmagan bo'lsa, bu oyna umuman ochilmaydi.
   // ============================================================
-  const DEFAULT_PAYMENT_CARDS = [
-    { type: 'UZCARD', number: '6262 4700 5841 9065', holder: 'YOKUBOV SARDORBEK' },
-    { type: 'HUMO', number: '6262 4700 5841 9065', holder: 'YOKUBOV SARDORBEK' }
-  ];
   const PAYMENT_CARD_GRADIENTS = [
     'linear-gradient(135deg,#2563eb,#1d4ed8)',
     'linear-gradient(135deg,#f59e0b,#c2410c)',
@@ -782,16 +783,22 @@
   }
 
   async function openPaymentModal() {
-    document.getElementById('payment-overlay').classList.add('open');
-    const wrap = document.getElementById('payment-cards-list');
-    if (wrap) wrap.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:12px;padding:14px 0">...</div>`;
-    let cards = DEFAULT_PAYMENT_CARDS;
+    // Avval Firestore'dagi kartalarni tekshiramiz. Admin panelda
+    // hech qanday karta kiritilmagan bo'lsa (to'plam bo'sh), bu
+    // to'lov oynasi umuman ochilmaydi — o'rniga oddiy "so'rov
+    // qabul qilindi" xabari ko'rsatiladi.
+    let cards = [];
     try {
       const snap = await firebase.firestore().collection('paymentCards').orderBy('order', 'asc').get();
-      if (!snap.empty) cards = snap.docs.map(d => d.data());
+      cards = snap.docs.map(d => d.data()).filter(c => c && String(c.number || '').trim());
     } catch (e) {
       console.error('To\'lov kartalarini olishda xato:', e);
     }
+    if (!cards.length) {
+      alert(t('pro_sent_msg'));
+      return;
+    }
+    document.getElementById('payment-overlay').classList.add('open');
     renderPaymentCardsList(cards);
   }
 
@@ -1076,14 +1083,16 @@
       set_title_lang: "🌐 Til", set_title_account: "👤 Hisobim va MT5 kodi",
       set_label_google_account: "Google hisobi",
       set_btn_add_account: "➕ Akkaunt qo'shish", set_btn_logout: "Chiqish",
-      set_btn_download_indicator: "📥 Indikatorni saqlab olish",
+      set_btn_download_indicator: "🔗 MT5 ga ulash (integratsiya)",
       set_btn_pro_upgrade: "⭐ Pro versiyasini sotib olish",
       premium_feat1_title: "Kompyutersiz uzluksiz integratsiya",
       premium_feat1_desc: "MT5 bilan integratsiya bizning VPS serverimiz orqali ishlaydi, shuning uchun kompyuteringiz o'chiq bo'lsa ham yoki hatto to'g'ridan-to'g'ri telefoningizning o'zida ham savdolaringiz uzluksiz kuzatib boriladi.",
-      premium_feat2_title: "Ketma-ket zarar ogohlantirishi",
-      premium_feat2_desc: "Qatorasiga zarar bilan yopilgan savdolaringizdan so'ng darhol push-bildirishnoma yuboriladi, bu his-hayajon asosidagi (\"revenge\") savdolardan saqlanishga yordam beradi.",
-      premium_feat3_title: "Kunlik risk limiti ogohlantirishi",
-      premium_feat3_desc: "O'zingiz belgilagan kunlik risk chegarasiga yetganingizda push-bildirishnoma darhol xabar beradi, shu kun uchun savdoni to'xtatish tavsiya etiladi va depozitingiz ortiqcha zarardan himoyalanadi.",
+      premium_feat2_title: "Ketma-ket zarar va kunlik risk limiti ogohlantirishi",
+      premium_feat2_desc: "Qatorasiga zarar bilan yopilgan savdolaringizdan so'ng, shuningdek o'zingiz belgilagan kunlik risk chegarasiga yetganingizda darhol push-bildirishnoma yuboriladi — bu his-hayajon asosidagi (\"revenge\") savdolardan saqlanishga va depozitingizni ortiqcha zarardan himoya qilishga yordam beradi.",
+      premium_feat3_title: "Ko'p hisobni qo'llab-quvvatlash",
+      premium_feat3_desc: "Bir nechta MT5 hisoblaringizni bitta jurnalda birlashtirib yuritish, shuningdek turli strategiyalar (masalan, scalping va swing) bo'yicha alohida jurnal yuritish imkoniyati.",
+      premium_feat4_title: "Ma'lumotlarni bulutda saqlash",
+      premium_feat4_desc: "Barcha ma'lumotlaringiz bulutda xavfsiz saqlanadi — telefoningizni almashtirsangiz ham, Gmail hisobingiz orqali kirib, barcha ma'lumotlaringizni to'liq tiklashingiz mumkin.",
       premium_tagline: "Savdolaringizni yanada xavfsiz va nazoratli boshqaring 🔥",
       guide_title: "📖 Indikatorni MT5'ga o'rnatish qo'llanmasi",
       guide_step1_title: "1-qadam. WebRequest ruxsatini yoqish",
@@ -1172,14 +1181,16 @@
       set_title_lang: "🌐 Язык", set_title_account: "👤 Мой аккаунт и код MT5",
       set_label_google_account: "Аккаунт Google",
       set_btn_add_account: "➕ Добавить аккаунт", set_btn_logout: "Выйти",
-      set_btn_download_indicator: "📥 Скачать индикатор",
+      set_btn_download_indicator: "🔗 Подключить к MT5 (интеграция)",
       set_btn_pro_upgrade: "⭐ Купить Pro версию",
       premium_feat1_title: "Работа без компьютера",
       premium_feat1_desc: "Интеграция с MT5 работает через наш VPS-сервер, поэтому ваши сделки отслеживаются непрерывно, даже если компьютер выключен или вы пользуетесь только телефоном.",
-      premium_feat2_title: "Уведомление о серии убытков",
-      premium_feat2_desc: "После серии убыточных сделок подряд вы сразу получаете push-уведомление — это помогает избежать эмоциональной («реванш») торговли.",
-      premium_feat3_title: "Уведомление о дневном лимите риска",
-      premium_feat3_desc: "Как только вы достигаете установленного дневного лимита риска, приходит push-уведомление, рекомендуется прекратить торговлю на этот день — это защищает депозит от лишних убытков.",
+      premium_feat2_title: "Уведомление о серии убытков и дневном лимите риска",
+      premium_feat2_desc: "После серии убыточных сделок подряд, а также при достижении установленного дневного лимита риска вы сразу получаете push-уведомление — это помогает избежать эмоциональной («реванш») торговли и защищает депозит от лишних убытков.",
+      premium_feat3_title: "Поддержка нескольких счетов",
+      premium_feat3_desc: "Ведение нескольких счетов MT5 в одном журнале, а также отдельных журналов по разным стратегиям (например, скальпинг и свинг).",
+      premium_feat4_title: "Хранение данных в облаке",
+      premium_feat4_desc: "Все ваши данные надёжно хранятся в облаке — даже при смене телефона вы можете войти через свой аккаунт Gmail и полностью восстановить все данные.",
       premium_tagline: "Управляйте своими сделками ещё безопаснее и увереннее 🔥",
       guide_title: "📖 Инструкция по установке индикатора в MT5",
       guide_step1_title: "Шаг 1. Разрешить WebRequest",
@@ -1296,28 +1307,18 @@
     adjustNavTabLabels();
   }
 
-  // Pastki menyu (Jurnal, Dash, Analiz, ...) matnlari uzun tilda (masalan rus)
-  // sig'may qolsa, avtomatik tarzda faqat bosh harfga qisqartiradi, shunda
-  // nomlar bir-biriga aralashib ketmaydi.
+  // Pastki menyu (Jurnal, Dash, Analiz, ...) nomlari sig'gancha to'liq
+  // bitta qatorda ko'rsatiladi; sig'masa CSS o'zi "..." bilan kesadi
+  // (2 qatorga o'tmaydi). Har bir tab'ga to'liq nomni title sifatida
+  // qo'shamiz (uzoq bosilganda ko'rinadi).
   function adjustNavTabLabels() {
     const tabsEl = document.querySelector('.tabs');
     if (!tabsEl) return;
     const spans = tabsEl.querySelectorAll('.tab > span[data-i18n]');
-    // Avval to'liq matnni tiklaymiz, so'ng haqiqatan sig'maydiganini tekshiramiz
     spans.forEach(s => {
       if (s.dataset.full === undefined) s.dataset.full = s.textContent;
       else s.textContent = s.dataset.full;
-    });
-    requestAnimationFrame(() => {
-      let overflow = false;
-      spans.forEach(s => { if (s.scrollWidth > s.clientWidth + 1) overflow = true; });
-      if (overflow) {
-        spans.forEach(s => {
-          const full = (s.dataset.full || s.textContent).trim();
-          s.textContent = full.length > 3 ? full.slice(0, 3) : full;
-          s.title = full;
-        });
-      }
+      s.title = s.dataset.full;
     });
   }
   window.addEventListener('resize', () => { adjustNavTabLabels(); });
@@ -1487,11 +1488,6 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3.5v2M12 18.5v2M20.5 12h-2M5.5 12h-2M17.6 6.4l-1.4 1.4M7.8 16.2l-1.4 1.4M17.6 17.6l-1.4-1.4M7.8 7.8 6.4 6.4"/></svg>
       <span data-i18n="nav_sozlama">Sozlama</span>
     </button>
-    <button id="theme-toggle-btn" class="tab" onclick="toggleTheme()" title="Tema almashtirish" style="flex:0 0 auto;padding:8px 10px">
-      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z"/></svg>
-      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.9 19.1l1.7-1.7M17.4 6.6l1.7-1.7"/></svg>
-      <span data-i18n="nav_tema">Tema</span>
-    </button>
   </div>
 </div>
 
@@ -1630,12 +1626,21 @@
 
 <!-- SOZLAMA -->
 <div id="page-sozlama" class="page">
-  <!-- TIL SECTION -->
+  <!-- TIL SECTION — endi yig'iladigan (accordion), sarlavha yonida
+       tema (kunduzgi/tungi) almashtirish tugmasi joylashgan -->
   <div class="settings-section" style="margin-bottom:12px">
-    <div class="settings-section-title" data-i18n="set_title_lang">🌐 Til</div>
-    <div style="display:flex;gap:8px">
-      <button id="lang-btn-uz" onclick="setLanguage('uz')" style="flex:1;border-radius:9px;padding:10px;font-size:13px;font-weight:700;cursor:pointer">🇺🇿 O'zbekcha</button>
-      <button id="lang-btn-ru" onclick="setLanguage('ru')" style="flex:1;border-radius:9px;padding:10px;font-size:13px;font-weight:700;cursor:pointer">🇷🇺 Русский</button>
+    <div class="settings-section-title" onclick="toggleTilSection()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <span data-i18n="set_title_lang">🌐 Til</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button id="theme-toggle-btn" class="theme-toggle-btn" onclick="event.stopPropagation();toggleTheme()" title="Tema almashtirish">🌙</button>
+        <span id="til-toggle-icon" style="font-size:15px;color:var(--muted);font-weight:700;line-height:1;padding:0 2px;transition:transform 0.2s">▾</span>
+      </div>
+    </div>
+    <div id="til-body" style="display:none;margin-top:10px">
+      <div style="display:flex;gap:8px">
+        <button id="lang-btn-uz" onclick="setLanguage('uz')" style="flex:1;border-radius:9px;padding:10px;font-size:13px;font-weight:700;cursor:pointer">🇺🇿 O'zbekcha</button>
+        <button id="lang-btn-ru" onclick="setLanguage('ru')" style="flex:1;border-radius:9px;padding:10px;font-size:13px;font-weight:700;cursor:pointer">🇷🇺 Русский</button>
+      </div>
     </div>
   </div>
   <!-- HISOB / MT5 UNIKAL KOD SECTION -->
@@ -1647,7 +1652,7 @@
       <div style="font-size:11px;color:var(--muted);margin-bottom:6px" data-i18n="auth_code_desc">Sizning shaxsiy kodingiz — buni MT5'dagi советникka (EA) bir marta kiritasiz:</div>
       <div id="settings-account-code" style="color:#22d3a5;font-size:24px;font-weight:800;letter-spacing:3px;font-family:monospace">------</div>
     </div>
-    <button onclick="openIndicatorGuideModal()" style="width:100%;margin-top:12px;background:rgba(34,211,165,0.1);border:1px solid rgba(34,211,165,0.35);color:#22d3a5;border-radius:9px;padding:11px;font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><span data-i18n="set_btn_download_indicator">📥 Indikatorni saqlab olish</span></button>
+    <button onclick="openIndicatorGuideModal()" style="width:100%;margin-top:12px;background:rgba(34,211,165,0.1);border:1px solid rgba(34,211,165,0.35);color:#22d3a5;border-radius:9px;padding:11px;font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"><span data-i18n="set_btn_download_indicator">🔗 MT5 ga ulash (integratsiya)</span></button>
     <button onclick="openProUpgradeModal()" style="width:100%;margin-top:8px;background:linear-gradient(135deg,#f59e0b,#ec4899);border:none;color:#fff;border-radius:9px;padding:11px;font-size:12.5px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 14px rgba(236,72,153,0.35)"><span data-i18n="set_btn_pro_upgrade">⭐ Pro versiyasini sotib olish</span></button>
     <button id="admin-panel-btn" onclick="openAdminPanel()" style="width:100%;margin-top:8px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.35);color:#60a5fa;border-radius:9px;padding:11px;font-size:12.5px;font-weight:700;cursor:pointer;display:none;align-items:center;justify-content:center;gap:6px"><span data-i18n="admin_btn_panel">🛠 Admin panel</span></button>
     <div style="display:flex;gap:8px;margin-top:8px">
@@ -2080,21 +2085,53 @@
 
       <div style="display:flex;flex-direction:column;gap:13px;margin-bottom:14px">
         <div style="display:flex;gap:10px;align-items:flex-start">
-          <div style="font-size:17px;line-height:1.3">🖥️</div>
+          <div style="flex:0 0 auto;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:linear-gradient(135deg, rgba(251,191,36,0.18), rgba(251,191,36,0.05));border:1px solid rgba(251,191,36,0.3)">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="12" rx="1.5"/>
+              <path d="M8 20h8"/>
+              <path d="M12 16v4"/>
+              <path d="M7 8h6"/>
+              <path d="M7 11h4"/>
+            </svg>
+          </div>
           <div style="font-size:12.5px;line-height:1.55;color:var(--text2);text-align:left">
             <b data-i18n="premium_feat1_title">Kompyutersiz uzluksiz integratsiya</b> — <span data-i18n="premium_feat1_desc">MT5 bilan integratsiya bizning VPS serverimiz orqali ishlaydi, shuning uchun kompyuteringiz o'chiq bo'lsa ham yoki hatto to'g'ridan-to'g'ri telefoningizning o'zida ham savdolaringiz uzluksiz kuzatib boriladi.</span>
           </div>
         </div>
         <div style="display:flex;gap:10px;align-items:flex-start">
-          <div style="font-size:17px;line-height:1.3">🔔</div>
+          <div style="flex:0 0 auto;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:linear-gradient(135deg, rgba(251,191,36,0.18), rgba(251,191,36,0.05));border:1px solid rgba(251,191,36,0.3)">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8a6 6 0 0 0-12 0c0 5-2 6-2 6h16s-2-1-2-6"/>
+              <path d="M10 20a2 2 0 0 0 4 0"/>
+            </svg>
+          </div>
           <div style="font-size:12.5px;line-height:1.55;color:var(--text2);text-align:left">
-            <b data-i18n="premium_feat2_title">Ketma-ket zarar ogohlantirishi</b> — <span data-i18n="premium_feat2_desc">Qatorasiga zarar bilan yopilgan savdolaringizdan so'ng darhol push-bildirishnoma yuboriladi, bu his-hayajon asosidagi ("revenge") savdolardan saqlanishga yordam beradi.</span>
+            <b data-i18n="premium_feat2_title">Ketma-ket zarar va kunlik risk limiti ogohlantirishi</b> — <span data-i18n="premium_feat2_desc">Qatorasiga zarar bilan yopilgan savdolaringizdan so'ng, shuningdek o'zingiz belgilagan kunlik risk chegarasiga yetganingizda darhol push-bildirishnoma yuboriladi — bu his-hayajon asosidagi ("revenge") savdolardan saqlanishga va depozitingizni ortiqcha zarardan himoya qilishga yordam beradi.</span>
           </div>
         </div>
         <div style="display:flex;gap:10px;align-items:flex-start">
-          <div style="font-size:17px;line-height:1.3">⚠️</div>
+          <div style="flex:0 0 auto;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:linear-gradient(135deg, rgba(251,191,36,0.18), rgba(251,191,36,0.05));border:1px solid rgba(251,191,36,0.3)">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1.3"/>
+              <rect x="14" y="3" width="7" height="7" rx="1.3"/>
+              <rect x="3" y="14" width="7" height="7" rx="1.3"/>
+              <rect x="14" y="14" width="7" height="7" rx="1.3"/>
+            </svg>
+          </div>
           <div style="font-size:12.5px;line-height:1.55;color:var(--text2);text-align:left">
-            <b data-i18n="premium_feat3_title">Kunlik risk limiti ogohlantirishi</b> — <span data-i18n="premium_feat3_desc">O'zingiz belgilagan kunlik risk chegarasiga yetganingizda push-bildirishnoma darhol xabar beradi, shu kun uchun savdoni to'xtatish tavsiya etiladi va depozitingiz ortiqcha zarardan himoyalanadi.</span>
+            <b data-i18n="premium_feat3_title">Ko'p hisobni qo'llab-quvvatlash</b> — <span data-i18n="premium_feat3_desc">Bir nechta MT5 hisoblaringizni bitta jurnalda birlashtirib yuritish, shuningdek turli strategiyalar (masalan, scalping va swing) bo'yicha alohida jurnal yuritish imkoniyati.</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="flex:0 0 auto;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:linear-gradient(135deg, rgba(251,191,36,0.18), rgba(251,191,36,0.05));border:1px solid rgba(251,191,36,0.3)">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 18a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17.3 9.02 4.5 4.5 0 0 1 16.5 18H7Z"/>
+              <path d="M12 12v6"/>
+              <path d="M9.5 15.5 12 18l2.5-2.5"/>
+            </svg>
+          </div>
+          <div style="font-size:12.5px;line-height:1.55;color:var(--text2);text-align:left">
+            <b data-i18n="premium_feat4_title">Ma'lumotlarni bulutda saqlash</b> — <span data-i18n="premium_feat4_desc">Barcha ma'lumotlaringiz bulutda xavfsiz saqlanadi — telefoningizni almashtirsangiz ham, Gmail hisobingiz orqali kirib, barcha ma'lumotlaringizni to'liq tiklashingiz mumkin.</span>
           </div>
         </div>
       </div>
@@ -2217,6 +2254,19 @@ function toggleTheme(){
   updateThemeIcon();
 }
 document.addEventListener('DOMContentLoaded', updateThemeIcon);
+
+// ============================================================
+// TIL (til tanlash) BO'LIMI — endi yig'iladigan (accordion),
+// standart holatda yopiq turadi, ortiqcha joy egallamasligi uchun
+// ============================================================
+function toggleTilSection(){
+  const body = document.getElementById('til-body');
+  const icon = document.getElementById('til-toggle-icon');
+  if (!body) return;
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  if (icon) icon.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+}
 
 // ============================================================
 // MT5 INTEGRATSIYA — Firebase Firestore ko'prigi
