@@ -275,6 +275,28 @@
 </head>
 <body>
 <!-- ============================================================
+     ONBOARDING / YO'RIQNOMA QATLAMI
+     Faqat qurilmada BIRINCHI marta ochilganda ko'rsatiladi (auth
+     qatlamidan ham TEPADA turadi). Dastur imkoniyatlari haqida
+     bir nechta slaydda tanishtiradi, "Otkazib yuborish" bosilsa yoki
+     oxirigacha o'tilsa — kirish oynasiga o'tkaziladi va qayta
+     ko'rsatilmaydi.
+     ============================================================ -->
+<div id="onboarding-overlay" style="position:fixed;inset:0;z-index:999999;background:linear-gradient(160deg,#0f172a,#1e293b);display:none;flex-direction:column;padding:22px 22px 26px;box-sizing:border-box;font-family:inherit">
+  <div style="display:flex;justify-content:flex-end;flex-shrink:0">
+    <button onclick="skipOnboarding()" style="background:none;border:none;color:#94a3b8;font-size:13px;font-weight:700;cursor:pointer;padding:8px 4px" data-i18n="onb_skip">Otkazib yuborish</button>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;max-width:340px;margin:0 auto;width:100%">
+    <div id="onb-icon" style="margin-bottom:24px;display:flex;align-items:center;justify-content:center"></div>
+    <div id="onb-title" style="color:#fff;font-size:20px;font-weight:800;margin-bottom:12px;line-height:1.3"></div>
+    <div id="onb-desc" style="color:#94a3b8;font-size:13.5px;line-height:1.65"></div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:center;gap:16px;flex-shrink:0">
+    <div id="onb-dots" style="display:flex;gap:6px;align-items:center"></div>
+    <button id="onb-next-btn" onclick="nextOnboardingSlide()" style="width:100%;max-width:300px;background:linear-gradient(135deg,#22d3a5,#14b8a6);color:#0f172a;border:none;border-radius:12px;padding:14px;font-weight:800;font-size:15px;cursor:pointer">Keyingi →</button>
+  </div>
+</div>
+<!-- ============================================================
      AUTENTIFIKATSIYA QATLAMI (Google Sign-In)
      Butun ilova ustidan to'liq ekran overlay sifatida chiziladi —
      mavjud ilova tuzilishiga (body ichidagi elementlarga) TEGILMAYDI,
@@ -282,33 +304,33 @@
      ============================================================ -->
 <div id="auth-overlay" style="position:fixed;inset:0;z-index:99999;background:linear-gradient(160deg,#0f172a,#1e293b);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:inherit">
   <div style="font-size:40px;margin-bottom:14px">📒</div>
-  <div style="color:#fff;font-size:19px;font-weight:800;margin-bottom:6px">Treding Jurnal</div>
-  <div id="auth-sub" style="color:#94a3b8;font-size:13px;margin-bottom:26px;max-width:280px;line-height:1.5">Davom etish uchun Google hisobingiz bilan kiring</div>
+  <div style="color:#fff;font-size:19px;font-weight:800;margin-bottom:6px" data-i18n="auth_brand">Treding Jurnal</div>
+  <div id="auth-sub" style="color:#94a3b8;font-size:13px;margin-bottom:26px;max-width:280px;line-height:1.5" data-i18n="auth_sub_default">Davom etish uchun Google hisobingiz bilan kiring</div>
   <button id="auth-google-btn" onclick="signInWithGoogle()" style="display:flex;align-items:center;gap:10px;background:#fff;color:#1f2937;border:none;border-radius:10px;padding:12px 22px;font-size:14.5px;font-weight:700;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,0.25)">
     <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.6 5.1 29.6 3 24 3c-7.7 0-14.4 4.3-17.7 10.7z"/><path fill="#4CAF50" d="M24 45c5.5 0 10.4-1.9 14-5l-6.5-5.3C29.4 36 26.9 37 24 37c-5.3 0-9.7-3.1-11.3-7.5l-6.6 5.1C9.5 40.6 16.2 45 24 45z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.3 5.7l6.5 5.3C41.3 36 45 30.7 45 24c0-1.2-.1-2.4-.4-3.5z"/></svg>
-    Google bilan kirish
+    <span data-i18n="auth_google_btn">Google bilan kirish</span>
   </button>
 
   <div id="auth-divider" style="display:flex;align-items:center;gap:12px;width:100%;max-width:300px;margin:22px 0 18px;color:#64748b;font-size:11px;letter-spacing:1.5px">
     <div style="flex:1;height:1px;background:rgba(255,255,255,0.12)"></div>
-    YOKI
+    <span data-i18n="auth_or">YOKI</span>
     <div style="flex:1;height:1px;background:rgba(255,255,255,0.12)"></div>
   </div>
 
   <div id="auth-form-box" style="width:100%;max-width:300px;text-align:left">
     <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.12)">
-      <button type="button" id="auth-tab-login" onclick="switchAuthTab('login')" style="flex:1;background:none;border:none;color:#fff;font-weight:700;font-size:14.5px;padding:10px 0;cursor:pointer;border-bottom:2.5px solid #f2a93c;transition:all .15s">Kirish</button>
-      <button type="button" id="auth-tab-register" onclick="switchAuthTab('register')" style="flex:1;background:none;border:none;color:#94a3b8;font-weight:700;font-size:14.5px;padding:10px 0;cursor:pointer;border-bottom:2.5px solid transparent;transition:all .15s">Ro'yxatdan o'tish</button>
+      <button type="button" id="auth-tab-login" onclick="switchAuthTab('login')" style="flex:1;background:none;border:none;color:#fff;font-weight:700;font-size:14.5px;padding:10px 0;cursor:pointer;border-bottom:2.5px solid #f2a93c;transition:all .15s" data-i18n="auth_tab_login">Kirish</button>
+      <button type="button" id="auth-tab-register" onclick="switchAuthTab('register')" style="flex:1;background:none;border:none;color:#94a3b8;font-weight:700;font-size:14.5px;padding:10px 0;cursor:pointer;border-bottom:2.5px solid transparent;transition:all .15s" data-i18n="auth_tab_register">Ro'yxatdan o'tish</button>
     </div>
 
     <div style="margin-bottom:12px">
-      <div style="color:#94a3b8;font-size:10.5px;font-weight:700;letter-spacing:0.6px;margin-bottom:6px">EMAIL</div>
+      <div style="color:#94a3b8;font-size:10.5px;font-weight:700;letter-spacing:0.6px;margin-bottom:6px" data-i18n="auth_label_email">EMAIL</div>
       <input type="email" id="auth-email" placeholder="email@misol.com" autocomplete="email"
         style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1.5px solid rgba(45,212,191,0.4);color:#fff;border-radius:10px;padding:12px 14px;font-size:14px;outline:none">
     </div>
 
     <div style="margin-bottom:6px">
-      <div id="auth-password-label" style="color:#94a3b8;font-size:10.5px;font-weight:700;letter-spacing:0.6px;margin-bottom:6px">PAROL</div>
+      <div id="auth-password-label" style="color:#94a3b8;font-size:10.5px;font-weight:700;letter-spacing:0.6px;margin-bottom:6px" data-i18n="auth_label_password">PAROL</div>
       <div style="position:relative">
         <input type="password" id="auth-password" placeholder="••••••••" autocomplete="current-password"
           style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1.5px solid rgba(45,212,191,0.4);color:#fff;border-radius:10px;padding:12px 42px 12px 14px;font-size:14px;outline:none">
@@ -318,7 +340,7 @@
     </div>
 
     <div id="auth-password-confirm-wrap" style="margin-bottom:6px;display:none">
-      <div style="color:#94a3b8;font-size:10.5px;font-weight:700;letter-spacing:0.6px;margin-bottom:6px">PAROLNI TASDIQLANG</div>
+      <div style="color:#94a3b8;font-size:10.5px;font-weight:700;letter-spacing:0.6px;margin-bottom:6px" data-i18n="auth_label_password_confirm">PAROLNI TASDIQLANG</div>
       <div style="position:relative">
         <input type="password" id="auth-password-confirm" placeholder="••••••••" autocomplete="new-password"
           style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1.5px solid rgba(45,212,191,0.4);color:#fff;border-radius:10px;padding:12px 42px 12px 14px;font-size:14px;outline:none">
@@ -327,20 +349,27 @@
       </div>
     </div>
 
-    <div id="auth-forgot-wrap" style="text-align:right;margin:8px 0 14px">
-      <span onclick="forgotAuthPassword()" style="color:#94a3b8;font-size:12px;cursor:pointer;text-decoration:underline">Parolni unutdingizmi?</span>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin:10px 0 4px">
+      <label style="display:flex;align-items:center;gap:7px;color:#cbd5e1;font-size:12.5px;cursor:pointer;user-select:none">
+        <input type="checkbox" id="auth-remember" checked style="width:15px;height:15px;accent-color:#22d3a5;cursor:pointer">
+        <span data-i18n="auth_remember_label">Meni eslab qolish</span>
+      </label>
+    </div>
+
+    <div id="auth-forgot-wrap" style="text-align:right;margin:2px 0 14px">
+      <span onclick="forgotAuthPassword()" style="color:#94a3b8;font-size:12px;cursor:pointer;text-decoration:underline" data-i18n="auth_forgot">Parolni unutdingizmi?</span>
     </div>
 
     <div id="auth-form-msg" style="font-size:12px;margin-bottom:10px;display:none;line-height:1.5"></div>
 
     <button type="button" id="auth-submit-btn" onclick="submitAuthForm()"
-      style="width:100%;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1f2937;border:none;border-radius:10px;padding:13px;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 4px 14px rgba(245,158,11,0.25)">Kirish</button>
+      style="width:100%;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#1f2937;border:none;border-radius:10px;padding:13px;font-weight:800;font-size:15px;cursor:pointer;box-shadow:0 4px 14px rgba(245,158,11,0.25)" data-i18n="auth_tab_login">Kirish</button>
   </div>
 
   <div id="auth-code-box" style="display:none;margin-top:26px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:18px 22px;max-width:300px">
-    <div style="color:#94a3b8;font-size:12px;margin-bottom:8px">Sizning shaxsiy kodingiz — buni MT5'dagi советникка (EA) bir marta kiritasiz:</div>
+    <div style="color:#94a3b8;font-size:12px;margin-bottom:8px" data-i18n="auth_code_desc">Sizning shaxsiy kodingiz — buni MT5'dagi советникка (EA) bir marta kiritasiz:</div>
     <div id="auth-code-text" style="color:#22d3a5;font-size:26px;font-weight:800;letter-spacing:3px;font-family:monospace">------</div>
-    <button onclick="enterAppFromAuth()" style="margin-top:14px;background:#22d3a5;color:#0f172a;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;width:100%">Jurnalga o'tish →</button>
+    <button onclick="enterAppFromAuth()" style="margin-top:14px;background:#22d3a5;color:#0f172a;border:none;border-radius:8px;padding:9px 18px;font-size:13px;font-weight:700;cursor:pointer;width:100%" data-i18n="auth_enter_app">Jurnalga o'tish →</button>
   </div>
 </div>
 <script>
@@ -377,7 +406,18 @@
   firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
     .catch(e => console.error('Auth persistence sozlashda xato:', e));
 
+  // "Meni eslab qolish" katakchasi holati — belgilangan bo'lsa, akkaunt
+  // Sozlamalar > "Ulangan akkauntlar" ro'yxatida saqlanadi; aks holda
+  // saqlanmaydi (faqat shu kirish uchun ishlatiladi).
+  let authRememberMe = true;
+
+  function readAuthRememberCheckbox() {
+    const cb = document.getElementById('auth-remember');
+    authRememberMe = cb ? cb.checked : true;
+  }
+
   function signInWithGoogle() {
+    readAuthRememberCheckbox();
     const provider = new firebase.auth.GoogleAuthProvider();
     firebase.auth().signInWithPopup(provider).catch(err => {
       console.error('Google sign-in xato:', err);
@@ -402,25 +442,26 @@
     const confirmWrap = document.getElementById('auth-password-confirm-wrap');
     const passLabel = document.getElementById('auth-password-label');
     hideAuthMsg();
+    const tr = (typeof translations !== 'undefined') ? (translations[currentLang] || translations.uz) : null;
     if (mode === 'login') {
       tabLogin.style.color = '#fff';
       tabLogin.style.borderBottomColor = '#f2a93c';
       tabReg.style.color = '#94a3b8';
       tabReg.style.borderBottomColor = 'transparent';
-      submitBtn.textContent = 'Kirish';
+      submitBtn.textContent = tr ? tr.auth_tab_login : 'Kirish';
       forgotWrap.style.display = 'block';
       confirmWrap.style.display = 'none';
-      passLabel.textContent = 'PAROL';
+      passLabel.textContent = tr ? tr.auth_label_password : 'PAROL';
       document.getElementById('auth-password').autocomplete = 'current-password';
     } else {
       tabReg.style.color = '#fff';
       tabReg.style.borderBottomColor = '#f2a93c';
       tabLogin.style.color = '#94a3b8';
       tabLogin.style.borderBottomColor = 'transparent';
-      submitBtn.textContent = "Ro'yxatdan o'tish";
+      submitBtn.textContent = tr ? tr.auth_tab_register : "Ro'yxatdan o'tish";
       forgotWrap.style.display = 'none';
       confirmWrap.style.display = 'block';
-      passLabel.textContent = 'YANGI PAROL';
+      passLabel.textContent = tr ? tr.auth_label_new_password : 'YANGI PAROL';
       document.getElementById('auth-password').autocomplete = 'new-password';
     }
   }
@@ -479,6 +520,7 @@
   function submitAuthForm() {
     const email = document.getElementById('auth-email').value.trim();
     const password = document.getElementById('auth-password').value;
+    readAuthRememberCheckbox();
     hideAuthMsg();
     if (!email) { showAuthMsg('Email kiriting', true); return; }
     if (!password) { showAuthMsg('Parol kiriting', true); return; }
@@ -571,26 +613,26 @@
     if (!box) return;
     const list = getKnownAccounts();
     if (!list.length) {
-      box.innerHTML = '<div style="font-size:12px;color:var(--muted)">Hozircha boshqa ulangan akkaunt yo\'q.</div>';
+      box.innerHTML = `<div style="font-size:12px;color:var(--muted)">${t('acc_no_other')}</div>`;
       return;
     }
     box.innerHTML = list.map(a => {
       const isActive = currentUid === a.uid;
       return `<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:9px;background:${isActive ? 'rgba(34,211,165,0.08)' : 'var(--bg2)'};border:1px solid ${isActive ? 'rgba(34,211,165,0.3)' : 'var(--border2)'};margin-bottom:8px">
         <div style="min-width:0">
-          <div style="font-size:13px;font-weight:700;color:var(--text2);word-break:break-all">${a.email || 'Nomalum email'}</div>
-          <div style="font-size:11px;color:var(--muted);font-family:monospace">Kod: ${a.code || '------'}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text2);word-break:break-all">${a.email || t('acc_unknown_email')}</div>
+          <div style="font-size:11px;color:var(--muted);font-family:monospace">${t('acc_code_label')} ${a.code || '------'}</div>
         </div>
         ${isActive
-          ? '<span style="font-size:11px;font-weight:700;color:var(--green);white-space:nowrap">✓ Faol</span>'
-          : `<button onclick="switchKnownAccount('${a.uid}')" style="white-space:nowrap;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer">O'tish</button>`
+          ? `<span style="font-size:11px;font-weight:700;color:var(--green);white-space:nowrap">${t('acc_active')}</span>`
+          : `<button onclick="switchKnownAccount('${a.uid}')" style="white-space:nowrap;background:var(--bg3);border:1px solid var(--border2);color:var(--text2);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;cursor:pointer">${t('acc_switch')}</button>`
         }
       </div>`;
     }).join('');
   }
 
   function logoutAccount() {
-    if (!confirm("Hisobdan chiqmoqchimisiz?")) return;
+    if (!confirm(t('logout_confirm'))) return;
     firebase.auth().signOut().catch(e => console.error('Chiqishda xato:', e));
   }
 
@@ -598,7 +640,7 @@
     // Joriy hisobdan chiqamiz va kirish oynasini ko'rsatamiz, shunda
     // foydalanuvchi boshqa gmail/parol bilan yangi akkaunt qo'sha oladi.
     firebase.auth().signOut().then(() => {
-      document.getElementById('auth-sub').textContent = 'Yangi akkaunt qo\'shish uchun kiring';
+      document.getElementById('auth-sub').textContent = t('new_account_sub');
       document.getElementById('auth-sub').style.color = '#94a3b8';
     }).catch(e => console.error('Chiqishda xato:', e));
   }
@@ -655,8 +697,11 @@
         if (typeof updateSababCounter === 'function') updateSababCounter();
       }
 
-      // Bu akkauntni "ma'lum akkauntlar" ro'yxatiga saqlaymiz/yangilaymiz.
-      rememberKnownAccount(user, userCode);
+      // Bu akkauntni "ma'lum akkauntlar" ro'yxatiga faqat foydalanuvchi
+      // "Meni eslab qolish" katagini belgilagan bo'lsa saqlaymiz/yangilaymiz.
+      if (authRememberMe) {
+        rememberKnownAccount(user, userCode);
+      }
 
       // Sozlamalar bo'limidagi hisob/kod blokini har doim yangilaymiz —
       // kod istalgan payt shu yerda ko'rinib turadi.
@@ -700,6 +745,222 @@
         document.body.classList.add('light-theme');
       }
     }catch(e){}
+  })();
+</script>
+<script>
+  // ===== TIL (O'zbekcha / Русский) =====
+  const TJ_LANG_KEY = 'tj_lang';
+  const translations = {
+    uz: {
+      nav_jurnal: "Jurnal", nav_dash: "Dash", nav_analiz: "Analiz", nav_kalendar: "Kalendar",
+      nav_chart: "Chart", nav_sozlama: "Sozlama", nav_tema: "Tema",
+      auth_brand: "Treding Jurnal",
+      auth_sub_default: "Davom etish uchun Google hisobingiz bilan kiring",
+      auth_google_btn: "Google bilan kirish", auth_or: "YOKI",
+      auth_tab_login: "Kirish", auth_tab_register: "Ro'yxatdan o'tish",
+      auth_label_email: "EMAIL", auth_label_password: "PAROL", auth_label_new_password: "YANGI PAROL",
+      auth_label_password_confirm: "PAROLNI TASDIQLANG",
+      auth_remember_label: "Meni eslab qolish", auth_forgot: "Parolni unutdingizmi?",
+      auth_code_desc: "Sizning shaxsiy kodingiz — buni MT5'dagi советникka (EA) bir marta kiritasiz:",
+      auth_enter_app: "Jurnalga o'tish →",
+      set_title_lang: "🌐 Til", set_title_account: "👤 Hisobim va MT5 kodi",
+      set_label_google_account: "Google hisobi",
+      set_btn_add_account: "➕ Akkaunt qo'shish", set_btn_logout: "Chiqish",
+      set_title_connected: "🔀 Ulangan akkauntlar",
+      set_title_deposit: "💰 Depozit (Boshlang'ich Balans)",
+      set_deposit_desc: "Brokeringizga qo'ygan boshlang'ich summangiz",
+      set_btn_save_deposit: "✓ Depozitni Saqlash", set_saved: "✓ Saqlandi!",
+      set_stat_start: "Boshlang'ich", set_stat_current: "Joriy Balans",
+      set_stat_pnl: "Jami Foyda/Zarar", set_stat_roi: "O'sish (ROI)",
+      set_title_pip: "💰 Har Punkt Dollari (1 lot uchun)",
+      set_btn_save_pip: "✓ Saqlash va Qayta Hisoblash",
+      set_pip_saved: "✓ Saqlandi! Barcha savdolar qayta hisoblandi.",
+      set_pip_info: `<b>Pip qiymati nima?</b><br>
+    Har bir instrument uchun 1 ta to'liq punkt harakatida <b>1 lot</b> uchun necha dollar o'zgarishini belgilang.<br><br>
+    <b>Misol (XAUUSD):</b> Narx 4550.00 &rarr; 4551.00 = 1 punkt.<br>
+    Ko'pchilik brokerlar: 1 lot = <b>$100/punkt</b><br>
+    Siz 0.01 lot savdo qilsangiz: 0.01 &times; $100 = <b>$1/punkt</b> hisoblanadi.`,
+      acc_no_other: "Hozircha boshqa ulangan akkaunt yo'q.",
+      acc_unknown_email: "Nomalum email", acc_code_label: "Kod:",
+      acc_active: "✓ Faol", acc_switch: "O'tish",
+      logout_confirm: "Hisobdan chiqmoqchimisiz?",
+      new_account_sub: "Yangi akkaunt qo'shish uchun kiring",
+      modal_chart_btn: "Chart",
+      chart_title: "📈 Grafik",
+      onb_skip: "Otkazib yuborish", onb_next: "Keyingi →", onb_start: "Boshlash",
+      onb1_title: "Savdo Jurnali",
+      onb1_desc: "Har bir savdongiz haqida to'liq jurnal yuriting — bu savdolaringiz nazoratini va hisobotini yuritishga yordam beradi.",
+      onb2_title: "MT5 bilan integratsiya",
+      onb2_desc: "Jurnalning o'zidan MT5'dagi hisobingizda savdo avtomatik ochiladi va yopiladi. MT5'ga o'rnatiladigan indikator yordamida, har bir foydalanuvchi o'zining unikal raqami asosida terminalga ulanib, hisobni jurnalning o'zidan boshqaradi — MT5'da ochilgan savdolar jurnalda avtomatik shakllanadi va har bir savdo doimiy nazoratda bo'ladi.",
+      onb3_title: "Bozor grafigi (Chart)",
+      onb3_desc: "Dastur ichida bozor grafigini ko'rish imkoniyati — istalgan instrumentni jonli kuzatib boring.",
+      onb4_title: "Analiz va Kalendar",
+      onb4_desc: "Har bir savdo tahlil qilinadi, Kalendar orqali kun-ma-kun va oy-ma-oy foyda hamda zararlaringiz haqida to'liq ma'lumot saqlanib boradi.",
+      onb5_title: "Ongli savdo — sabab talab qilinadi",
+      onb5_desc: "Yangi ochilayotgan bitimlarni aniq sabablarsiz ochib bo'lmaydi — bu his-tuyg'ularga asoslangan savdolarning oldini oladi va intizomni saqlaydi."
+    },
+    ru: {
+      nav_jurnal: "Журнал", nav_dash: "Дэш", nav_analiz: "Анализ", nav_kalendar: "Календарь",
+      nav_chart: "График", nav_sozlama: "Настройки", nav_tema: "Тема",
+      auth_brand: "Торговый журнал",
+      auth_sub_default: "Войдите через аккаунт Google, чтобы продолжить",
+      auth_google_btn: "Войти через Google", auth_or: "ИЛИ",
+      auth_tab_login: "Вход", auth_tab_register: "Регистрация",
+      auth_label_email: "EMAIL", auth_label_password: "ПАРОЛЬ", auth_label_new_password: "НОВЫЙ ПАРОЛЬ",
+      auth_label_password_confirm: "ПОДТВЕРДИТЕ ПАРОЛЬ",
+      auth_remember_label: "Запомнить меня", auth_forgot: "Забыли пароль?",
+      auth_code_desc: "Ваш личный код — введите его один раз в советник (EA) в MT5:",
+      auth_enter_app: "Перейти в журнал →",
+      set_title_lang: "🌐 Язык", set_title_account: "👤 Мой аккаунт и код MT5",
+      set_label_google_account: "Аккаунт Google",
+      set_btn_add_account: "➕ Добавить аккаунт", set_btn_logout: "Выйти",
+      set_title_connected: "🔀 Связанные аккаунты",
+      set_title_deposit: "💰 Депозит (Начальный баланс)",
+      set_deposit_desc: "Сумма, внесённая у брокера изначально",
+      set_btn_save_deposit: "✓ Сохранить депозит", set_saved: "✓ Сохранено!",
+      set_stat_start: "Начальный", set_stat_current: "Текущий баланс",
+      set_stat_pnl: "Общая прибыль/убыток", set_stat_roi: "Рост (ROI)",
+      set_title_pip: "💰 Доллар за пункт (на 1 лот)",
+      set_btn_save_pip: "✓ Сохранить и пересчитать",
+      set_pip_saved: "✓ Сохранено! Все сделки пересчитаны.",
+      set_pip_info: `<b>Что такое стоимость пункта?</b><br>
+    Укажите, на сколько долларов изменится результат при движении цены на 1 полный пункт для <b>1 лота</b>.<br><br>
+    <b>Пример (XAUUSD):</b> Цена 4550.00 &rarr; 4551.00 = 1 пункт.<br>
+    У большинства брокеров: 1 лот = <b>$100/пункт</b><br>
+    При объёме 0.01 лота: 0.01 &times; $100 = <b>$1/пункт</b>.`,
+      acc_no_other: "Пока нет других связанных аккаунтов.",
+      acc_unknown_email: "Неизвестный email", acc_code_label: "Код:",
+      acc_active: "✓ Активен", acc_switch: "Перейти",
+      logout_confirm: "Выйти из аккаунта?",
+      new_account_sub: "Войдите, чтобы добавить новый аккаунт",
+      modal_chart_btn: "График",
+      chart_title: "📈 График",
+      onb_skip: "Пропустить", onb_next: "Далее →", onb_start: "Начать",
+      onb1_title: "Торговый журнал",
+      onb1_desc: "Ведите полный журнал каждой сделки — это помогает контролировать сделки и вести отчётность.",
+      onb2_title: "Интеграция с MT5",
+      onb2_desc: "Прямо из журнала сделки автоматически открываются и закрываются на вашем счёте в MT5. С помощью индикатора, устанавливаемого в MT5, каждый пользователь подключается к терминалу по своему уникальному номеру и управляет счётом прямо из журнала — сделки, открытые в MT5, автоматически отражаются в журнале, и каждая сделка находится под постоянным контролем.",
+      onb3_title: "Рыночный график (Chart)",
+      onb3_desc: "Возможность смотреть рыночный график прямо внутри приложения — следите за любым инструментом в реальном времени.",
+      onb4_title: "Анализ и Календарь",
+      onb4_desc: "Каждая сделка анализируется, а через Календарь сохраняется полная информация о прибыли и убытках день за днём и месяц за месяцем.",
+      onb5_title: "Осознанная торговля — нужна причина",
+      onb5_desc: "Новую сделку нельзя открыть без чётких причин — это предотвращает эмоциональную торговлю и сохраняет дисциплину."
+    }
+  };
+
+  let currentLang = 'uz';
+
+  function applyLanguage(lang) {
+    if (!translations[lang]) lang = 'uz';
+    currentLang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (translations[lang][key] !== undefined) el.textContent = translations[lang][key];
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => {
+      const key = el.getAttribute('data-i18n-html');
+      if (translations[lang][key] !== undefined) el.innerHTML = translations[lang][key];
+    });
+    // Kirish/Ro'yxatdan o'tish rejimiga qarab parol yorlig'i va tugma matnini yangilash
+    const passLabel = document.getElementById('auth-password-label');
+    const submitBtn = document.getElementById('auth-submit-btn');
+    if (passLabel && submitBtn) {
+      if (typeof authMode !== 'undefined' && authMode === 'register') {
+        passLabel.textContent = translations[lang].auth_label_new_password;
+        submitBtn.textContent = translations[lang].auth_tab_register;
+      } else {
+        passLabel.textContent = translations[lang].auth_label_password;
+        submitBtn.textContent = translations[lang].auth_tab_login;
+      }
+    }
+    const uzBtn = document.getElementById('lang-btn-uz');
+    const ruBtn = document.getElementById('lang-btn-ru');
+    if (uzBtn && ruBtn) {
+      const active = "background:var(--accent,#22d3a5);border:1px solid var(--accent,#22d3a5);color:#0f172a";
+      const inactive = "background:var(--bg2);border:1px solid var(--border2);color:var(--text2)";
+      uzBtn.style.cssText += (lang === 'uz' ? active : inactive);
+      ruBtn.style.cssText += (lang === 'ru' ? active : inactive);
+    }
+    if (typeof renderKnownAccountsList === 'function') renderKnownAccountsList();
+  }
+
+  function setLanguage(lang) {
+    try { localStorage.setItem(TJ_LANG_KEY, lang); } catch (e) {}
+    applyLanguage(lang);
+  }
+
+  function t(key) {
+    return (translations[currentLang] && translations[currentLang][key]) || (translations.uz[key] || key);
+  }
+
+  (function initLanguage(){
+    let saved = 'uz';
+    try { saved = localStorage.getItem(TJ_LANG_KEY) || 'uz'; } catch (e) {}
+    applyLanguage(saved);
+  })();
+
+  // ===== ONBOARDING / YO'RIQNOMA (faqat birinchi marta) =====
+  const ONBOARDING_SLIDES = [
+    { color: '#22d3a5', titleKey: 'onb1_title', descKey: 'onb1_desc',
+      svg: '<rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 3.5h6a1 1 0 0 1 1 1V6H8V4.5a1 1 0 0 1 1-1Z"/><line x1="8.5" y1="11" x2="15.5" y2="11"/><line x1="8.5" y1="14.5" x2="15.5" y2="14.5"/><line x1="8.5" y1="18" x2="12.5" y2="18"/>' },
+    { color: '#60a5fa', titleKey: 'onb2_title', descKey: 'onb2_desc',
+      svg: '<path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/>' },
+    { color: '#fbbf24', titleKey: 'onb3_title', descKey: 'onb3_desc',
+      svg: '<path d="M3 3v18h18"/><path d="M18.7 8 13 13.7l-3-3L3.3 17.4"/>' },
+    { color: '#a78bfa', titleKey: 'onb4_title', descKey: 'onb4_desc',
+      svg: '<rect x="4" y="5.5" width="16" height="15" rx="2.5"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><circle cx="8.5" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="14" r="1" fill="currentColor" stroke="none"/>' },
+    { color: '#fb7185', titleKey: 'onb5_title', descKey: 'onb5_desc',
+      svg: '<path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3Z"/><path d="m9 12 2 2 4-4"/>' }
+  ];
+  const ONBOARDING_SEEN_KEY = 'tj_onboarding_seen';
+  let onbIndex = 0;
+
+  function renderOnboardingSlide() {
+    const slide = ONBOARDING_SLIDES[onbIndex];
+    const tr = translations[currentLang] || translations.uz;
+    document.getElementById('onb-icon').innerHTML = `
+      <div style="width:104px;height:104px;border-radius:28px;background:${slide.color}1f;border:1.5px solid ${slide.color}55;display:flex;align-items:center;justify-content:center;color:${slide.color};box-shadow:0 8px 28px ${slide.color}26">
+        <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${slide.svg}</svg>
+      </div>`;
+    document.getElementById('onb-title').textContent = tr[slide.titleKey] || translations.uz[slide.titleKey];
+    document.getElementById('onb-desc').textContent = tr[slide.descKey] || translations.uz[slide.descKey];
+    const dotsBox = document.getElementById('onb-dots');
+    dotsBox.innerHTML = ONBOARDING_SLIDES.map((s, i) =>
+      `<div style="width:${i === onbIndex ? 20 : 7}px;height:7px;border-radius:4px;background:${i === onbIndex ? s.color : 'rgba(255,255,255,0.22)'};transition:width .2s,background .2s"></div>`
+    ).join('');
+    const nextBtn = document.getElementById('onb-next-btn');
+    nextBtn.textContent = (onbIndex === ONBOARDING_SLIDES.length - 1) ? (tr.onb_start || 'Boshlash') : (tr.onb_next || 'Keyingi →');
+    nextBtn.style.background = `linear-gradient(135deg,${slide.color},${slide.color}cc)`;
+  }
+
+  function nextOnboardingSlide() {
+    if (onbIndex < ONBOARDING_SLIDES.length - 1) {
+      onbIndex++;
+      renderOnboardingSlide();
+    } else {
+      finishOnboarding();
+    }
+  }
+
+  function skipOnboarding() {
+    finishOnboarding();
+  }
+
+  function finishOnboarding() {
+    try { localStorage.setItem(ONBOARDING_SEEN_KEY, '1'); } catch (e) {}
+    const overlay = document.getElementById('onboarding-overlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+
+  (function initOnboarding(){
+    let seen = false;
+    try { seen = localStorage.getItem(ONBOARDING_SEEN_KEY) === '1'; } catch (e) {}
+    if (!seen) {
+      onbIndex = 0;
+      document.getElementById('onboarding-overlay').style.display = 'flex';
+      renderOnboardingSlide();
+    }
   })();
 </script>
 
@@ -767,28 +1028,32 @@
   <div class="tabs">
     <button class="tab active" onclick="switchTab('jurnal',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2.5"/><path d="M9 3.5h6a1 1 0 0 1 1 1V6H8V4.5a1 1 0 0 1 1-1Z"/><line x1="8.5" y1="11" x2="15.5" y2="11"/><line x1="8.5" y1="14.5" x2="15.5" y2="14.5"/><line x1="8.5" y1="18" x2="12.5" y2="18"/></svg>
-      Jurnal
+      <span data-i18n="nav_jurnal">Jurnal</span>
     </button>
     <button class="tab" onclick="switchTab('dashboard',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="13" width="4" height="7" rx="1"/><rect x="10" y="8" width="4" height="12" rx="1"/><rect x="16" y="4" width="4" height="16" rx="1"/></svg>
-      Dash
+      <span data-i18n="nav_dash">Dash</span>
     </button>
     <button class="tab" onclick="switchTab('analiz',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.3 15.3 20 20"/><path d="M10.5 7.5v3M9 9h3" stroke-linecap="round"/></svg>
-      Analiz
+      <span data-i18n="nav_analiz">Analiz</span>
     </button>
     <button class="tab" onclick="switchTab('kalendar',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5.5" width="16" height="15" rx="2.5"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><circle cx="8.5" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="14" r="1" fill="currentColor" stroke="none"/></svg>
-      Kalendar
+      <span data-i18n="nav_kalendar">Kalendar</span>
+    </button>
+    <button class="tab" onclick="switchTab('chart',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8 13 13.7l-3-3L3.3 17.4"/></svg>
+      <span data-i18n="nav_chart">Chart</span>
     </button>
     <button class="tab" onclick="switchTab('sozlama',this)">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 3.5v2M12 18.5v2M20.5 12h-2M5.5 12h-2M17.6 6.4l-1.4 1.4M7.8 16.2l-1.4 1.4M17.6 17.6l-1.4-1.4M7.8 7.8 6.4 6.4"/></svg>
-      Sozlama
+      <span data-i18n="nav_sozlama">Sozlama</span>
     </button>
     <button id="theme-toggle-btn" class="tab" onclick="toggleTheme()" title="Tema almashtirish" style="flex:0 0 auto;padding:8px 10px">
       <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11Z"/></svg>
       <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M2.5 12h2.4M19.1 12h2.4M4.9 19.1l1.7-1.7M17.4 6.6l1.7-1.7"/></svg>
-      Tema
+      <span data-i18n="nav_tema">Tema</span>
     </button>
   </div>
 </div>
@@ -903,64 +1168,95 @@
   </div>
 </div>
 
+<!-- CHART -->
+<div id="page-chart" class="page">
+  <div class="settings-section" style="margin-bottom:12px">
+    <div class="settings-section-title" data-i18n="chart_title">📈 Grafik</div>
+    <select id="chart-page-inst" class="form-select" onchange="renderChartPage()">
+      <option value="XAUUSD">XAUUSD</option>
+      <option value="EURUSD">EURUSD</option>
+      <option value="GBPUSD">GBPUSD</option>
+      <option value="USDJPY">USDJPY</option>
+      <option value="BTCUSD">BTCUSD</option>
+      <option value="ETHUSD">ETHUSD</option>
+      <option value="US30">US30</option>
+      <option value="NAS100">NAS100</option>
+      <option value="SP500">SP500</option>
+      <option value="USOIL">USOIL</option>
+    </select>
+  </div>
+  <div style="position:relative;width:100%;height:70vh;border-radius:12px;overflow:hidden;background:#131722;border:1px solid var(--border2)">
+    <div id="chart-page-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px">Yuklanmoqda...</div>
+    <iframe id="chart-page-iframe" style="width:100%;height:100%;border:none;display:none" allowfullscreen></iframe>
+  </div>
+</div>
+
 <!-- SOZLAMA -->
 <div id="page-sozlama" class="page">
+  <!-- TIL SECTION -->
+  <div class="settings-section" style="margin-bottom:12px">
+    <div class="settings-section-title" data-i18n="set_title_lang">🌐 Til</div>
+    <div style="display:flex;gap:8px">
+      <button id="lang-btn-uz" onclick="setLanguage('uz')" style="flex:1;border-radius:9px;padding:10px;font-size:13px;font-weight:700;cursor:pointer">🇺🇿 O'zbekcha</button>
+      <button id="lang-btn-ru" onclick="setLanguage('ru')" style="flex:1;border-radius:9px;padding:10px;font-size:13px;font-weight:700;cursor:pointer">🇷🇺 Русский</button>
+    </div>
+  </div>
   <!-- HISOB / MT5 UNIKAL KOD SECTION -->
   <div class="settings-section" style="margin-bottom:12px">
-    <div class="settings-section-title">👤 Hisobim va MT5 kodi</div>
+    <div class="settings-section-title" data-i18n="set_title_account">👤 Hisobim va MT5 kodi</div>
     <div style="background:rgba(34,211,165,0.06);border:1px solid rgba(34,211,165,0.25);border-radius:10px;padding:14px 16px">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:3px">Google hisobi</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:3px" data-i18n="set_label_google_account">Google hisobi</div>
       <div id="settings-account-email" style="font-size:14px;font-weight:700;color:var(--text2);margin-bottom:14px;word-break:break-all">—</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Sizning shaxsiy kodingiz — buni MT5'dagi советникka (EA) bir marta kiritasiz:</div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px" data-i18n="auth_code_desc">Sizning shaxsiy kodingiz — buni MT5'dagi советникka (EA) bir marta kiritasiz:</div>
       <div id="settings-account-code" style="color:#22d3a5;font-size:24px;font-weight:800;letter-spacing:3px;font-family:monospace">------</div>
     </div>
     <div style="display:flex;gap:8px;margin-top:12px">
-      <button onclick="addNewAccount()" style="flex:1;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);border-radius:9px;padding:10px;font-size:12.5px;font-weight:700;cursor:pointer">➕ Akkaunt qo'shish</button>
-      <button onclick="logoutAccount()" style="flex:1;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.35);color:var(--red);border-radius:9px;padding:10px;font-size:12.5px;font-weight:700;cursor:pointer">Chiqish</button>
+      <button onclick="addNewAccount()" style="flex:1;background:var(--bg2);border:1px solid var(--border2);color:var(--text2);border-radius:9px;padding:10px;font-size:12.5px;font-weight:700;cursor:pointer"><span data-i18n="set_btn_add_account">➕ Akkaunt qo'shish</span></button>
+      <button onclick="logoutAccount()" style="flex:1;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.35);color:var(--red);border-radius:9px;padding:10px;font-size:12.5px;font-weight:700;cursor:pointer" data-i18n="set_btn_logout">Chiqish</button>
     </div>
   </div>
   <!-- ULANGAN AKKAUNTLAR SECTION -->
   <div class="settings-section" style="margin-bottom:12px">
-    <div class="settings-section-title" style="margin-bottom:12px">🔀 Ulangan akkauntlar</div>
+    <div class="settings-section-title" style="margin-bottom:12px" data-i18n="set_title_connected">🔀 Ulangan akkauntlar</div>
     <div id="settings-accounts-list"></div>
   </div>
   <!-- DEPOZIT SECTION -->
   <div class="settings-section" style="margin-bottom:12px">
-    <div class="settings-section-title">💰 Depozit (Boshlang'ich Balans)</div>
+    <div class="settings-section-title" data-i18n="set_title_deposit">💰 Depozit (Boshlang'ich Balans)</div>
     <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
       <div style="flex:1">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Brokeringizga qo'ygan boshlang'ich summangiz</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px" data-i18n="set_deposit_desc">Brokeringizga qo'ygan boshlang'ich summangiz</div>
         <div style="display:flex;gap:8px;align-items:center">
           <span style="font-size:16px;color:var(--muted);font-weight:700">$</span>
           <input type="number" id="depozit-input" class="form-input" placeholder="1000" step="100" min="0" style="flex:1;font-size:16px;font-weight:700;font-family:monospace">
         </div>
       </div>
     </div>
-    <button onclick="saveDepozit()" class="save-pip-btn">✓ Depozitni Saqlash</button>
-    <div id="depozit-saved" style="text-align:center;color:var(--green);font-size:13px;font-weight:600;margin-top:10px;display:none">✓ Saqlandi!</div>
+    <button onclick="saveDepozit()" class="save-pip-btn" data-i18n="set_btn_save_deposit">✓ Depozitni Saqlash</button>
+    <div id="depozit-saved" style="text-align:center;color:var(--green);font-size:13px;font-weight:600;margin-top:10px;display:none" data-i18n="set_saved">✓ Saqlandi!</div>
     <!-- Live balans preview -->
     <div id="depozit-preview" style="margin-top:14px;display:none">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="stat-card">
-          <div class="stat-label">Boshlang'ich</div>
+          <div class="stat-label" data-i18n="set_stat_start">Boshlang'ich</div>
           <div class="stat-value" style="font-size:16px;color:var(--muted)" id="dep-start"></div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Joriy Balans</div>
+          <div class="stat-label" data-i18n="set_stat_current">Joriy Balans</div>
           <div class="stat-value" style="font-size:16px" id="dep-current"></div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">Jami Foyda/Zarar</div>
+          <div class="stat-label" data-i18n="set_stat_pnl">Jami Foyda/Zarar</div>
           <div class="stat-value" style="font-size:16px" id="dep-pnl"></div>
         </div>
         <div class="stat-card">
-          <div class="stat-label">O'sish (ROI)</div>
+          <div class="stat-label" data-i18n="set_stat_roi">O'sish (ROI)</div>
           <div class="stat-value" style="font-size:16px" id="dep-roi"></div>
         </div>
       </div>
     </div>
   </div>
-  <div class="settings-info">
+  <div class="settings-info" id="settings-info-pip" data-i18n-html="set_pip_info">
     <b>Pip qiymati nima?</b><br>
     Har bir instrument uchun 1 ta to'liq punkt harakatida <b>1 lot</b> uchun necha dollar o'zgarishini belgilang.<br><br>
     <b>Misol (XAUUSD):</b> Narx 4550.00 &rarr; 4551.00 = 1 punkt.<br>
@@ -968,20 +1264,39 @@
     Siz 0.01 lot savdo qilsangiz: 0.01 &times; $100 = <b>$1/punkt</b> hisoblanadi.
   </div>
   <div class="settings-section">
-    <div class="settings-section-title">&#128176; Har Punkt Dollari (1 lot uchun)</div>
+    <div class="settings-section-title" data-i18n="set_title_pip">&#128176; Har Punkt Dollari (1 lot uchun)</div>
     <div id="pip-rows"></div>
-    <button class="save-pip-btn" onclick="savePipSettings()">&#10003; Saqlash va Qayta Hisoblash</button>
-    <div class="pip-saved" id="pip-saved">&#10003; Saqlandi! Barcha savdolar qayta hisoblandi.</div>
+    <button class="save-pip-btn" onclick="savePipSettings()" data-i18n="set_btn_save_pip">&#10003; Saqlash va Qayta Hisoblash</button>
+    <div class="pip-saved" id="pip-saved" data-i18n="set_pip_saved">&#10003; Saqlandi! Barcha savdolar qayta hisoblandi.</div>
+  </div>
+</div>
+
+<!-- CHART MODAL (TradingView) -->
+<div class="overlay" id="chart-overlay" onclick="closeChartModalOutside(event)" style="display:none;z-index:100000">
+  <div class="modal" style="padding:0;overflow:hidden;display:flex;flex-direction:column;height:88vh;max-height:88vh">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border2);flex-shrink:0">
+      <button onclick="closeChartModal()" style="background:rgba(34,211,165,0.12);border:2px solid rgba(34,211,165,0.4);border-radius:10px;color:var(--green);font-size:20px;font-weight:900;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;line-height:1">‹</button>
+      <div style="font-size:15px;font-weight:800;color:var(--text2)" id="chart-modal-title">Chart</div>
+    </div>
+    <div style="flex:1;min-height:0;position:relative;background:#131722">
+      <div id="chart-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px">Yuklanmoqda...</div>
+      <iframe id="chart-iframe" style="width:100%;height:100%;border:none;display:none" allowfullscreen></iframe>
+    </div>
   </div>
 </div>
 
 <!-- TRADE MODAL -->
+
 <div class="overlay" id="modal-overlay" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-handle"></div>
     <div style="display:flex;align-items:center;margin-bottom:14px;gap:10px">
       <button onclick="tryCloseModal()" style="background:rgba(34,211,165,0.12);border:2px solid rgba(34,211,165,0.4);border-radius:10px;color:var(--green);font-size:20px;font-weight:900;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;line-height:1">‹</button>
       <div class="modal-title" id="modal-title" style="margin-bottom:0">Yangi Savdo</div>
+      <button onclick="openChartModal()" title="Grafikni ochish" style="margin-left:auto;flex-shrink:0;display:flex;align-items:center;gap:6px;background:rgba(59,130,246,0.12);border:2px solid rgba(59,130,246,0.4);border-radius:10px;color:#60a5fa;font-size:13px;font-weight:800;padding:0 14px;height:40px;cursor:pointer">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8 13 13.7l-3-3L3.3 17.4"/></svg>
+        <span data-i18n="modal_chart_btn">Chart</span>
+      </button>
     </div>
     <div class="live-box">
       <div class="live-item"><label>HISOBLANGAN P&L</label><div class="live-val" id="live-pnl">$0.00</div></div>
@@ -3340,6 +3655,73 @@ function closeModal(e) {
   tryCloseModal();
 }
 
+// ============================================================
+// CHART (TradingView) — tanlangan instrument uchun jonli grafik
+// ============================================================
+const TRADINGVIEW_SYMBOLS = {
+  XAUUSD: 'OANDA:XAUUSD',
+  EURUSD: 'OANDA:EURUSD',
+  GBPUSD: 'OANDA:GBPUSD',
+  USDJPY: 'OANDA:USDJPY',
+  BTCUSD: 'BINANCE:BTCUSDT',
+  ETHUSD: 'BINANCE:ETHUSDT',
+  US30: 'OANDA:US30USD',
+  NAS100: 'OANDA:NAS100USD',
+  SP500: 'OANDA:SPX500USD',
+  USOIL: 'OANDA:WTICOUSD'
+};
+
+function openChartModal() {
+  const instSel = document.getElementById('f-inst');
+  const inst = instSel ? instSel.value : 'XAUUSD';
+  const tvSymbol = TRADINGVIEW_SYMBOLS[inst] || ('OANDA:' + inst);
+  const overlay = document.getElementById('chart-overlay');
+  const iframe = document.getElementById('chart-iframe');
+  const loading = document.getElementById('chart-loading');
+  const titleEl = document.getElementById('chart-modal-title');
+
+  titleEl.textContent = inst + ' — Chart';
+  loading.style.display = 'flex';
+  iframe.style.display = 'none';
+
+  const isLight = !document.body.classList.contains('light-theme') ? 'dark' : 'light';
+  const src = `https://s.tradingview.com/widgetembed/?symbol=${encodeURIComponent(tvSymbol)}&interval=15&theme=${isLight === 'dark' ? 'dark' : 'light'}&style=1&timezone=Etc%2FUTC&withdateranges=1&hide_side_toolbar=0&allow_symbol_change=1`;
+  iframe.onload = () => { loading.style.display = 'none'; iframe.style.display = 'block'; };
+  iframe.src = src;
+
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeChartModal() {
+  const overlay = document.getElementById('chart-overlay');
+  const iframe = document.getElementById('chart-iframe');
+  overlay.style.display = 'none';
+  iframe.src = 'about:blank';
+  document.body.style.overflow = '';
+}
+
+function closeChartModalOutside(e) {
+  if (e && e.target !== document.getElementById('chart-overlay')) return;
+  closeChartModal();
+}
+
+// "Chart" asosiy bo'limi — doimiy TradingView vidjeti, instrument tanlash bilan
+function renderChartPage() {
+  const sel = document.getElementById('chart-page-inst');
+  const iframe = document.getElementById('chart-page-iframe');
+  const loading = document.getElementById('chart-page-loading');
+  if (!sel || !iframe) return;
+  const inst = sel.value;
+  const tvSymbol = TRADINGVIEW_SYMBOLS[inst] || ('OANDA:' + inst);
+  loading.style.display = 'flex';
+  iframe.style.display = 'none';
+  const theme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+  const src = `https://s.tradingview.com/widgetembed/?symbol=${encodeURIComponent(tvSymbol)}&interval=15&theme=${theme}&style=1&timezone=Etc%2FUTC&withdateranges=1&hide_side_toolbar=0&allow_symbol_change=1`;
+  iframe.onload = () => { loading.style.display = 'none'; iframe.style.display = 'block'; };
+  iframe.src = src;
+}
+
 function saveTrade() {
   if (!editId && selectedSabablar.length < 3) {
     document.getElementById('sabab-hint').style.display = 'block';
@@ -4010,8 +4392,15 @@ function savePipSettings() {
 
 // ============================================================
 // SABAB (MULTI-SELECT, KAMIDA 3 TA)
+// Bu yerdagi "OWNER_SABABLAR" — dastur egasining shaxsiy strategiyasiga oid
+// batafsil sabablar ro'yxati. Bu faqat OWNER_EMAILS ro'yxatidagi gmail(lar)
+// bilan kirilganda ko'rinadi. Boshqa foydalanuvchilar (masalan, dasturdan
+// foydalanish uchun berilgan tanishlar) esa umumiy, oddiy GENERIC_SABABLAR
+// ro'yxatini ko'radi — shunda shaxsiy strategiya boshqalarga oshkor bo'lmaydi.
 // ============================================================
-const DEFAULT_SABABLAR = [
+const OWNER_EMAILS = ['sardoryakubov94@gmail.com', 'sardoryakubov905@gmail.com'];
+
+const OWNER_SABABLAR = [
   'HTF dan D1 dan minimal M15 gacha Setap qidirildi va TOPILDI',
   'Setap zonalari xarxil T.F lar boyicha ustma usti KESISHGAN',
   'Narx Zonadagi xarakati zona ichiga QAYTIB KIRDI',
@@ -4025,6 +4414,56 @@ const DEFAULT_SABABLAR = [
   "Bank bo'yicha SFU+AFU Svechasi SHAKILLANDI",
   'Bank boyicha Entry Model + HCS SHAKILLANDI'
 ];
+// OWNER_SABABLAR bilan bir index tartibida — har biriga qisqa sarlavha va icon
+const OWNER_SABAB_META = [
+  { title: "HTF Setup topildi", icon: "layers" },
+  { title: "Zonalar ustma-usti kesishgan", icon: "target" },
+  { title: "Zona ichiga qaytib kirdi", icon: "corner" },
+  { title: "ELIOT TO'LQINI SANALDI", icon: "wave" },
+  { title: "Impuls masofasi tekshirildi", icon: "ruler" },
+  { title: "Obyom tasdig'i bor", icon: "filecheck" },
+  { title: "Divergensiya / Konvergensiya", icon: "compare" },
+  { title: "ATR bo'yicha volatillik yaxshi", icon: "gauge" },
+  { title: "1 ATR masofasida SAVE qilish", icon: "bookmark" },
+  { title: "Kichik T.F da narx razvorot qildi", icon: "repeat" },
+  { title: "Bank SFU+AFU svechasi", icon: "candles" },
+  { title: "Bank Entry Model + HCS", icon: "flag" }
+];
+
+// Boshqa (egasi bo'lmagan) foydalanuvchilar uchun umumiy, oddiy sabablar ro'yxati
+const GENERIC_SABABLAR = [
+  'Order Block (OB) tasdiqlandi',
+  'Imbalans / FVG zonasi mavjud',
+  "Trend yo'nalishi bo'yicha kirish",
+  'Support / Resistance darajasidan qaytish',
+  'Struktura buzilishi (BOS/CHoCH) tasdiqlandi',
+  'Yuqori taymfreym bilan mos keladi',
+  "Risk:Reward nisbati yaxshi",
+  "Savdo hajmi (Volume) tasdig'i bor"
+];
+const GENERIC_SABAB_META = [
+  { title: "Order Block (OB)", icon: "target" },
+  { title: "Imbalans / FVG", icon: "layers" },
+  { title: "Trend bo'yicha kirish", icon: "wave" },
+  { title: "Support / Resistance", icon: "corner" },
+  { title: "BOS / CHoCH", icon: "repeat" },
+  { title: "Yuqori taymfreym mos", icon: "compare" },
+  { title: "Risk:Reward yaxshi", icon: "gauge" },
+  { title: "Volume tasdig'i", icon: "filecheck" }
+];
+
+function isOwnerAccount() {
+  try {
+    const u = firebase.auth().currentUser;
+    return !!(u && u.email && OWNER_EMAILS.includes(u.email.toLowerCase()));
+  } catch (e) { return false; }
+}
+function activeDefaultSabablar() {
+  return isOwnerAccount() ? OWNER_SABABLAR : GENERIC_SABABLAR;
+}
+function activeSababMeta() {
+  return isOwnerAccount() ? OWNER_SABAB_META : GENERIC_SABAB_META;
+}
 const SABAB_COLOR_PALETTE = [
   '#22d3a5','#7ab3e0','#a78bfa','#fbbf24','#fb923c','#f472b6',
   '#f87171','#22d3ee','#a3e635','#818cf8','#fb7185','#34d399'
@@ -4057,26 +4496,11 @@ const SABAB_ICON_PATHS = {
 function sababIconSvg(name) {
   return `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${SABAB_ICON_PATHS[name] || SABAB_ICON_PATHS.star}</svg>`;
 }
-// DEFAULT_SABABLAR bilan bir index tartibida — har biriga qisqa sarlavha va icon
-const SABAB_META = [
-  { title: "HTF Setup topildi", icon: "layers" },
-  { title: "Zonalar ustma-usti kesishgan", icon: "target" },
-  { title: "Zona ichiga qaytib kirdi", icon: "corner" },
-  { title: "ELIOT TO'LQINI SANALDI", icon: "wave" },
-  { title: "Impuls masofasi tekshirildi", icon: "ruler" },
-  { title: "Obyom tasdig'i bor", icon: "filecheck" },
-  { title: "Divergensiya / Konvergensiya", icon: "compare" },
-  { title: "ATR bo'yicha volatillik yaxshi", icon: "gauge" },
-  { title: "1 ATR masofasida SAVE qilish", icon: "bookmark" },
-  { title: "Kichik T.F da narx razvorot qildi", icon: "repeat" },
-  { title: "Bank SFU+AFU svechasi", icon: "candles" },
-  { title: "Bank Entry Model + HCS", icon: "flag" }
-];
 let customSabablar = [];
 let selectedSabablar = []; // joriy tanlangan sabablar
 
 function getAllSabablar() {
-  return [...DEFAULT_SABABLAR, ...customSabablar];
+  return [...activeDefaultSabablar(), ...customSabablar];
 }
 
 function refreshSababSelect() {
@@ -4173,8 +4597,8 @@ function renderSababModalList() {
   document.getElementById('sabab-modal-list').innerHTML = all.map((s, i) => {
     const isSelected = selectedSabablar.includes(s);
     const c = getSababColor(s);
-    const isCustom = !DEFAULT_SABABLAR.includes(s);
-    const meta = SABAB_META[i] || { title: (s.length > 38 ? s.slice(0, 38) + '…' : s), icon: 'star' };
+    const isCustom = !activeDefaultSabablar().includes(s);
+    const meta = activeSababMeta()[i] || { title: (s.length > 38 ? s.slice(0, 38) + '…' : s), icon: 'star' };
     const esc = s.replace(/'/g, "\\'");
     return `
     <div onclick="selectSababFromModal('${esc}')" class="${isSelected ? '' : 'sabab-card'}" style="position:relative;display:flex;gap:8px;align-items:flex-start;${isSelected ? `background:${c}22;` : ''}border:1.5px solid ${isSelected ? c : 'var(--border2)'};border-radius:11px;padding:7px 32px 7px 8px;margin-bottom:5px;cursor:pointer;transition:border-color .15s,background .15s">
@@ -4200,7 +4624,7 @@ function addNewSabab() {
   const inp = document.getElementById('new-sabab-input');
   const val = inp.value.trim();
   if (!val) return;
-  if (!customSabablar.includes(val) && !DEFAULT_SABABLAR.includes(val)) {
+  if (!customSabablar.includes(val) && !activeDefaultSabablar().includes(val)) {
     customSabablar.push(val);
     localStorage.setItem(tjKey('tj_sabablar'), JSON.stringify(customSabablar));
   }
@@ -4233,6 +4657,10 @@ function switchTab(name, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + name).classList.add('active');
   el.classList.add('active');
+  if (name === 'chart') {
+    const iframe = document.getElementById('chart-page-iframe');
+    if (iframe && !iframe.src) renderChartPage();
+  }
 }
 
 renderAll();
