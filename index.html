@@ -87,9 +87,10 @@
   .badge{font-size:10px;color:var(--green);background:rgba(34,211,165,0.1);padding:2px 7px;border-radius:20px;font-weight:700}
   .add-btn{background:linear-gradient(135deg,var(--green),#14b8a6);color:#000;border:none;border-radius:10px;padding:9px 20px;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}
 
-  .tabs{display:flex;gap:2px;width:100%}
+  .tabs{display:flex;gap:6px;width:100%}
   .tabs::-webkit-scrollbar{display:none}
-  .tab{flex:1 1 0;min-width:0;padding:8px 2px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-weight:700;font-size:11.5px;cursor:pointer;text-align:center;transition:all 0.2s;white-space:nowrap;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .tab{flex:1 1 0;min-width:0;padding:8px 2px;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-weight:700;font-size:10.5px;cursor:pointer;text-align:center;transition:all 0.2s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;flex-direction:column;align-items:center;gap:3px}
+  .tab span{overflow:hidden;text-overflow:ellipsis;max-width:100%}
   .tab svg{width:16px;height:16px;flex-shrink:0}
   .tab.active{border-bottom-color:var(--green);color:var(--green)}
 
@@ -911,7 +912,34 @@
       ruBtn.style.cssText += (lang === 'ru' ? active : inactive);
     }
     if (typeof renderKnownAccountsList === 'function') renderKnownAccountsList();
+    adjustNavTabLabels();
   }
+
+  // Pastki menyu (Jurnal, Dash, Analiz, ...) matnlari uzun tilda (masalan rus)
+  // sig'may qolsa, avtomatik tarzda faqat bosh harfga qisqartiradi, shunda
+  // nomlar bir-biriga aralashib ketmaydi.
+  function adjustNavTabLabels() {
+    const tabsEl = document.querySelector('.tabs');
+    if (!tabsEl) return;
+    const spans = tabsEl.querySelectorAll('.tab > span[data-i18n]');
+    // Avval to'liq matnni tiklaymiz, so'ng haqiqatan sig'maydiganini tekshiramiz
+    spans.forEach(s => {
+      if (s.dataset.full === undefined) s.dataset.full = s.textContent;
+      else s.textContent = s.dataset.full;
+    });
+    requestAnimationFrame(() => {
+      let overflow = false;
+      spans.forEach(s => { if (s.scrollWidth > s.clientWidth + 1) overflow = true; });
+      if (overflow) {
+        spans.forEach(s => {
+          const full = s.dataset.full || s.textContent;
+          s.textContent = full.trim().charAt(0).toUpperCase();
+          s.title = full;
+        });
+      }
+    });
+  }
+  window.addEventListener('resize', () => { adjustNavTabLabels(); });
 
   function setLanguage(lang) {
     try { localStorage.setItem(TJ_LANG_KEY, lang); } catch (e) {}
