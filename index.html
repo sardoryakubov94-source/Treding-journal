@@ -127,7 +127,7 @@
   .nat-win{background:rgba(34,211,165,0.1);color:var(--green)}
   .nat-loss{background:rgba(248,113,113,0.1);color:var(--red)}
   .trade-actions{display:flex;gap:3px}
-  .action-btn{background:var(--bg4);border:1px solid var(--border);border-radius:6px;padding:3px 6px;font-size:11px;cursor:pointer}
+  .action-btn{background:var(--bg4);border:1px solid var(--border);border-radius:6px;padding:3px 6px;font-size:11px;cursor:pointer;color:var(--text2)}
 
   .empty{text-align:center;padding:50px 20px;color:var(--muted)}
   .empty-icon{font-size:44px;margin-bottom:12px}
@@ -2225,8 +2225,8 @@
       <button type="button" class="action-btn manual-stage-btn" data-stage="exit" onclick="selectManualShotStage('exit')" style="flex:1;padding:8px 4px;font-size:11.5px;font-weight:600">🔴 Yopilganda</button>
     </div>
 
-    <div id="manual-shot-preview" style="position:relative;background:#000;border-radius:10px;overflow:hidden;min-height:120px;display:flex;align-items:center;justify-content:center;margin-bottom:10px">
-      <span style="color:#cbd5e1;font-size:12px">Rasm tanlanmagan</span>
+    <div id="manual-shot-preview" style="position:relative;background:#3a3f4a;border-radius:10px;overflow:hidden;min-height:120px;display:flex;align-items:center;justify-content:center;margin-bottom:10px">
+      <span style="color:#e2e8f0;font-size:12px">Rasm tanlanmagan</span>
     </div>
 
     <input type="file" id="manual-shot-file" accept="image/*" style="display:none" onchange="handleManualShotFile(event)">
@@ -2986,7 +2986,7 @@ function openManualShotModal(ticket) {
   const key = String(ticket);
   const trade = trades.find(t => String(t.mt5Ticket || t.id) === key);
   manualShotState = { ticket: key, trade: trade || null, stage: 'during', base64: null };
-  document.getElementById('manual-shot-preview').innerHTML = '<span style="color:#cbd5e1;font-size:12px">Rasm tanlanmagan</span>';
+  document.getElementById('manual-shot-preview').innerHTML = '<span style="color:#e2e8f0;font-size:12px">Rasm tanlanmagan</span>';
   document.getElementById('manual-shot-file').value = '';
   document.getElementById('manual-shot-status').textContent = '';
   document.getElementById('manual-shot-tf').value = 'M15';
