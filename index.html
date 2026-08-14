@@ -125,8 +125,8 @@
   .nat-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
   .nat-win{background:rgba(34,211,165,0.1);color:var(--green)}
   .nat-loss{background:rgba(248,113,113,0.1);color:var(--red)}
-  .trade-actions{display:flex;gap:6px}
-  .action-btn{background:var(--bg4);border:1px solid var(--border);border-radius:7px;padding:5px 9px;font-size:13px;cursor:pointer}
+  .trade-actions{display:flex;gap:4px}
+  .action-btn{background:var(--bg4);border:1px solid var(--border);border-radius:6px;padding:3px 6px;font-size:11px;cursor:pointer}
 
   .empty{text-align:center;padding:50px 20px;color:var(--muted)}
   .empty-icon{font-size:44px;margin-bottom:12px}
@@ -1666,7 +1666,7 @@
       <button class="action-btn" style="flex:1;padding:9px 4px;font-size:11px" onclick="runPeriodAnalysis('weekly')" data-i18n="analiz_btn_weekly">📆 Haftalik</button>
       <button class="action-btn" style="flex:1;padding:9px 4px;font-size:11px" onclick="runPeriodAnalysis('monthly')" data-i18n="analiz_btn_monthly">🗓 Oylik</button>
     </div>
-    <div id="ai-analyst-result" style="font-size:12px;line-height:1.6;color:var(--text2)"></div>
+    <div id="ai-analyst-result" style="font-size:13px;line-height:1.6;color:var(--text2)"></div>
   </div>
   <div class="chart-box">
     <div class="chart-title" data-i18n="analiz_pnl_grafigi">Foyda / Zarar Grafigi</div>
@@ -2245,7 +2245,7 @@
       <div class="modal-title" style="margin-bottom:0">🤖 AI Savdo Tahlili</div>
       <button class="sabab-fs-close" onclick="closeAiTradeModal()">✕</button>
     </div>
-    <div id="ai-trade-result" style="font-size:12px;line-height:1.65;color:var(--text2);overflow-y:auto;flex:1"></div>
+    <div id="ai-trade-result" style="font-size:13px;line-height:1.65;color:var(--text2);overflow-y:auto;flex:1"></div>
   </div>
 </div>
 
@@ -3089,11 +3089,25 @@ function closeAiTradeModal(e) {
 // hech qachon savdo ochmaydi/yopmaydi va treyder o'rniga qaror qabul
 // qilmaydi — bu tizim promptlar darajasida ham qat'iy talab qilinadi.
 
-const AI_SYSTEM_PROMPT_PERIOD = `Sen tajribali trading coach va tahlilchisan. Treyderning trading jurnalidagi savdo ma'lumotlarini tahlil qilasan (instrument, entry/exit, SL/TP, lot, risk, P/L, RR, davomiylik, setup/sabab va izohlar).
+const AI_SYSTEM_PROMPT_PERIOD = `Sen tajribali trading coach va tahlilchisan. Treyderning trading jurnalidagi savdo ma'lumotlarini (instrument, entry/exit, SL/TP, lot, risk, P/L, RR, davomiylik, SL/TP o'zgarishlari, savdolar orasidagi vaqt, setup/sabab, izohlar va skrinshotlar) chuqur tahlil qilib, xulosa chiqarasan.
+
+TAHLILDA ALBATTA TEKSHIR (topilgan bo'lsa aytib o't, topilmasa o'sha bandni tashlab ket):
+- Revenge trading (zarardan keyin darhol qasos olish uchun ochilgan savdolar)
+- FOMO (imkoniyatni boy bermaslik uchun shoshilinch kirish)
+- Overtrading (haddan tashqari ko'p/tez-tez savdo qilish)
+- SL'ni ko'chirish/kengaytirish (stop-lossni zarar ko'payishiga yo'l qo'yadigan tarzda o'zgartirish)
+- TP'ni erta yopish (maqsaddan oldin foyda bilan chiqib ketish)
+- Riskni oshirish (lot/risk hajmini asossiz ravishda kattalashtirish)
+- Reja/setup'ga mos yoki nomos entry
+- Eng samarali va eng zararli setup turlari
+- Vaqt o'tishi bilan oldingi hisobotlarga nisbatan takrorlanayotgan xatolar yoki kuchayayotgan yaxshi odatlar (agar "OLDINGI HISOBOTLAR" berilgan bo'lsa)
 
 QAT'IY QOIDALAR:
 - Sen HECH QACHON savdo ochish/yopishni yoki aniq buy/sell signalini tavsiya qilmaysan.
 - Sen treyder o'rniga qaror qabul qilmaysan — faqat allaqachon amalga oshirilgan (yopilgan/ochiq) savdolar tarixini tahlil qilib xulosa berasan.
+- JAVOBDA xom kirish/chiqish narxlari, SL/TP raqamlari, lot va sanalarni QAYTA SANAB O'TIRMA — bu ma'lumotlar allaqachon jurnalda ko'rinib turibdi. Faqat ULARDAN CHIQARILGAN XULOSA/TAHLILNI yoz (masalan "3 marta SL kengaytirilgan" emas, "SL'ni tez-tez kengaytirish zararni oshiryapti" kabi xulosa).
+- Har bir band — bitta lo'nda, aniq gap (taxminan 8-14 so'z). Ortiqcha kirish so'zlar, umumiy gaplar yoki takrorlash bo'lmasin.
+- Javob TO'LIQ mazmunli, lekin QISQA yozilgan bo'lishi kerak — umumiy javob taxminan 150-200 so'zdan oshmasin.
 - Javobni FAQAT o'zbek tilida, quyidagi 6 ta bo'lim sarlavhasi bilan, aynan shu tartibda va aynan shu emoji+matn bilan yoz (har biri alohida qatorda boshlansin):
 
 🟢 Kuchli tomonlar
@@ -3103,18 +3117,20 @@ QAT'IY QOIDALAR:
 ⚠️ Eng zararli odat
 💡 Keyingi davr uchun tavsiyalar
 
-Har bir bo'limda 2-4 ta qisqa, aniq va amaliy band yoz. Ma'lumotlar asosida revenge trading, FOMO, overtrading, SL/TP bilan bog'liq xatolar (masalan SLni kengaytirish yoki TPni erta yopish belgilari), riskni oshirish, rejaga mos/nomos entry kabi holatlarni aniqlab, iloji bo'lsa aniq sana/instrument bilan misol keltir. Agar "OLDINGI HISOBOTLAR" bo'limida tendensiya ko'rinsa (masalan bir xil xato bir necha davr davomida takrorlanmoqda), buni alohida ta'kidla.`;
+Har bir bo'limda 2-3 ta band yoz — faqat ma'lumotlarda haqiqatan topilgan, eng muhim xulosalar bo'lsin.`;
 
 const AI_SYSTEM_PROMPT_SINGLE = `Sen tajribali trading coach va tahlilchisan. Quyida bitta savdoning to'liq ma'lumotlari (va agar mavjud bo'lsa, ochilish/yopilish paytidagi grafik skrinshotlari) berilgan.
 
 QAT'IY QOIDALAR:
 - Sen HECH QACHON savdo ochish/yopishni tavsiya qilmaysan va treyder o'rniga qaror qabul qilmaysan.
-- Faqat berilgan (allaqachon amalga oshirilgan) savdoni retrospektiv tahlil qilasan.
+- Faqat berilgan (allaqachon amalga oshirilgan) savdoni retrospektiv tahlil qilasan — revenge trading, FOMO, SL ko'chirish, TP erta yopish, reja/setup'ga mos-nomoslik kabi belgilarni tekshir.
+- JAVOBDA entry/exit narxi, SL/TP raqamlari, lot kabi xom ma'lumotlarni qayta yozma — faqat xulosa/tahlilni yoz.
+- Javob QISQA bo'lsin — umumiy taxminan 50-70 so'z, har bir band 1 ta lo'nda gap.
 
-Javobni FAQAT o'zbek tilida, qisqa va aniq, quyidagi tuzilishda yoz:
-✅ Setup rejaga mosmi?
-🔍 Kuzatilgan holatlar (SL/TP, risk, vaqtlash bo'yicha)
-💡 Bu savdodan xulosa/tavsiya`;
+Javobni FAQAT o'zbek tilida, quyidagi tuzilishda yoz:
+✅ Setup rejaga mosmi? (1 gap)
+🔍 Kuzatilgan holat (1 gap, eng muhimi)
+💡 Xulosa/tavsiya (1 gap)`;
 
 // AI Analyst — faqat admin gmail (ADMIN_EMAIL) uchun ochiq, qolgan barcha
 // foydalanuvchilar uchun Premium obuna talab qilinadi. Ruxsat yo'q bo'lsa,
@@ -3152,13 +3168,24 @@ async function callAIAnalyst(system, userText, images) {
 }
 
 // AI javobidagi bo'lim sarlavhalarini (🟢 🔴 📊 🎯 ⚠️ 💡 ✅ 🔍) qalin qilib,
-// oddiy matnni xavfsiz (XSS'siz) HTML'ga o'giradi.
+// har bir tahlil/tavsiya qatorini ham (sarlavha ostidagi matnni) ko'zga
+// yaqqol tashlanadigan qalinroq shrift bilan chiqaradi, oddiy matnni esa
+// xavfsiz (XSS'siz) HTML'ga o'giradi.
 function formatAIResultHTML(text) {
   const escaped = String(text)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  return escaped.replace(/^(🟢|🔴|📊|🎯|⚠️|💡|✅|🔍)(.*)$/gm,
-    (m, emoji, rest) => `<div style="font-weight:800;margin:12px 0 4px;color:var(--text)">${emoji}${rest}</div>`
-  ).replace(/\n/g, '<br>');
+  const lines = escaped.split('\n');
+  const isHeader = (l) => /^(🟢|🔴|📊|🎯|⚠️|💡|✅|🔍)/.test(l);
+  const html = lines.map(line => {
+    if (!line.trim()) return '';
+    if (isHeader(line)) {
+      return `<div style="font-weight:800;font-size:13.5px;margin:14px 0 6px;color:var(--text)">${line}</div>`;
+    }
+    // Asosiy tahlil/tavsiya qatori — sarlavhadan farqli, lekin baribir
+    // ko'zga yaqqol tashlanadigan qalinroq shrift va ochroq rangda.
+    return `<div style="font-weight:600;font-size:13px;line-height:1.55;color:var(--text);margin:0 0 6px">${line}</div>`;
+  }).join('');
+  return html;
 }
 
 // Bitta savdo bo'yicha RR (reja va amaldagi), davomiylik va boshqa
@@ -5673,10 +5700,10 @@ function renderTrades() {
       prevLivePnlByTradeId[t.id] = livePnl;
     }
     const buMovedBadge = t.buStopSaved
-      ? `<span style="font-size:9px;font-weight:700;color:var(--red);background:rgba(248,113,113,0.13);border:1px solid rgba(248,113,113,0.4);border-radius:4px;padding:1px 5px">B/U</span>`
+      ? `<span style="font-size:9px;font-weight:700;color:var(--red);background:rgba(248,113,113,0.13);border:1px solid rgba(248,113,113,0.4);border-radius:4px;padding:1px 4px">B/U</span>`
       : '';
     const partialBadge = (hasPartial && !t.isBU)
-      ? `<span style="font-size:10px;font-weight:700;color:var(--gold);background:rgba(251,191,36,0.13);border:1px solid rgba(251,191,36,0.4);border-radius:5px;padding:1px 6px">½${parseFloat(t.partialLot||0).toFixed(2)}/${parseFloat(t.lot).toFixed(2)}</span>${buMovedBadge}`
+      ? `<span style="font-size:9.5px;font-weight:700;color:var(--gold);background:rgba(251,191,36,0.13);border:1px solid rgba(251,191,36,0.4);border-radius:5px;padding:1px 5px">½${parseFloat(t.partialLot||0).toFixed(2)}/${parseFloat(t.lot).toFixed(2)}</span>${buMovedBadge}`
       : buMovedBadge;
     const isPartialOpen = hasPartial;
     const isFullBU = t.isBU && !hasPartial;
@@ -5685,25 +5712,25 @@ function renderTrades() {
     if (isPartialOpen && t.isBU) {
       const pp = t.partialChiqish && t.partialLot ? calcPnL(t.instrument,t.turi,t.kirish,t.partialChiqish,t.partialLot) : 0;
       const ps = (pp>=0?'+$':'-$')+Math.abs(pp).toFixed(2);
-      natBadge = `<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;background:rgba(34,211,165,0.12);border:1px solid rgba(34,211,165,0.35);white-space:nowrap"><span style="color:var(--green)">${ps}</span><span style="opacity:0.35;font-size:8px">·</span><span style="color:var(--red)">B/U</span><span style="opacity:0.35;font-size:8px">·</span><span style="color:var(--green)">YOPILDI</span></span>`;
+      natBadge = `<span style="display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:5px;background:rgba(34,211,165,0.12);border:1px solid rgba(34,211,165,0.35);white-space:nowrap"><span style="color:var(--green)">${ps}</span><span style="opacity:0.35;font-size:8px">·</span><span style="color:var(--red)">B/U</span><span style="opacity:0.35;font-size:8px">·</span><span style="color:var(--green)">YOPILDI</span></span>`;
     } else if (isPartialOpen) {
-      natBadge = `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;background:rgba(251,191,36,0.12);color:var(--gold);border:1px solid rgba(251,191,36,0.35)">OCHIQ</span>`;
+      natBadge = `<span style="font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:5px;background:rgba(251,191,36,0.12);color:var(--gold);border:1px solid rgba(251,191,36,0.35)">OCHIQ</span>`;
     } else if (isFullBU) {
-      natBadge = `<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;background:rgba(248,113,113,0.13);border:1.5px solid rgba(248,113,113,0.45);white-space:nowrap"><span style="color:var(--red)">B/U</span><span style="opacity:0.35;font-size:8px">·</span><span style="color:var(--red);font-size:10px">YOPILDI</span></span>`;
+      natBadge = `<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:800;padding:1px 6px;border-radius:6px;background:rgba(248,113,113,0.13);border:1.5px solid rgba(248,113,113,0.45);white-space:nowrap"><span style="color:var(--red)">B/U</span><span style="opacity:0.35;font-size:8px">·</span><span style="color:var(--red);font-size:10px">YOPILDI</span></span>`;
     } else if (isFullTP) {
-      natBadge = `<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;background:rgba(34,211,165,0.12);border:1px solid rgba(34,211,165,0.4);white-space:nowrap"><span style="color:var(--green)">WIN</span><span style="opacity:0.35;font-size:8px">·</span><span style="color:var(--green);font-size:10px">YOPILDI</span></span>`;
+      natBadge = `<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:800;padding:1px 6px;border-radius:6px;background:rgba(34,211,165,0.12);border:1px solid rgba(34,211,165,0.4);white-space:nowrap"><span style="color:var(--green)">WIN</span><span style="opacity:0.35;font-size:8px">·</span><span style="color:var(--green);font-size:10px">YOPILDI</span></span>`;
     } else if (t.natija === 'Loss') {
-      natBadge = `<span style="display:inline-flex;align-items:center;gap:3px;font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;background:rgba(248,113,113,0.13);border:1px solid rgba(248,113,113,0.4);white-space:nowrap"><span style="color:var(--red)">LOSS</span><span style="opacity:0.35;font-size:8px">·</span><span style="color:var(--red);font-size:10px">YOPILDI</span></span>`;
+      natBadge = `<span style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:800;padding:1px 6px;border-radius:6px;background:rgba(248,113,113,0.13);border:1px solid rgba(248,113,113,0.4);white-space:nowrap"><span style="color:var(--red)">LOSS</span><span style="opacity:0.35;font-size:8px">·</span><span style="color:var(--red);font-size:10px">YOPILDI</span></span>`;
     } else if (isFullyOpenTrade) {
       // Hali yopilmagan savdo — statik "WIN" o'rniga jonli OCHIQ indikator
       const dotCol = hasLive ? pnlColor(livePnl) : 'var(--muted)';
-      natBadge = `<span style="display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:5px;background:rgba(148,163,184,0.12);border:1px solid rgba(148,163,184,0.35);white-space:nowrap">
+      natBadge = `<span style="display:inline-flex;align-items:center;gap:5px;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:5px;background:rgba(148,163,184,0.12);border:1px solid rgba(148,163,184,0.35);white-space:nowrap">
         <span style="width:6px;height:6px;border-radius:50%;background:${dotCol};display:inline-block;${hasLive ? 'animation:pulseLive 1.4s ease-in-out infinite' : ''}"></span>
         <span style="color:var(--text2)">OCHIQ</span>
         ${hasLive ? `<span style="opacity:0.35;font-size:8px">·</span><span style="color:${dotCol}">${livePnl >= 0 ? 'foydada' : 'zararda'}</span>` : ''}
       </span>`;
     } else {
-      natBadge = `<span style="font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;background:rgba(34,211,165,0.12);color:var(--green);border:1px solid rgba(34,211,165,0.4)">WIN</span>`;
+      natBadge = `<span style="font-size:10px;font-weight:800;padding:1px 6px;border-radius:6px;background:rgba(34,211,165,0.12);color:var(--green);border:1px solid rgba(34,211,165,0.4)">WIN</span>`;
     }
     // MT5'dan (terminalning o'zida) avtomatik qo'shilgan, hali sababi/izohi
     // to'ldirilmagan yozuvlar uchun alohida (ogohlantiruvchi) fon rangi va yorliq —
@@ -5752,8 +5779,8 @@ function renderTrades() {
           ${partialBadge}
         </div>
         <div class="trade-actions">
-          <button class="action-btn" onclick="analyzeSingleTrade('${shotKey}', ${t.id})" title="AI orqali shu savdoni tahlil qilish">🤖</button>
-          <button class="action-btn" onclick="openManualShotModal('${shotKey}')" title="Kompyuter/EA o'chiq bo'lganda grafikni qo'lda skrinshot qilib biriktirish">📷</button>
+          <button class="action-btn" onclick="analyzeSingleTrade('${shotKey}', ${t.id})" title="AI orqali shu savdoni tahlil qilish" style="display:inline-flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="8" width="14" height="11" rx="2.5"/><path d="M12 8V5"/><circle cx="12" cy="3.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"/><path d="M9 16.3h6"/><line x1="2.2" y1="11.5" x2="5" y2="11.5"/><line x1="19" y1="11.5" x2="21.8" y2="11.5"/></svg></button>
+          <button class="action-btn" onclick="openManualShotModal('${shotKey}')" title="Kompyuter/EA o'chiq bo'lganda grafikni qo'lda skrinshot qilib biriktirish" style="display:inline-flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.4"/></svg></button>
           <button class="action-btn" onclick="openModal(${t.id})">✏️</button>
           <button class="action-btn" onclick="askDelete(${t.id})">🗑</button>
         </div>
