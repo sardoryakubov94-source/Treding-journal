@@ -406,6 +406,18 @@
     appId: "1:408641929345:web:a7933bc86cc6647aaa8d80"
   };
 
+  // 🤖 AI TRADING ANALYST — Cloudflare Worker orqali ishlaydi (API kalit
+  // brauzerda emas, Worker serverida saqlanadi). "ai-analyst-worker.js"
+  // faylini Cloudflare Workers'ga deploy qilgach, quyidagi ikkalasini
+  // to'ldiring:
+  //   workerUrl  — Worker manzilingiz + "/analyze" (masalan:
+  //                "https://ai-analyst.SIZNING-NICK.workers.dev/analyze")
+  //   appSecret  — Workerdagi APP_SECRET bilan AYNAN bir xil maxfiy so'z
+  const AI_ANALYST_CONFIG = {
+    workerUrl: "https://ai-analyst.sardoryakubov94.workers.dev/analyze",
+    appSecret: "Sar.2412059"
+  };
+
   // Firebase Auth (Google Sign-In) + har bir foydalanuvchiga 6 xonali
   // shaxsiy kod biriktirish. Kod Firestore'da /users/{kod} hujjatining
   // ID'si sifatida ishlatiladi — MT5'dagi EA ham AYNAN shu kodni
@@ -1129,6 +1141,8 @@
       premium_feat3_desc: "Bir nechta MT5 hisoblaringizni bitta jurnalda birlashtirib yuritish, shuningdek turli strategiyalar (masalan, scalping va swing) bo'yicha alohida jurnal yuritish imkoniyati.",
       premium_feat4_title: "Ma'lumotlarni bulutda saqlash",
       premium_feat4_desc: "Barcha ma'lumotlaringiz bulutda xavfsiz saqlanadi — telefoningizni almashtirsangiz ham, Gmail hisobingiz orqali kirib, barcha ma'lumotlaringizni to'liq tiklashingiz mumkin.",
+      premium_feat5_title: "🤖 AI Tahlilchi (AI Analyst)",
+      premium_feat5_desc: "Sun'iy intellekt yordamchisi savdolaringizni (kunlik/haftalik/oylik va har bir savdo alohida) tahlil qilib, kuchli tomonlar, xatolar va aniq tavsiyalarni o'z ichiga olgan tuzilgan hisobot beradi — bu funksiya faqat Premium foydalanuvchilar uchun mavjud.",
       premium_tagline: "Savdolaringizni yanada xavfsiz va nazoratli boshqaring 🔥",
       guide_title: "📖 Indikatorni MT5'ga o'rnatish qo'llanmasi",
       guide_step1_title: "1-qadam. WebRequest ruxsatini yoqish",
@@ -1200,7 +1214,33 @@
       onb4_title: "Analiz va Kalendar",
       onb4_desc: "Har bir savdo tahlil qilinadi, Kalendar orqali kun-ma-kun va oy-ma-oy foyda hamda zararlaringiz haqida to'liq ma'lumot saqlanib boradi.",
       onb5_title: "Ongli savdo — sabab talab qilinadi",
-      onb5_desc: "Yangi ochilayotgan bitimlarni aniq sabablarsiz ochib bo'lmaydi — bu his-tuyg'ularga asoslangan savdolarning oldini oladi va intizomni saqlaydi."
+      onb5_desc: "Yangi ochilayotgan bitimlarni aniq sabablarsiz ochib bo'lmaydi — bu his-tuyg'ularga asoslangan savdolarning oldini oladi va intizomni saqlaydi.",
+      onb6_title: "🤖 AI Tahlilchi (AI Analyst)",
+      onb6_desc: "Sun'iy intellekt savdolaringizni kunlik/haftalik/oylik va har bir savdo alohida tahlil qilib, kuchli tomonlar, xatolar va aniq tavsiyalar beradi. Bu — Premium xususiyat: undan foydalanish uchun Premium obunani rasmiylashtirish kerak bo'ladi.",
+
+      stat_jami_savdolar: "Jami Savdolar", stat_jami_pnl: "Jami P&L", stat_win_rate: "Win Rate",
+      stat_win_loss: "Win / Loss", stat_joriy_balans: "Joriy Balans", stat_roi: "ROI",
+      stat_max_dd: "Max Drawdown", stat_ortacha_win: "O'rtacha Win", stat_ortacha_loss: "O'rtacha Loss",
+      stat_eng_yaxshi: "Eng Yaxshi", stat_eng_yomon: "Eng Yomon", stat_depozit_osish: "Depozitdan o'sish",
+      stat_yuqoridan: "% yuqoridan", stat_win_short: " win / ", stat_loss_short: " loss",
+
+      jurnal_close_all: "🔒 Barcha ochiq savdolarni yopish", jurnal_close_all_mt5: " — MT5'da ham",
+      filter_barcha_instrument: "Barcha instrument", filter_barcha_natija: "Barcha natija",
+      filter_win: "Win", filter_loss: "Loss", filter_bu: "B/U", filter_ochiq: "Ochiq",
+
+      dash_equity_curve: "Equity Curve", dash_winloss_nisbati: "Win / Loss Nisbati",
+
+      analiz_ai_title: "🤖 AI Trading Analyst",
+      analiz_ai_desc: "Savdolaringizni AI tahlil qiladi: kuchli/zaif tomonlar, xatolar (revenge trading, FOMO, overtrading, SL/TP bilan bog'liq muammolar va h.k.), eng samarali setup va tavsiyalar. AI hech qachon savdo ochmaydi/yopmaydi va sizning o'rningizga qaror qabul qilmaydi — faqat mavjud jurnal ma'lumotlarini tahlil qilib xulosa beradi.",
+      analiz_btn_daily: "📅 Kunlik", analiz_btn_weekly: "📆 Haftalik", analiz_btn_monthly: "🗓 Oylik",
+      analiz_pnl_grafigi: "Foyda / Zarar Grafigi", analiz_instrument_boyicha: "Instrument bo'yicha",
+      analiz_sabab_boyicha: "Sabab bo'yicha",
+
+      cal_oylik_pnl: "Oylik P&L", cal_savdolar: "Savdolar", cal_win_rate: "Win Rate",
+      cal_wd_du: "Du", cal_wd_se: "Se", cal_wd_ch: "Ch", cal_wd_pa: "Pa", cal_wd_ju: "Ju", cal_wd_sh: "Sh", cal_wd_ya: "Ya",
+      cal_yillik_xulosa: "📆 Yillik Xulosa",
+
+      chart_yuklanmoqda: "Yuklanmoqda..."
     },
     ru: {
       nav_jurnal: "Журнал", nav_dash: "Дэш", nav_analiz: "Анализ", nav_kalendar: "Календарь",
@@ -1227,6 +1267,8 @@
       premium_feat3_desc: "Ведение нескольких счетов MT5 в одном журнале, а также отдельных журналов по разным стратегиям (например, скальпинг и свинг).",
       premium_feat4_title: "Хранение данных в облаке",
       premium_feat4_desc: "Все ваши данные надёжно хранятся в облаке — даже при смене телефона вы можете войти через свой аккаунт Gmail и полностью восстановить все данные.",
+      premium_feat5_title: "🤖 AI Аналитик (AI Analyst)",
+      premium_feat5_desc: "Помощник на основе искусственного интеллекта анализирует ваши сделки (по дням/неделям/месяцам, а также каждую сделку отдельно) и даёт структурированный отчёт с сильными сторонами, ошибками и конкретными рекомендациями — эта функция доступна только для Premium-пользователей.",
       premium_tagline: "Управляйте своими сделками ещё безопаснее и увереннее 🔥",
       guide_title: "📖 Инструкция по установке индикатора в MT5",
       guide_step1_title: "Шаг 1. Разрешить WebRequest",
@@ -1298,7 +1340,33 @@
       onb4_title: "Анализ и Календарь",
       onb4_desc: "Каждая сделка анализируется, а через Календарь сохраняется полная информация о прибыли и убытках день за днём и месяц за месяцем.",
       onb5_title: "Осознанная торговля — нужна причина",
-      onb5_desc: "Новую сделку нельзя открыть без чётких причин — это предотвращает эмоциональную торговлю и сохраняет дисциплину."
+      onb5_desc: "Новую сделку нельзя открыть без чётких причин — это предотвращает эмоциональную торговлю и сохраняет дисциплину.",
+      onb6_title: "🤖 AI Аналитик (AI Analyst)",
+      onb6_desc: "Искусственный интеллект анализирует ваши сделки по дням/неделям/месяцам, а также каждую сделку отдельно, и даёт сильные стороны, ошибки и конкретные рекомендации. Это Premium-функция: для использования потребуется оформить Premium-подписку.",
+
+      stat_jami_savdolar: "Всего сделок", stat_jami_pnl: "Общий P&L", stat_win_rate: "Win Rate",
+      stat_win_loss: "Win / Loss", stat_joriy_balans: "Текущий баланс", stat_roi: "ROI",
+      stat_max_dd: "Макс. просадка", stat_ortacha_win: "Средний Win", stat_ortacha_loss: "Средний Loss",
+      stat_eng_yaxshi: "Лучшая сделка", stat_eng_yomon: "Худшая сделка", stat_depozit_osish: "Рост от депозита",
+      stat_yuqoridan: "% от максимума", stat_win_short: " win / ", stat_loss_short: " loss",
+
+      jurnal_close_all: "🔒 Закрыть все открытые сделки", jurnal_close_all_mt5: " — также в MT5",
+      filter_barcha_instrument: "Все инструменты", filter_barcha_natija: "Все результаты",
+      filter_win: "Win", filter_loss: "Loss", filter_bu: "Б/У", filter_ochiq: "Открыта",
+
+      dash_equity_curve: "Кривая доходности", dash_winloss_nisbati: "Соотношение Win / Loss",
+
+      analiz_ai_title: "🤖 AI Trading Analyst",
+      analiz_ai_desc: "ИИ анализирует ваши сделки: сильные/слабые стороны, ошибки (реванш-торговля, FOMO, овертрейдинг, проблемы со SL/TP и т.д.), самый эффективный сетап и рекомендации. ИИ никогда не открывает/закрывает сделки и не принимает решения за вас — только анализирует имеющиеся данные журнала и даёт заключение.",
+      analiz_btn_daily: "📅 За день", analiz_btn_weekly: "📆 За неделю", analiz_btn_monthly: "🗓 За месяц",
+      analiz_pnl_grafigi: "График прибыли / убытка", analiz_instrument_boyicha: "По инструментам",
+      analiz_sabab_boyicha: "По причинам",
+
+      cal_oylik_pnl: "Мес. P&L", cal_savdolar: "Сделок", cal_win_rate: "Win Rate",
+      cal_wd_du: "Пн", cal_wd_se: "Вт", cal_wd_ch: "Ср", cal_wd_pa: "Чт", cal_wd_ju: "Пт", cal_wd_sh: "Сб", cal_wd_ya: "Вс",
+      cal_yillik_xulosa: "📆 Годовой итог",
+
+      chart_yuklanmoqda: "Загрузка..."
     }
   };
 
@@ -1340,6 +1408,9 @@
       ruBtn.style.cssText += (lang === 'ru' ? active : inactive);
     }
     if (typeof renderKnownAccountsList === 'function') renderKnownAccountsList();
+    if (typeof renderQuickStats === 'function') renderQuickStats();
+    if (typeof renderDash === 'function') renderDash();
+    if (typeof renderKalendar === 'function') renderKalendar();
     adjustNavTabLabels();
   }
 
@@ -1385,7 +1456,9 @@
     { color: '#a78bfa', titleKey: 'onb4_title', descKey: 'onb4_desc',
       svg: '<rect x="4" y="5.5" width="16" height="15" rx="2.5"/><line x1="4" y1="10" x2="20" y2="10"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><circle cx="8.5" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="12" cy="14" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="14" r="1" fill="currentColor" stroke="none"/>' },
     { color: '#fb7185', titleKey: 'onb5_title', descKey: 'onb5_desc',
-      svg: '<path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3Z"/><path d="m9 12 2 2 4-4"/>' }
+      svg: '<path d="M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3Z"/><path d="m9 12 2 2 4-4"/>' },
+    { color: '#fbbf24', titleKey: 'onb6_title', descKey: 'onb6_desc',
+      svg: '<rect x="3" y="11" width="18" height="9" rx="2"/><circle cx="12" cy="7" r="3"/><line x1="12" y1="10" x2="12" y2="11"/><circle cx="8.5" cy="15.5" r="1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="15.5" r="1" fill="currentColor" stroke="none"/>' }
   ];
   const ONBOARDING_SEEN_KEY = 'tj_onboarding_seen';
   let onbIndex = 0;
@@ -1530,23 +1603,23 @@
 <!-- JURNAL -->
 <div id="page-jurnal" class="page active">
   <div id="jurnal-balans-bar" style="display:none;background:var(--bg3);border:1.5px solid rgba(34,211,165,0.45);border-radius:10px;padding:10px 14px;margin-bottom:10px;display:none;align-items:center;justify-content:space-between">
-    <div style="font-size:11px;color:var(--muted)">Joriy Balans</div>
+    <div style="font-size:11px;color:var(--muted)" data-i18n="stat_joriy_balans">Joriy Balans</div>
     <div id="jb-val" style="font-size:16px;font-weight:700;font-family:monospace"></div>
   </div>
   <div class="stat-grid" id="quick-stats"></div>
   <div class="filter-row">
     <select class="filter-select" id="filter-inst" onchange="renderTrades()">
-      <option value="">Barcha instrument</option>
+      <option value="" data-i18n="filter_barcha_instrument">Barcha instrument</option>
       <option>XAUUSD</option><option>EURUSD</option><option>GBPUSD</option>
       <option>USDJPY</option><option>BTCUSD</option><option>ETHUSD</option>
       <option>US30</option><option>NAS100</option><option>SP500</option><option>USOIL</option>
     </select>
     <select class="filter-select" id="filter-nat" onchange="renderTrades()">
-      <option value="">Barcha natija</option>
-      <option>Win</option><option>Loss</option><option value="BU">B/U</option><option value="OCHIQ">Ochiq</option>
+      <option value="" data-i18n="filter_barcha_natija">Barcha natija</option>
+      <option data-i18n="filter_win">Win</option><option data-i18n="filter_loss">Loss</option><option value="BU" data-i18n="filter_bu">B/U</option><option value="OCHIQ" data-i18n="filter_ochiq">Ochiq</option>
     </select>
   </div>
-  <button id="close-all-btn" onclick="closeAllOpenTrades()" style="display:none;width:100%;margin:0 0 10px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.4);color:var(--red);border-radius:9px;padding:9px;font-size:12px;font-weight:700;cursor:pointer">🔒 Barcha ochiq savdolarni yopish (<span id="close-all-count">0</span>) — MT5'da ham</button>
+  <button id="close-all-btn" onclick="closeAllOpenTrades()" style="display:none;width:100%;margin:0 0 10px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.4);color:var(--red);border-radius:9px;padding:9px;font-size:12px;font-weight:700;cursor:pointer"><span data-i18n="jurnal_close_all">🔒 Barcha ochiq savdolarni yopish</span> (<span id="close-all-count">0</span>)<span data-i18n="jurnal_close_all_mt5"> — MT5'da ham</span></button>
   <div id="trades-list"></div>
 </div>
 
@@ -1554,7 +1627,7 @@
 <div id="page-dashboard" class="page">
   <!-- Balans banner -->
   <div id="balans-banner" style="display:none;background:linear-gradient(135deg,#0d2a1a,#0a1f2e);border:1px solid rgba(34,211,165,0.25);border-radius:14px;padding:16px;margin-bottom:12px">
-    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Joriy Balans</div>
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px" data-i18n="stat_joriy_balans">Joriy Balans</div>
     <div id="bb-balans" style="font-size:30px;font-weight:700;font-family:monospace;color:var(--green)"></div>
     <div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap">
       <div><div style="font-size:9px;color:var(--muted)">DEPOZIT</div><div id="bb-depozit" style="font-size:13px;font-weight:700;color:var(--text3)"></div></div>
@@ -1565,11 +1638,11 @@
   </div>
   <div class="stat-grid" id="dash-stats"></div>
   <div class="chart-box">
-    <div class="chart-title">Equity Curve</div>
+    <div class="chart-title" data-i18n="dash_equity_curve">Equity Curve</div>
     <svg class="chart-svg" id="equity-chart" viewBox="0 0 320 90"></svg>
   </div>
   <div class="chart-box">
-    <div class="chart-title">Win / Loss Nisbati</div>
+    <div class="chart-title" data-i18n="dash_winloss_nisbati">Win / Loss Nisbati</div>
     <div class="win-bar-wrap"><div class="win-bar-inner" id="win-bar"></div></div>
     <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px">
       <span id="wl-wins" class="green"></span>
@@ -1580,17 +1653,32 @@
 
 <!-- ANALIZ -->
 <div id="page-analiz" class="page">
+  <div class="chart-box" id="ai-analyst-box">
+    <div class="chart-title" data-i18n="analiz_ai_title">🤖 AI Trading Analyst</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5" data-i18n="analiz_ai_desc">
+      Savdolaringizni AI tahlil qiladi: kuchli/zaif tomonlar, xatolar (revenge trading, FOMO,
+      overtrading, SL/TP bilan bog'liq muammolar va h.k.), eng samarali setup va tavsiyalar.
+      AI hech qachon savdo ochmaydi/yopmaydi va sizning o'rningizga qaror qabul qilmaydi —
+      faqat mavjud jurnal ma'lumotlarini tahlil qilib xulosa beradi.
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:10px">
+      <button class="action-btn" style="flex:1;padding:9px 4px;font-size:11px" onclick="runPeriodAnalysis('daily')" data-i18n="analiz_btn_daily">📅 Kunlik</button>
+      <button class="action-btn" style="flex:1;padding:9px 4px;font-size:11px" onclick="runPeriodAnalysis('weekly')" data-i18n="analiz_btn_weekly">📆 Haftalik</button>
+      <button class="action-btn" style="flex:1;padding:9px 4px;font-size:11px" onclick="runPeriodAnalysis('monthly')" data-i18n="analiz_btn_monthly">🗓 Oylik</button>
+    </div>
+    <div id="ai-analyst-result" style="font-size:12px;line-height:1.6;color:var(--text2)"></div>
+  </div>
   <div class="chart-box">
-    <div class="chart-title">Foyda / Zarar Grafigi</div>
+    <div class="chart-title" data-i18n="analiz_pnl_grafigi">Foyda / Zarar Grafigi</div>
     <svg id="pnl-graph" width="100%" viewBox="0 0 320 120" style="display:block;overflow:visible"></svg>
     <div id="pnl-graph-legend" style="display:flex;gap:12px;margin-top:8px;font-size:11px;flex-wrap:wrap"></div>
   </div>
   <div class="chart-box">
-    <div class="chart-title">Instrument bo'yicha</div>
+    <div class="chart-title" data-i18n="analiz_instrument_boyicha">Instrument bo'yicha</div>
     <div id="inst-list"></div>
   </div>
   <div class="chart-box">
-    <div class="chart-title">Sabab bo'yicha</div>
+    <div class="chart-title" data-i18n="analiz_sabab_boyicha">Sabab bo'yicha</div>
     <div id="sabab-list"></div>
   </div>
 </div>
@@ -1608,31 +1696,31 @@
     </div>
     <div class="cal-summary">
       <div class="cal-sum-card">
-        <div class="cal-sum-label">Oylik P&L</div>
+        <div class="cal-sum-label" data-i18n="cal_oylik_pnl">Oylik P&L</div>
         <div class="cal-sum-val" id="cal-monthly-pnl">$0.00</div>
       </div>
       <div class="cal-sum-card">
-        <div class="cal-sum-label">Savdolar</div>
+        <div class="cal-sum-label" data-i18n="cal_savdolar">Savdolar</div>
         <div class="cal-sum-val" id="cal-monthly-count">0</div>
       </div>
       <div class="cal-sum-card">
-        <div class="cal-sum-label">Win Rate</div>
+        <div class="cal-sum-label" data-i18n="cal_win_rate">Win Rate</div>
         <div class="cal-sum-val" id="cal-monthly-wr">0%</div>
       </div>
     </div>
     <div class="cal-weekdays">
-      <div class="cal-wd">Du</div>
-      <div class="cal-wd">Se</div>
-      <div class="cal-wd">Ch</div>
-      <div class="cal-wd">Pa</div>
-      <div class="cal-wd">Ju</div>
-      <div class="cal-wd" style="color:var(--gold)">Sh</div>
-      <div class="cal-wd" style="color:var(--red)">Ya</div>
+      <div class="cal-wd" data-i18n="cal_wd_du">Du</div>
+      <div class="cal-wd" data-i18n="cal_wd_se">Se</div>
+      <div class="cal-wd" data-i18n="cal_wd_ch">Ch</div>
+      <div class="cal-wd" data-i18n="cal_wd_pa">Pa</div>
+      <div class="cal-wd" data-i18n="cal_wd_ju">Ju</div>
+      <div class="cal-wd" style="color:var(--gold)" data-i18n="cal_wd_sh">Sh</div>
+      <div class="cal-wd" style="color:var(--red)" data-i18n="cal_wd_ya">Ya</div>
     </div>
     <div class="cal-grid" id="cal-grid"></div>
   </div>
   <div class="year-box">
-    <div class="year-box-title">&#128198; Yillik Xulosa &mdash; <span id="year-label"></span></div>
+    <div class="year-box-title"><span data-i18n="cal_yillik_xulosa">&#128198; Yillik Xulosa</span> &mdash; <span id="year-label"></span></div>
     <div class="year-months" id="year-months"></div>
   </div>
 </div>
@@ -1655,7 +1743,7 @@
     </select>
   </div>
   <div style="position:relative;width:100%;height:70vh;border-radius:12px;overflow:hidden;background:#131722;border:1px solid var(--border2)">
-    <div id="chart-page-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px">Yuklanmoqda...</div>
+    <div id="chart-page-loading" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px" data-i18n="chart_yuklanmoqda">Yuklanmoqda...</div>
     <iframe id="chart-page-iframe" style="width:100%;height:100%;border:none;display:none" allowfullscreen></iframe>
   </div>
 </div>
@@ -2079,6 +2167,88 @@
   </div>
 </div>
 
+<!-- TRADE REPLAY OYNASI -->
+<!-- MT5 EA'dagi "📸" tugmasi orqali saqlangan chart screenshotlarini
+     bosqichma-bosqich (open -> during -> exit) ko'rish uchun -->
+<div class="overlay" id="replay-overlay" onclick="closeTradeReplay(event)">
+  <div class="modal" style="max-height:92vh;padding:0;display:flex;flex-direction:column">
+    <div class="sabab-fs-head" style="padding:14px 14px 8px">
+      <div class="modal-title" id="replay-title" style="margin-bottom:0">🎬 Trade Replay</div>
+      <button class="sabab-fs-close" onclick="closeTradeReplay()">✕</button>
+    </div>
+    <div style="flex:1;min-height:0;display:flex;flex-direction:column;padding:0 14px">
+      <div style="position:relative;background:#000;border-radius:10px;overflow:hidden;flex-shrink:0">
+        <img id="replay-image" style="width:100%;display:block;max-height:46vh;object-fit:contain;background:#000" />
+        <button onclick="replayStep(-1)" style="position:absolute;left:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:none;background:rgba(0,0,0,0.55);color:#fff;font-size:16px;cursor:pointer">‹</button>
+        <button onclick="replayStep(1)" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:none;background:rgba(0,0,0,0.55);color:#fff;font-size:16px;cursor:pointer">›</button>
+        <span id="replay-stage-badge" style="position:absolute;top:8px;left:8px;font-size:10px;font-weight:800;padding:3px 9px;border-radius:6px;background:rgba(0,0,0,0.55);color:#fff;text-transform:uppercase;letter-spacing:0.5px"></span>
+        <span id="replay-counter" style="position:absolute;top:8px;right:8px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;background:rgba(0,0,0,0.55);color:#fff"></span>
+      </div>
+      <div id="replay-meta" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 2px;font-size:11px;color:var(--text2)"></div>
+      <div id="replay-thumbs" style="display:flex;gap:5px;overflow-x:auto;padding:2px 2px 12px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- QO'LDA SCREENSHOT MODALI -->
+<!-- MT5 kompyuter/VPS o'chiq bo'lgani uchun EA "📸" tugmasi ishlamagan
+     paytlarda ishlatiladi. Treyder grafikni (jurnaldagi Chart bo'limi,
+     MT5 mobil ilovasi va h.k.) o'zi oddiy skrinshot qilib, shu yerdan
+     tanlab yuklaydi. Rasm EA yozadigan aynan o'sha "mt5_screenshots"
+     to'plamiga saqlanadi — shu sabab qo'shimcha kodsiz Trade Replay
+     va savdo kartasida EA'nikidek ko'rinadi. -->
+<div class="overlay" id="manual-shot-overlay" onclick="closeManualShotModal(event)">
+  <div class="modal" style="max-height:92vh;display:flex;flex-direction:column">
+    <div class="modal-handle"></div>
+    <div class="sabab-fs-head" style="padding:0 0 8px">
+      <div class="modal-title" style="margin-bottom:0">📷 Qo'lda screenshot qo'shish</div>
+      <button class="sabab-fs-close" onclick="closeManualShotModal()">✕</button>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+      Kompyuter/VPS o'chiq bo'lganda EA screenshot ololmaydi. Bunday holda grafikni
+      (Chart bo'limi yoki MT5 ilovasi) o'zingiz skrinshot qilib galereyaga saqlang,
+      so'ng shu yerdan tanlang — u Trade Replay'ga EA'nikidek qo'shiladi.
+    </div>
+
+    <div style="display:flex;gap:6px;margin-bottom:10px" id="manual-shot-stage-btns">
+      <button type="button" class="action-btn manual-stage-btn" data-stage="open" onclick="selectManualShotStage('open')" style="flex:1;padding:8px 4px;font-size:11px">🟢 Ochilganda</button>
+      <button type="button" class="action-btn manual-stage-btn" data-stage="during" onclick="selectManualShotStage('during')" style="flex:1;padding:8px 4px;font-size:11px">🟡 Davomida</button>
+      <button type="button" class="action-btn manual-stage-btn" data-stage="exit" onclick="selectManualShotStage('exit')" style="flex:1;padding:8px 4px;font-size:11px">🔴 Yopilganda</button>
+    </div>
+
+    <div id="manual-shot-preview" style="position:relative;background:#000;border-radius:10px;overflow:hidden;min-height:120px;display:flex;align-items:center;justify-content:center;margin-bottom:10px">
+      <span style="color:var(--muted);font-size:12px">Rasm tanlanmagan</span>
+    </div>
+
+    <input type="file" id="manual-shot-file" accept="image/*" style="display:none" onchange="handleManualShotFile(event)">
+    <button type="button" class="action-btn" style="width:100%;padding:11px;font-size:13px;margin-bottom:8px" onclick="document.getElementById('manual-shot-file').click()">🖼 Galereyadan rasm tanlash</button>
+
+    <div style="display:flex;gap:6px;margin-bottom:6px">
+      <input type="text" id="manual-shot-tf" class="form-input" placeholder="TF (masalan M15)" style="flex:1;font-size:12px;padding:8px">
+      <input type="text" id="manual-shot-price" class="form-input" placeholder="Narx" style="flex:1;font-size:12px;padding:8px">
+    </div>
+
+    <div id="manual-shot-status" style="font-size:11px;color:var(--muted);min-height:16px;margin-bottom:6px"></div>
+
+    <button type="button" onclick="saveManualShot()" style="width:100%;padding:13px;border-radius:10px;border:none;background:linear-gradient(135deg,var(--green),#14b8a6);color:#000;font-size:14px;font-weight:700;cursor:pointer">💾 Jurnalga saqlash</button>
+  </div>
+</div>
+
+<!-- AI SAVDO TAHLILI MODALI -->
+<!-- Bitta savdoni AI (Claude, Cloudflare Worker orqali) tahlil qilib beradi.
+     AI hech qachon savdo ochish/yopishni tavsiya qilmaydi — faqat retrospektiv
+     tahlil va xulosa beradi. -->
+<div class="overlay" id="ai-trade-overlay" onclick="closeAiTradeModal(event)">
+  <div class="modal" style="max-height:85vh;display:flex;flex-direction:column">
+    <div class="modal-handle"></div>
+    <div class="sabab-fs-head" style="padding:0 0 8px">
+      <div class="modal-title" style="margin-bottom:0">🤖 AI Savdo Tahlili</div>
+      <button class="sabab-fs-close" onclick="closeAiTradeModal()">✕</button>
+    </div>
+    <div id="ai-trade-result" style="font-size:12px;line-height:1.65;color:var(--text2);overflow-y:auto;flex:1"></div>
+  </div>
+</div>
+
 <!-- DELETE MODAL -->
 <!-- Chiqish tasdiq modali -->
 <div class="overlay" id="exit-overlay">
@@ -2170,6 +2340,20 @@
           </div>
           <div style="font-size:12.5px;line-height:1.55;color:var(--text2);text-align:left">
             <b data-i18n="premium_feat4_title">Ma'lumotlarni bulutda saqlash</b> — <span data-i18n="premium_feat4_desc">Barcha ma'lumotlaringiz bulutda xavfsiz saqlanadi — telefoningizni almashtirsangiz ham, Gmail hisobingiz orqali kirib, barcha ma'lumotlaringizni to'liq tiklashingiz mumkin.</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div style="flex:0 0 auto;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:9px;background:linear-gradient(135deg, rgba(251,191,36,0.18), rgba(251,191,36,0.05));border:1px solid rgba(251,191,36,0.3)">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="9" rx="2"/>
+              <circle cx="12" cy="7" r="3"/>
+              <line x1="12" y1="10" x2="12" y2="11"/>
+              <circle cx="8.5" cy="15.5" r="1" fill="var(--gold)" stroke="none"/>
+              <circle cx="15.5" cy="15.5" r="1" fill="var(--gold)" stroke="none"/>
+            </svg>
+          </div>
+          <div style="font-size:12.5px;line-height:1.55;color:var(--text2);text-align:left">
+            <b data-i18n="premium_feat5_title">🤖 AI Tahlilchi (AI Analyst)</b> — <span data-i18n="premium_feat5_desc">Sun'iy intellekt yordamchisi savdolaringizni (kunlik/haftalik/oylik va har bir savdo alohida) tahlil qilib, kuchli tomonlar, xatolar va aniq tavsiyalarni o'z ichiga olgan tuzilgan hisobot beradi — bu funksiya faqat Premium foydalanuvchilar uchun mavjud.</span>
           </div>
         </div>
       </div>
@@ -2322,6 +2506,16 @@ let mt5Unsub = null;
 // shu bilan "MT5 javobi jurnal yozuvidan tezroq kelib qolish" muammosi hal bo'ladi.
 let unmatchedMt5OpenEvents = {};
 
+// ============================================================
+// MT5 SCREENSHOT + TRADE REPLAY
+// EA'dagi "📸" tugmasi bosilganda yuborilgan chart rasmlari shu yerda
+// tradeTicket bo'yicha guruhlanib saqlanadi (savdo kartasida ko'rsatish
+// va "Trade Replay" oynasi uchun).
+// ============================================================
+let mt5ScreenshotsUnsub = null;
+let mt5ScreenshotsByTicket = {}; // { "<ticket>": [ {id, stage, capturedAt, imageBase64, ...}, ... ] }
+let tradeReplayState = { ticket: null, shots: [], index: 0 };
+
 function initMT5() {
   try {
     if (firebaseConfig.apiKey === "SIZNING_API_KEY") {
@@ -2342,6 +2536,7 @@ function initMT5() {
     setMT5StatusUI('connecting');
     listenMT5Events();
     listenEaHeartbeat();
+    listenMT5Screenshots();
     startMt5Heartbeat();
   } catch (e) {
     console.error('MT5 init xato:', e);
@@ -2453,6 +2648,7 @@ function toggleMt5Integration() {
     // Barcha MT5 tinglovchilarini to'xtatamiz
     if (mt5Unsub) { mt5Unsub(); mt5Unsub = null; }
     if (eaHeartbeatUnsub) { eaHeartbeatUnsub(); eaHeartbeatUnsub = null; }
+    if (mt5ScreenshotsUnsub) { mt5ScreenshotsUnsub(); mt5ScreenshotsUnsub = null; }
     if (mt5HeartbeatTimer) { clearInterval(mt5HeartbeatTimer); mt5HeartbeatTimer = null; }
     mt5Connected = false;
     lastEaPingMs = 0;
@@ -2648,6 +2844,509 @@ function listenMT5Events() {
     });
 }
 
+// MT5 EA'dagi "📸" tugmasi bosilganda yuborilgan chart screenshotlarini
+// tradeTicket bo'yicha guruhlab, xotirada saqlaydi. Bu ma'lumot savdo
+// kartasida "🎬 Trade Replay" tugmasi va rasmlar sonini ko'rsatish uchun
+// ishlatiladi. Screenshot avtomatik olinmaydi — faqat treyder o'zi
+// MT5'dagi tugmani bosganda keladi.
+function listenMT5Screenshots() {
+  if (!mt5db) return;
+  if (mt5ScreenshotsUnsub) mt5ScreenshotsUnsub();
+  mt5ScreenshotsByTicket = {};
+  mt5ScreenshotsUnsub = mt5db.collection('users').doc(userCode).collection('mt5_screenshots')
+    .orderBy('capturedAt', 'desc')
+    .limit(500)
+    .onSnapshot((snapshot) => {
+      const grouped = {};
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        if (!d) return;
+        const key = String(d.tradeTicket || '0');
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push({ id: doc.id, ...d });
+      });
+      // Har bir guruhni vaqt bo'yicha ESKIDAN YANGIGA tartiblaymiz (Replay uchun tabiiy tartib)
+      Object.keys(grouped).forEach(k => {
+        grouped[k].sort((a, b) => (a.capturedAt || 0) - (b.capturedAt || 0));
+      });
+      mt5ScreenshotsByTicket = grouped;
+      renderAll();
+      // Agar Replay oynasi ochiq bo'lsa, undagi ro'yxatni ham yangilaymiz
+      if (tradeReplayState.ticket) refreshOpenTradeReplay();
+    }, (err) => {
+      console.error('MT5 screenshot tinglashda xato:', err);
+    });
+}
+
+// ============================================================
+// TRADE REPLAY OYNASI
+// ============================================================
+const REPLAY_STAGE_LABEL = { open: 'OCHILDI', during: 'DAVOMIDA', exit: 'YOPILDI', unlinked: "BOG'LANMAGAN" };
+const REPLAY_STAGE_COLOR = { open: '#22d3a5', during: '#fbbf24', exit: '#f87171', unlinked: '#94a3b8' };
+
+function openTradeReplay(ticket) {
+  const shots = mt5ScreenshotsByTicket[String(ticket)] || [];
+  if (!shots.length) return;
+  tradeReplayState = { ticket: String(ticket), shots, index: shots.length - 1 }; // oxirgi (eng yangi) holatdan boshlanadi
+  document.getElementById('replay-overlay').classList.add('open');
+  renderReplayFrame();
+}
+
+function refreshOpenTradeReplay() {
+  const shots = mt5ScreenshotsByTicket[tradeReplayState.ticket] || [];
+  if (!shots.length) { closeTradeReplay(); return; }
+  // Joriy ko'rilayotgan rasmni (id bo'yicha) saqlab qolishga harakat qilamiz
+  const curId = tradeReplayState.shots[tradeReplayState.index] ? tradeReplayState.shots[tradeReplayState.index].id : null;
+  let idx = shots.findIndex(s => s.id === curId);
+  if (idx === -1) idx = shots.length - 1;
+  tradeReplayState.shots = shots;
+  tradeReplayState.index = idx;
+  renderReplayFrame();
+}
+
+function replayStep(dir) {
+  const n = tradeReplayState.shots.length;
+  if (!n) return;
+  tradeReplayState.index = Math.max(0, Math.min(n - 1, tradeReplayState.index + dir));
+  renderReplayFrame();
+}
+
+function renderReplayFrame() {
+  const { shots, index } = tradeReplayState;
+  if (!shots.length) return;
+  const s = shots[index];
+  document.getElementById('replay-image').src = 'data:image/png;base64,' + s.imageBase64;
+  const stage = s.stage || 'unlinked';
+  const badge = document.getElementById('replay-stage-badge');
+  badge.textContent = REPLAY_STAGE_LABEL[stage] || stage;
+  badge.style.color = REPLAY_STAGE_COLOR[stage] || '#fff';
+  document.getElementById('replay-counter').textContent = (index + 1) + ' / ' + shots.length;
+  const dt = s.capturedAt ? new Date(Number(s.capturedAt)) : null;
+  const timeStr = dt ? dt.toLocaleString() : '—';
+  document.getElementById('replay-title').textContent = '🎬 Trade Replay · ' + (s.symbol || '');
+  const pnlNum = typeof s.pnl === 'number' ? s.pnl : parseFloat(s.pnl || 0);
+  const pnlStr = (pnlNum >= 0 ? '+$' : '-$') + Math.abs(pnlNum).toFixed(2);
+  document.getElementById('replay-meta').innerHTML = `
+    <span>🕒 ${timeStr}</span>
+    <span>⏱ ${s.timeframe || '—'}</span>
+    <span>💰 Narx: ${s.price || '—'}</span>
+    <span style="color:var(--red)">SL: ${s.sl || '—'}</span>
+    <span style="color:var(--green)">TP: ${s.tp || '—'}</span>
+    <span>L: ${s.lot || '—'}</span>
+    <span style="color:${pnlNum >= 0 ? 'var(--green)' : 'var(--red)'};font-weight:700">${pnlStr}</span>
+    <span style="color:${s.source === 'manual' ? 'var(--gold)' : 'var(--muted)'}">${s.source === 'manual' ? '✋ Qo\'lda' : '🤖 EA'}</span>
+  `;
+  document.getElementById('replay-thumbs').innerHTML = shots.map((sh, i) => `
+    <img src="data:image/png;base64,${sh.imageBase64}" onclick="tradeReplayState.index=${i};renderReplayFrame()"
+      style="width:46px;height:32px;object-fit:cover;border-radius:5px;cursor:pointer;flex-shrink:0;border:2px solid ${i === index ? 'var(--green)' : 'var(--border2)'}" />
+  `).join('');
+}
+
+function closeTradeReplay(e) {
+  if (e && e.target !== document.getElementById('replay-overlay')) return;
+  document.getElementById('replay-overlay').classList.remove('open');
+  tradeReplayState = { ticket: null, shots: [], index: 0 };
+}
+
+// ============================================================
+// QO'LDA SCREENSHOT (EA ishlamayotgan payt uchun zaxira usul)
+// ============================================================
+// MT5 EA faqat kompyuter/VPS ochiq va EA ishlab turgandagina "📸" tugmasi
+// orqali screenshot oladi. Kompyuter o'chiq bo'lsa, bu funksiyalar orqali
+// treyder grafikni o'zi (OS skrinshoti bilan) suratga olib, galereyadan
+// tanlab, xuddi EA yozadigan "mt5_screenshots" to'plamiga qo'lda yozadi —
+// natijada Trade Replay va savdo kartasida EA'nikidan farqsiz ko'rinadi.
+let manualShotState = { ticket: null, trade: null, stage: 'during', base64: null };
+
+function openManualShotModal(ticket) {
+  const key = String(ticket);
+  const trade = trades.find(t => String(t.mt5Ticket || t.id) === key);
+  manualShotState = { ticket: key, trade: trade || null, stage: 'during', base64: null };
+  document.getElementById('manual-shot-preview').innerHTML = '<span style="color:var(--muted);font-size:12px">Rasm tanlanmagan</span>';
+  document.getElementById('manual-shot-file').value = '';
+  document.getElementById('manual-shot-status').textContent = '';
+  document.getElementById('manual-shot-tf').value = 'M15';
+  const liveP = trade ? liveInstrumentPrices[trade.instrument] : null;
+  const prefPrice = trade ? (trade.chiqish && parseFloat(trade.chiqish) > 0 ? trade.chiqish : (typeof liveP === 'number' ? liveP : trade.kirish)) : '';
+  document.getElementById('manual-shot-price').value = prefPrice || '';
+  const isStillOpen = trade && (!trade.chiqish || trade.chiqish == 0);
+  selectManualShotStage(isStillOpen ? 'during' : 'exit');
+  document.getElementById('manual-shot-overlay').classList.add('open');
+}
+
+function closeManualShotModal(e) {
+  if (e && e.target !== document.getElementById('manual-shot-overlay')) return;
+  document.getElementById('manual-shot-overlay').classList.remove('open');
+}
+
+function selectManualShotStage(stage) {
+  manualShotState.stage = stage;
+  document.querySelectorAll('.manual-stage-btn').forEach(btn => {
+    const on = btn.getAttribute('data-stage') === stage;
+    btn.style.background = on ? 'rgba(34,211,165,0.18)' : '';
+    btn.style.borderColor = on ? 'var(--green)' : '';
+  });
+}
+
+// Tanlangan rasmni o'qib, Firestore hujjat hajmi (~1MB) chegarasidan
+// xavfsiz pastda qolish uchun canvas orqali kichraytirib/siqib,
+// data: prefiksisiz base64 shaklga o'tkazadi.
+function handleManualShotFile(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('manual-shot-status');
+  statusEl.textContent = 'Rasm tayyorlanmoqda...';
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX_W = 1280;
+      const scale = img.width > MAX_W ? MAX_W / img.width : 1;
+      const w = Math.round(img.width * scale);
+      const h = Math.round(img.height * scale);
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+
+      let quality = 0.82;
+      let dataUrl = canvas.toDataURL('image/jpeg', quality);
+      while (dataUrl.length > 700000 && quality > 0.3) {
+        quality -= 0.12;
+        dataUrl = canvas.toDataURL('image/jpeg', quality);
+      }
+      if (dataUrl.length > 700000) {
+        statusEl.textContent = "⚠️ Rasm hali ham katta — boshqa (kichikroq) rasm tanlang.";
+        return;
+      }
+      manualShotState.base64 = dataUrl.split(',')[1];
+      document.getElementById('manual-shot-preview').innerHTML =
+        `<img src="${dataUrl}" style="width:100%;max-height:220px;object-fit:contain;display:block" />`;
+      statusEl.textContent = `Tayyor · ${Math.round(dataUrl.length / 1024)}KB`;
+    };
+    img.onerror = () => { statusEl.textContent = "⚠️ Rasmni o'qib bo'lmadi."; };
+    img.src = reader.result;
+  };
+  reader.onerror = () => { statusEl.textContent = "⚠️ Faylni o'qishda xato."; };
+  reader.readAsDataURL(file);
+}
+
+// Qo'lda tanlangan rasmni EA yozadigan aynan o'sha "mt5_screenshots"
+// to'plamiga yozadi (source:'manual' belgisi bilan) — shu sabab
+// listenMT5Screenshots() ushbu yozuvni ham avtomatik o'qib, Trade
+// Replay va savdo kartasidagi thumbnaillarga qo'shib beradi.
+function saveManualShot() {
+  if (!mt5db || !userCode) { alert("MT5/Firebase hali ulanmagan. Avval MT5 integratsiyani sozlang."); return; }
+  if (!manualShotState.base64) { alert("Avval rasm tanlang."); return; }
+  const trade = manualShotState.trade;
+  const statusEl = document.getElementById('manual-shot-status');
+  statusEl.textContent = 'Saqlanmoqda...';
+  const liveP = trade ? liveInstrumentPrices[trade.instrument] : null;
+  let pnlVal = 0;
+  if (trade) {
+    if (trade.chiqish && parseFloat(trade.chiqish) > 0) {
+      pnlVal = calcPnL(trade.instrument, trade.turi, trade.kirish, trade.chiqish, trade.lot);
+    } else if (typeof liveP === 'number') {
+      pnlVal = calcPnL(trade.instrument, trade.turi, trade.kirish, liveP, trade.lot);
+    }
+  }
+  const shotDoc = {
+    tradeTicket: manualShotState.ticket,
+    stage: manualShotState.stage,
+    capturedAt: Date.now(),
+    imageBase64: manualShotState.base64,
+    symbol: trade ? trade.instrument : '',
+    timeframe: (document.getElementById('manual-shot-tf').value || '').trim() || 'M15',
+    price: (document.getElementById('manual-shot-price').value || '').trim() || (trade ? (trade.chiqish || trade.kirish) : ''),
+    sl: trade ? (trade.sl || '') : '',
+    tp: trade ? (trade.tp || '') : '',
+    lot: trade ? trade.lot : '',
+    pnl: pnlVal,
+    source: 'manual'
+  };
+  mt5db.collection('users').doc(userCode).collection('mt5_screenshots').add(shotDoc)
+    .then(() => {
+      statusEl.textContent = '✅ Saqlandi';
+      setTimeout(() => closeManualShotModal(), 500);
+    })
+    .catch(err => {
+      console.error("Qo'lda screenshot saqlashda xato:", err);
+      statusEl.textContent = "⚠️ Saqlashda xato: " + (err && err.message ? err.message : '');
+    });
+}
+
+function closeAiTradeModal(e) {
+  if (e && e.target !== document.getElementById('ai-trade-overlay')) return;
+  document.getElementById('ai-trade-overlay').classList.remove('open');
+}
+
+// ============================================================
+// 🤖 AI TRADING ANALYST
+// ============================================================
+// MT5 → EA → Trade ma'lumotlari + Screenshot → Trading Journal → AI Analyst.
+// Bu bo'lim savdo (jurnal) ma'lumotlarini yig'ib, Cloudflare Worker orqali
+// Claude API'ga yuboradi va tahlil natijasini ko'rsatadi. Muhim shart: AI
+// hech qachon savdo ochmaydi/yopmaydi va treyder o'rniga qaror qabul
+// qilmaydi — bu tizim promptlar darajasida ham qat'iy talab qilinadi.
+
+const AI_SYSTEM_PROMPT_PERIOD = `Sen tajribali trading coach va tahlilchisan. Treyderning trading jurnalidagi savdo ma'lumotlarini tahlil qilasan (instrument, entry/exit, SL/TP, lot, risk, P/L, RR, davomiylik, setup/sabab va izohlar).
+
+QAT'IY QOIDALAR:
+- Sen HECH QACHON savdo ochish/yopishni yoki aniq buy/sell signalini tavsiya qilmaysan.
+- Sen treyder o'rniga qaror qabul qilmaysan — faqat allaqachon amalga oshirilgan (yopilgan/ochiq) savdolar tarixini tahlil qilib xulosa berasan.
+- Javobni FAQAT o'zbek tilida, quyidagi 6 ta bo'lim sarlavhasi bilan, aynan shu tartibda va aynan shu emoji+matn bilan yoz (har biri alohida qatorda boshlansin):
+
+🟢 Kuchli tomonlar
+🔴 Asosiy xatolar
+📊 Statistikalar
+🎯 Eng samarali setup
+⚠️ Eng zararli odat
+💡 Keyingi davr uchun tavsiyalar
+
+Har bir bo'limda 2-4 ta qisqa, aniq va amaliy band yoz. Ma'lumotlar asosida revenge trading, FOMO, overtrading, SL/TP bilan bog'liq xatolar (masalan SLni kengaytirish yoki TPni erta yopish belgilari), riskni oshirish, rejaga mos/nomos entry kabi holatlarni aniqlab, iloji bo'lsa aniq sana/instrument bilan misol keltir. Agar "OLDINGI HISOBOTLAR" bo'limida tendensiya ko'rinsa (masalan bir xil xato bir necha davr davomida takrorlanmoqda), buni alohida ta'kidla.`;
+
+const AI_SYSTEM_PROMPT_SINGLE = `Sen tajribali trading coach va tahlilchisan. Quyida bitta savdoning to'liq ma'lumotlari (va agar mavjud bo'lsa, ochilish/yopilish paytidagi grafik skrinshotlari) berilgan.
+
+QAT'IY QOIDALAR:
+- Sen HECH QACHON savdo ochish/yopishni tavsiya qilmaysan va treyder o'rniga qaror qabul qilmaysan.
+- Faqat berilgan (allaqachon amalga oshirilgan) savdoni retrospektiv tahlil qilasan.
+
+Javobni FAQAT o'zbek tilida, qisqa va aniq, quyidagi tuzilishda yoz:
+✅ Setup rejaga mosmi?
+🔍 Kuzatilgan holatlar (SL/TP, risk, vaqtlash bo'yicha)
+💡 Bu savdodan xulosa/tavsiya`;
+
+// AI Analyst — faqat admin gmail (ADMIN_EMAIL) uchun ochiq, qolgan barcha
+// foydalanuvchilar uchun Premium obuna talab qilinadi. Ruxsat yo'q bo'lsa,
+// Premium modalni ochib, false qaytaradi (chaqirgan funksiya davom etmasligi kerak).
+function hasAIAnalystAccess() {
+  const user = firebase.auth().currentUser;
+  if (user && user.email === ADMIN_EMAIL) return true;
+  openProUpgradeModal();
+  return false;
+}
+
+// Cloudflare Worker'ga so'rov yuboradi (API kalit brauzerda emas — Worker'da).
+async function callAIAnalyst(system, userText, images) {
+  if (!AI_ANALYST_CONFIG.workerUrl || AI_ANALYST_CONFIG.workerUrl.includes('SIZNING-WORKER')) {
+    throw new Error("AI Analyst hali sozlanmagan. Kodning yuqori qismidagi AI_ANALYST_CONFIG'ga Cloudflare Worker manzili va maxfiy kalitni kiriting.");
+  }
+  const resp = await fetch(AI_ANALYST_CONFIG.workerUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      secret: AI_ANALYST_CONFIG.appSecret,
+      system,
+      userText,
+      images: images || []
+    })
+  });
+  if (!resp.ok) {
+    let errMsg = '';
+    try { const errJson = await resp.json(); errMsg = errJson.error || ''; } catch (e) {}
+    throw new Error(errMsg || `AI server xatosi (${resp.status})`);
+  }
+  const data = await resp.json();
+  if (!data.text) throw new Error("AI javobi bo'sh keldi.");
+  return data.text;
+}
+
+// AI javobidagi bo'lim sarlavhalarini (🟢 🔴 📊 🎯 ⚠️ 💡 ✅ 🔍) qalin qilib,
+// oddiy matnni xavfsiz (XSS'siz) HTML'ga o'giradi.
+function formatAIResultHTML(text) {
+  const escaped = String(text)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return escaped.replace(/^(🟢|🔴|📊|🎯|⚠️|💡|✅|🔍)(.*)$/gm,
+    (m, emoji, rest) => `<div style="font-weight:800;margin:12px 0 4px;color:var(--text)">${emoji}${rest}</div>`
+  ).replace(/\n/g, '<br>');
+}
+
+// Bitta savdo bo'yicha RR (reja va amaldagi), davomiylik va boshqa
+// ko'rsatkichlarni hisoblab, matn ko'rinishida tayyorlaydi (AI promptiga
+// yuborish uchun).
+function buildSingleTradePromptText(trade) {
+  const durMin = (trade.openedAtMs && trade.closedAtMs)
+    ? Math.max(0, Math.round((trade.closedAtMs - trade.openedAtMs) / 60000)) : null;
+  const rrPlanned = calcRR(trade.kirish, trade.sl, trade.tp, trade.turi) || '-';
+  let rrActual = '-';
+  if (trade.chiqish && parseFloat(trade.chiqish) > 0 && trade.sl) {
+    const risk = Math.abs(parseFloat(trade.kirish) - parseFloat(trade.sl));
+    const reward = Math.abs(parseFloat(trade.chiqish) - parseFloat(trade.kirish));
+    if (risk > 0) rrActual = (reward / risk).toFixed(2);
+  }
+  return `SAVDO MA'LUMOTLARI:
+Sana: ${trade.sana}
+Instrument: ${trade.instrument}
+Turi: ${(trade.turi || '').toUpperCase()}
+Kirish narxi: ${trade.kirish}
+SL: ${trade.sl || '-'}
+TP: ${trade.tp || '-'}
+Chiqish narxi: ${trade.chiqish || 'hali ochiq'}
+Lot: ${trade.lot}
+Reja RR: ${rrPlanned}
+Amaldagi RR: ${rrActual}
+P/L: $${(trade.pnl || 0).toFixed(2)} (${trade.natija})
+Davomiylik: ${durMin !== null ? durMin + ' daqiqa' : "noma'lum"}
+Setup/Sabab: ${trade.sabab || '-'}
+Izoh: ${trade.izoh || '-'}`;
+}
+
+// Bitta savdoni AI'ga tahlil qildiradi — imkon bo'lsa "open" va "exit"
+// bosqichidagi screenshotlarni ham (Trade Replay'dagi rasmlar, EA yoki
+// qo'lda yuklangan) biriktirib yuboradi.
+async function analyzeSingleTrade(shotKey, tradeId) {
+  if (!hasAIAnalystAccess()) return;
+  const overlay = document.getElementById('ai-trade-overlay');
+  const box = document.getElementById('ai-trade-result');
+  overlay.classList.add('open');
+  box.innerHTML = '<div style="color:var(--muted);padding:20px 0;text-align:center">🤖 Tahlil qilinmoqda...</div>';
+  try {
+    const trade = trades.find(t => t.id === tradeId);
+    if (!trade) throw new Error("Savdo topilmadi.");
+    const promptText = buildSingleTradePromptText(trade);
+
+    const shots = mt5ScreenshotsByTicket[String(shotKey)] || [];
+    const openShot = shots.find(s => s.stage === 'open');
+    const exitShot = shots.slice().reverse().find(s => s.stage === 'exit');
+    const picked = [];
+    if (openShot) picked.push(openShot);
+    if (exitShot && exitShot !== openShot) picked.push(exitShot);
+    const images = picked.map(s => ({
+      media_type: s.source === 'manual' ? 'image/jpeg' : 'image/png',
+      data: s.imageBase64
+    }));
+
+    const text = await callAIAnalyst(AI_SYSTEM_PROMPT_SINGLE, promptText, images);
+    box.innerHTML = formatAIResultHTML(text);
+  } catch (err) {
+    console.error('AI savdo tahlili xatosi:', err);
+    box.innerHTML = `<div style="color:var(--red);padding:10px 0">⚠️ ${(err && err.message) || 'Xato yuz berdi'}</div>`;
+  }
+}
+
+// Bitta savdoni bir qatorli matnga aylantiradi (davr bo'yicha hisobotlarda
+// har bir savdo shu ko'rinishda AI'ga yuboriladi — screenshot yubormaymiz,
+// aks holda ko'p savdoli davrlarda payload juda katta bo'lib ketadi).
+function buildTradeLine(t, idx) {
+  const rrPlanned = calcRR(t.kirish, t.sl, t.tp, t.turi) || '-';
+  let durMin = '-';
+  if (t.openedAtMs && t.closedAtMs) durMin = Math.max(0, Math.round((t.closedAtMs - t.openedAtMs) / 60000)) + 'daq';
+  return `${idx}. ${t.sana} ${t.instrument} ${(t.turi || '').toUpperCase()} | Kirish:${t.kirish} SL:${t.sl || '-'} TP:${t.tp || '-'} Chiqish:${t.chiqish || 'ochiq'} | Lot:${t.lot} | RR(reja):${rrPlanned} | P/L:$${(t.pnl || 0).toFixed(2)} (${t.natija}) | Davomiylik:${durMin} | Setup:${t.sabab || '-'} | Izoh:${t.izoh || '-'}`;
+}
+
+// Tanlangan davr (kunlik/haftalik/oylik) bo'yicha umumiy statistikani
+// hisoblaydi — win rate, o'rtacha RR, sabab/setup bo'yicha taqsimot va h.k.
+function computePeriodStats(list) {
+  const closed = list.filter(t => t.chiqish && parseFloat(t.chiqish) > 0);
+  const wins = closed.filter(t => t.natija === 'Win');
+  const losses = closed.filter(t => t.natija === 'Loss');
+  const totalPnl = closed.reduce((s, t) => s + (t.pnl || 0), 0);
+  const winRate = closed.length ? Math.round(wins.length / closed.length * 100) : 0;
+  const rrList = closed.map(t => parseFloat(calcRR(t.kirish, t.sl, t.tp, t.turi))).filter(v => !isNaN(v));
+  const avgRR = rrList.length ? (rrList.reduce((a, b) => a + b, 0) / rrList.length).toFixed(2) : '-';
+  const sababMap = {};
+  closed.forEach(t => {
+    const key = t.sabab || 'Nomalum';
+    if (!sababMap[key]) sababMap[key] = { count: 0, wins: 0, pnl: 0 };
+    sababMap[key].count++; sababMap[key].pnl += (t.pnl || 0);
+    if (t.natija === 'Win') sababMap[key].wins++;
+  });
+  return { total: list.length, closedCount: closed.length, wins: wins.length, losses: losses.length, winRate, totalPnl, avgRR, sababMap };
+}
+
+// Firestore'dagi shu davr turi (kunlik/haftalik/oylik) bo'yicha oldingi
+// saqlangan hisobot xulosalarini o'qiydi — AI'ga tendensiya (takrorlanuvchi
+// xato/kuchli tomon) ko'rish imkonini berish uchun.
+async function loadRecentAIHistoryLines(period) {
+  if (!mt5db || !userCode) return '';
+  try {
+    const snap = await mt5db.collection('users').doc(userCode).collection('ai_reports')
+      .where('period', '==', period)
+      .orderBy('createdAt', 'desc')
+      .limit(4)
+      .get();
+    const lines = [];
+    snap.forEach(doc => {
+      const d = doc.data();
+      lines.push(`- ${new Date(d.createdAt).toLocaleDateString()}: Win rate ${d.winRate}%, P/L $${(d.totalPnl || 0).toFixed(2)}, savdolar soni ${d.count}, o'rtacha RR ${d.avgRR}`);
+    });
+    return lines.join('\n');
+  } catch (e) {
+    console.error("AI tarixini o'qishda xato:", e);
+    return '';
+  }
+}
+
+// Yangi hisobotning qisqa (og'ir bo'lmagan) xulosasini Firestore'ga
+// saqlaydi — keyingi hisobotlar shu yerdan tendensiyani ko'radi.
+function saveAIReportSummary(period, stats, resultText) {
+  if (!mt5db || !userCode) return;
+  mt5db.collection('users').doc(userCode).collection('ai_reports').add({
+    period,
+    createdAt: Date.now(),
+    count: stats.total,
+    winRate: stats.winRate,
+    totalPnl: stats.totalPnl,
+    avgRR: stats.avgRR,
+    summarySnippet: String(resultText).slice(0, 500)
+  }).catch(e => console.error('AI hisobotni saqlashda xato:', e));
+}
+
+function buildPeriodPromptText(period, list, stats, historyLines) {
+  const label = { daily: 'Kunlik', weekly: 'Haftalik (oxirgi 7 kun)', monthly: 'Oylik (oxirgi 30 kun)' }[period];
+  const lines = list.slice(0, 60).map((t, i) => buildTradeLine(t, i + 1)).join('\n');
+  const sababSummary = Object.entries(stats.sababMap)
+    .map(([k, v]) => `${k}: ${v.count} savdo, ${v.wins} win, $${v.pnl.toFixed(2)}`).join('\n');
+  return `TAHLIL TURI: ${label} hisobot
+DAVR: ${list.length} ta savdo (${stats.closedCount} ta yopilgan)
+UMUMIY STATISTIKA: Win rate ${stats.winRate}%, Jami P/L $${stats.totalPnl.toFixed(2)}, O'rtacha RR ${stats.avgRR}
+
+SAVDOLAR RO'YXATI:
+${lines || "Bu davrda savdo yo'q."}
+
+SABAB/SETUP BO'YICHA:
+${sababSummary || '-'}
+
+OLDINGI HISOBOTLAR (tendensiya uchun, eng yangisi birinchi):
+${historyLines || 'Oldingi hisobot topilmadi.'}`;
+}
+
+// Asosiy funksiya: "📅 Kunlik" / "📆 Haftalik" / "🗓 Oylik" tugmalari shu
+// yerga ulanadi. Davrdagi barcha savdolarni yig'ib, statistikani hisoblab,
+// AI'dan tuzilgan (6 bo'limli) hisobot so'raydi va natijani "Analiz"
+// sahifasida ko'rsatadi, so'ng tendensiya uchun qisqa xulosani saqlaydi.
+async function runPeriodAnalysis(period) {
+  if (!hasAIAnalystAccess()) return;
+  const resultBox = document.getElementById('ai-analyst-result');
+  resultBox.innerHTML = '<div style="color:var(--muted);padding:10px 0;text-align:center">🤖 Tahlil qilinmoqda...</div>';
+  try {
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+    let startStr;
+    if (period === 'daily') { startStr = todayStr; }
+    else if (period === 'weekly') { const d = new Date(now); d.setDate(d.getDate() - 6); startStr = d.toISOString().slice(0, 10); }
+    else { const d = new Date(now); d.setDate(d.getDate() - 29); startStr = d.toISOString().slice(0, 10); }
+
+    const list = trades.filter(t => t.sana && t.sana >= startStr && t.sana <= todayStr)
+      .slice().sort((a, b) => (a.sana || '').localeCompare(b.sana || ''));
+
+    if (!list.length) {
+      resultBox.innerHTML = '<div style="color:var(--muted)">Bu davrda savdo topilmadi.</div>';
+      return;
+    }
+
+    const stats = computePeriodStats(list);
+    const historyLines = await loadRecentAIHistoryLines(period);
+    const promptText = buildPeriodPromptText(period, list, stats, historyLines);
+    const text = await callAIAnalyst(AI_SYSTEM_PROMPT_PERIOD, promptText, []);
+    resultBox.innerHTML = formatAIResultHTML(text);
+    saveAIReportSummary(period, stats, text);
+  } catch (err) {
+    console.error('AI davr tahlili xatosi:', err);
+    resultBox.innerHTML = `<div style="color:var(--red)">⚠️ ${(err && err.message) || 'Xato yuz berdi'}</div>`;
+  }
+}
+
 // Bitta "open" hodisasi uchun jurnaldagi mos ("yetim", hali ticketsiz) yozuvni qidiradi.
 // MUHIM TUZATISH: bir nechta "yetim" nomzod bo'lsa (masalan bir xil symbol/turi/lot
 // bilan bir necha marta test qilingan bo'lsa), ENDI eng vaqt jihatdan YAQINI tanlanadi
@@ -2704,13 +3403,58 @@ function handleMT5Event(eventId, ev) {
       return;
     }
 
-    // MUHIM: mos yozuv HALI topilmadi — bu ko'pincha MT5'dan javob foydalanuvchi
-    // hali "Qo'shish"ni bosishidan OLDIN kelib qolgani sababli bo'ladi (tezlik
-    // farqi). Bunday holatda hodisani "ko'rilmagan" deb qoldiramiz (Firestore'da
-    // processed:true QILMAYMIZ) va xotirada saqlab qo'yamiz — foydalanuvchi
-    // savdoni jurnalga saqlagach, retryUnmatchedMt5OpenEvents() orqali qayta
-    // urinib ko'riladi va shunda to'g'ri bog'lanadi.
-    unmatchedMt5OpenEvents[eventId] = ev;
+    // MUHIM: mos yozuv HALI topilmadi. Bu ikki holatdan biri bo'lishi mumkin:
+    // 1) Foydalanuvchi HOZIRGINA ilova ichidan "MT5'da och" bosgan (pendingMt5CmdId
+    //    hali bor) va hali "Qo'shish"ni bosishidan OLDIN javob kelib qoldi (tezlik
+    //    farqi). Bunday holatda ESKICHA xatti-harakat saqlanadi — hodisa vaqtincha
+    //    "ko'rilmagan" qoldiriladi, chunki foydalanuvchi bir necha soniyada o'zi
+    //    "Qo'shish" orqali to'liq (sababli) yozuv qo'shadi va retryUnmatchedMt5OpenEvents()
+    //    orqali ticket o'sha yozuvga bog'lanadi — aks holda IKKALASI HAM (avtomatik +
+    //    qo'lda) saqlanib, DUBLIKAT yozuv paydo bo'lardi.
+    // 2) Savdo MT5 TERMINALINING O'ZIDA to'g'ridan-to'g'ri ochilgan (yoki ilovada
+    //    hech qanday "MT5'da och" jarayoni ketayotgani yo'q) — bu holda ilova
+    //    savdoni oldindan bilmagan, shu sabab orphan HECH QACHON topilmaydi va
+    //    avval hodisa umuman jurnalga tushmay qolar edi (faqat keyinchalik
+    //    yopilganda, pastdagi "close" fallback orqali paydo bo'lardi). ENDI:
+    //    ochilishning O'ZIDA DARHOL jurnalga yozuv qo'shiladi — lekin bu yozuv
+    //    "sabab"siz (foydalanuvchi kiritmagan) bo'lgani uchun mt5AutoAdded:true
+    //    bilan belgilanadi, shunda jurnal ro'yxatida boshqacha fon rangi bilan
+    //    ko'rsatiladi va foydalanuvchiga sababni keyin to'ldirishi kerakligi
+    //    eslatiladi.
+    if (pendingMt5CmdId) {
+      unmatchedMt5OpenEvents[eventId] = ev;
+      return;
+    }
+    trades.unshift({
+      id: Date.now() + Math.floor(Math.random()*1000),
+      mt5Ticket: evTicket,
+      source: 'mt5',
+      mt5AutoAdded: true,
+      sana: (ev.openTime ? new Date(ev.openTime).toISOString().slice(0,10) : new Date().toISOString().slice(0,10)),
+      openedAtMs: ev.openTime ? Number(ev.openTime) : Date.now(), // AI Analyst uchun: savdo davomiyligini hisoblash
+      instrument: ev.symbol || '',
+      turi: ev.type || 'buy',
+      kirish: ev.openPrice || 0,
+      kirishZona: '',
+      partialLot: 0,
+      chiqish: 0,
+      lot: ev.lot || 0,
+      sl: ev.sl || 0,
+      tp: ev.tp || 0,
+      sabab: '',
+      izoh: '',
+      isBU: false,
+      partialChiqish: 0,
+      pnl: 0,
+      natija: 'BU',
+      atr: 0, atrMultiSL: 0.5, atrMultiTP: 3.0,
+      hilowType: null, hilowVal: 0, svechaHajm: 0,
+      buStopSaved: false, buLockedStop11Saved: null, buLockedStop12Saved: null,
+      buLockedChiqishSaved: null, buLockedLotSaved: null, buLockedKirishSaved: null
+    });
+    save(); renderAll();
+    delete unmatchedMt5OpenEvents[eventId];
+    mt5db.collection('users').doc(userCode).collection('mt5_events').doc(eventId).update({ processed: true }).catch(()=>{});
     return;
   } else if (ev.eventType === 'close') {
     // Yopilgan savdo — mos ticket bo'lsa yangilaydi, bo'lmasa yangi yozuv qo'shadi
@@ -2747,12 +3491,18 @@ function handleMT5Event(eventId, ev) {
       // ochiq deb hisoblanadi.
       t.partialLot = isFullyClosedNow ? totalLot : closedSoFar;
       if (isFullyClosedNow && t.pnl !== 0) t.isBU = false;
+      // AI Analyst uchun: savdo to'liq yopilganda yopilish vaqtini qayd etamiz
+      // (davomiylikni hisoblash uchun kerak).
+      if (isFullyClosedNow) t.closedAtMs = ev.closeTime ? Number(ev.closeTime) : Date.now();
     } else {
       trades.unshift({
         id: Date.now() + Math.floor(Math.random()*1000),
         mt5Ticket: evTicket,
         source: 'mt5',
+        mt5AutoAdded: true,
         sana: (ev.closeTime ? new Date(ev.closeTime).toISOString().slice(0,10) : new Date().toISOString().slice(0,10)),
+        openedAtMs: ev.openTime ? Number(ev.openTime) : (ev.closeTime ? Number(ev.closeTime) : Date.now()),
+        closedAtMs: ev.closeTime ? Number(ev.closeTime) : Date.now(),
         instrument: ev.symbol || '',
         turi: ev.type || 'buy',
         kirish: ev.openPrice || 0,
@@ -3164,6 +3914,7 @@ setInterval(retryUnmatchedMt5OpenEvents, 10000);
 let calMonth = new Date().getMonth();
 
 const MONTHS_UZ = ['Yanvar','Fevral','Mart','Aprel','May','Iyun','Iyul','Avgust','Sentabr','Oktabr','Noyabr','Dekabr'];
+const MONTHS_RU = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 
 function save() { localStorage.setItem(tjKey('tj_trades'), JSON.stringify(trades)); }
 function pnlColor(v) { return v > 0 ? 'var(--green)' : v < 0 ? 'var(--red)' : 'var(--muted)'; }
@@ -4466,6 +5217,12 @@ function saveTrade() {
   const trade = {
     id: editId || Date.now(),
     mt5Ticket: origTrade ? origTrade.mt5Ticket : undefined,
+    // AI Analyst uchun: savdo davomiyligini hisoblash uchun ochilish/yopilish
+    // vaqti. MT5'dan kelgan savdolarda bu aniq EA vaqti (yuqorida allaqachon
+    // qo'yilgan); bu yerda faqat QO'LDA kiritilgan/tahrirlangan savdolar uchun
+    // taxminiy vaqt (jurnalga saqlangan payt) qo'yiladi.
+    openedAtMs: origTrade ? origTrade.openedAtMs : Date.now(),
+    closedAtMs: (chiqishNum > 0) ? (origTrade && origTrade.closedAtMs ? origTrade.closedAtMs : Date.now()) : (origTrade ? origTrade.closedAtMs : undefined),
     // Agar shu modal sessiyasida "MT5'da och" allaqachon bosilgan bo'lsa (natija hali kelmagan),
     // shu buyruqqa bog'laymiz — natija kelganda MT5 ticketi shu yozuvga biriktiriladi,
     // yangi (dublikat) yozuv yaratilmaydi.
@@ -4616,10 +5373,10 @@ function sc(label, value, color, sub) {
 
 function renderQuickStats() {
   const s = getStats();
-  let html = sc('Jami Savdolar', s.total, '') +
-    sc('Jami P&L', (s.totalPnL >= 0 ? '+' : '') + '$' + s.totalPnL.toFixed(2), pnlColor(s.totalPnL)) +
-    sc('Win Rate', s.winRate + '%', 'var(--green)') +
-    sc('Win / Loss', s.wins + ' / ' + s.losses, '');
+  let html = sc(t('stat_jami_savdolar'), s.total, '') +
+    sc(t('stat_jami_pnl'), (s.totalPnL >= 0 ? '+' : '') + '$' + s.totalPnL.toFixed(2), pnlColor(s.totalPnL)) +
+    sc(t('stat_win_rate'), s.winRate + '%', 'var(--green)') +
+    sc(t('stat_win_loss'), s.wins + ' / ' + s.losses, '');
   document.getElementById('quick-stats').innerHTML = html;
   renderBalansBanner();
 }
@@ -4630,19 +5387,19 @@ function renderDash() {
   let extraCards = '';
   if (b) {
     extraCards =
-      sc('Joriy Balans', '$' + b.currentBalans.toFixed(2), pnlColor(b.totalPnL)) +
-      sc('ROI', (b.roi >= 0 ? '+' : '') + b.roi.toFixed(2) + '%', pnlColor(b.roi), 'Depozitdan o\'sish') +
-      sc('Max Drawdown', '-$' + b.maxDD.toFixed(2), 'var(--red)', b.ddPct.toFixed(1) + '% yuqoridan');
+      sc(t('stat_joriy_balans'), '$' + b.currentBalans.toFixed(2), pnlColor(b.totalPnL)) +
+      sc(t('stat_roi'), (b.roi >= 0 ? '+' : '') + b.roi.toFixed(2) + '%', pnlColor(b.roi), t('stat_depozit_osish')) +
+      sc(t('stat_max_dd'), '-$' + b.maxDD.toFixed(2), 'var(--red)', b.ddPct.toFixed(1) + t('stat_yuqoridan'));
   }
   document.getElementById('dash-stats').innerHTML =
-    sc('Jami P&L', (s.totalPnL >= 0 ? '+' : '') + '$' + s.totalPnL.toFixed(2), pnlColor(s.totalPnL)) +
-    sc('Win Rate', s.winRate + '%', 'var(--green)', s.wins + ' win / ' + s.losses + ' loss') +
-    sc("O'rtacha Win", '$' + s.avgWin, 'var(--green)') +
-    sc("O'rtacha Loss", '$' + s.avgLoss, 'var(--red)') +
-    sc('Eng Yaxshi', '$' + s.best.toFixed(2), 'var(--green)') +
-    sc('Eng Yomon', '$' + s.worst.toFixed(2), 'var(--red)') +
-    (b ? sc('Max Drawdown', '-$' + b.maxDD.toFixed(2), 'var(--red)', b.ddPct.toFixed(1) + '% yuqoridan') +
-         sc('ROI', (b.roi >= 0 ? '+' : '') + b.roi.toFixed(2) + '%', pnlColor(b.roi), 'Depozitdan o\'sish') : '');
+    sc(t('stat_jami_pnl'), (s.totalPnL >= 0 ? '+' : '') + '$' + s.totalPnL.toFixed(2), pnlColor(s.totalPnL)) +
+    sc(t('stat_win_rate'), s.winRate + '%', 'var(--green)', s.wins + t('stat_win_short') + s.losses + t('stat_loss_short')) +
+    sc(t('stat_ortacha_win'), '$' + s.avgWin, 'var(--green)') +
+    sc(t('stat_ortacha_loss'), '$' + s.avgLoss, 'var(--red)') +
+    sc(t('stat_eng_yaxshi'), '$' + s.best.toFixed(2), 'var(--green)') +
+    sc(t('stat_eng_yomon'), '$' + s.worst.toFixed(2), 'var(--red)') +
+    (b ? sc(t('stat_max_dd'), '-$' + b.maxDD.toFixed(2), 'var(--red)', b.ddPct.toFixed(1) + t('stat_yuqoridan')) +
+         sc(t('stat_roi'), (b.roi >= 0 ? '+' : '') + b.roi.toFixed(2) + '%', pnlColor(b.roi), t('stat_depozit_osish')) : '');
   renderBalansBanner();
   const sorted = [...trades].sort((a, b) => new Date(a.sana) - new Date(b.sana));
   let cum = depozit || 0;
@@ -4926,9 +5683,36 @@ function renderTrades() {
     } else {
       natBadge = `<span style="font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;background:rgba(34,211,165,0.12);color:var(--green);border:1px solid rgba(34,211,165,0.4)">WIN</span>`;
     }
-    return `<div class="trade-card" style="padding:8px 10px;margin-bottom:6px">
+    // MT5'dan (terminalning o'zida) avtomatik qo'shilgan, hali sababi/izohi
+    // to'ldirilmagan yozuvlar uchun alohida (ogohlantiruvchi) fon rangi va yorliq —
+    // foydalanuvga bu savdoni ochib, sababini to'ldirishi kerakligini eslatadi.
+    const needsReview = !!t.mt5AutoAdded;
+    const cardBg = needsReview ? 'background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.35);' : '';
+    const reviewBadge = needsReview
+      ? `<span style="font-size:9px;font-weight:700;color:var(--gold);background:rgba(251,191,36,0.15);border:1px solid rgba(251,191,36,0.4);border-radius:4px;padding:1px 6px;white-space:nowrap">⚠️ MT5'dan · sabab kiriting</span>`
+      : '';
+
+    // MT5 EA'dagi "📸" tugmasi orqali shu savdo uchun saqlangan chart
+    // screenshotlari (agar bo'lsa) — kichik so'rov (thumbnail) qatori va
+    // "Trade Replay" tugmasi bilan ko'rsatiladi.
+    // Screenshotlarni mt5Ticket bo'yicha guruhlaymiz; agar savdo hali MT5'ga
+    // bog'lanmagan bo'lsa (mt5Ticket yo'q), jurnal ichidagi t.id kalit sifatida
+    // ishlatiladi — shu bilan qo'lda qo'shilgan screenshotlar ham har doim
+    // to'g'ri savdoga bog'lanib qoladi.
+    const shotKey = t.mt5Ticket || t.id;
+    const shotsForTrade = mt5ScreenshotsByTicket[String(shotKey)] || [];
+    const screenshotBlock = shotsForTrade.length ? `
+      <div style="display:flex;align-items:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+        <div style="display:flex;gap:4px;overflow-x:auto;flex:1">
+          ${shotsForTrade.slice(0, 6).map(s => `<img src="data:image/png;base64,${s.imageBase64}" style="width:34px;height:24px;object-fit:cover;border-radius:4px;border:1px solid ${s.source === 'manual' ? 'var(--gold)' : 'var(--border2)'};cursor:pointer;flex-shrink:0" onclick="openTradeReplay('${shotKey}')" />`).join('')}
+        </div>
+        <button class="action-btn" style="font-size:10px;white-space:nowrap;padding:3px 8px" onclick="openTradeReplay('${shotKey}')">🎬 Replay (${shotsForTrade.length})</button>
+      </div>` : '';
+
+    return `<div class="trade-card" style="padding:8px 10px;margin-bottom:6px;${cardBg}">
       <div style="display:flex;align-items:center;margin-bottom:5px;flex-wrap:wrap;gap:3px">
         <span class="trade-inst" style="font-size:11px">${t.instrument}</span>
+        ${reviewBadge}
         <span class="type-badge ${t.turi==='buy'?'type-buy':'type-sell'}" style="font-size:10px;padding:2px 7px">${t.turi.toUpperCase()}</span>
         <span style="font-size:10px;color:var(--muted)">L:<span style="color:var(--text2);font-weight:600">${parseFloat(t.lot||0).toFixed(2)}</span></span>
         ${rr ? `<span style="font-size:10px;font-weight:700;color:var(--gold)">1:${rr}</span>` : ''}
@@ -4946,11 +5730,14 @@ function renderTrades() {
           ${partialBadge}
         </div>
         <div class="trade-actions">
+          <button class="action-btn" onclick="analyzeSingleTrade('${shotKey}', ${t.id})" title="AI orqali shu savdoni tahlil qilish">🤖</button>
+          <button class="action-btn" onclick="openManualShotModal('${shotKey}')" title="Kompyuter/EA o'chiq bo'lganda grafikni qo'lda skrinshot qilib biriktirish">📷</button>
           <button class="action-btn" onclick="openModal(${t.id})">✏️</button>
           <button class="action-btn" onclick="askDelete(${t.id})">🗑</button>
         </div>
       </div>
       ${t.izoh ? `<div style="display:flex;align-items:flex-start;gap:4px;margin-top:4px;padding-top:4px;border-top:1px solid var(--border)"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span style="font-size:10px;color:var(--muted);font-style:italic;flex:1;white-space:pre-wrap;word-break:break-word;line-height:1.4">izoh: ${t.izoh}</span></div>` : ''}
+      ${screenshotBlock}
     </div>`;
   };
 
@@ -4967,8 +5754,9 @@ function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; }
 function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderKalendar(); }
 
 function renderKalendar() {
-  document.getElementById('cal-month-title').textContent = MONTHS_UZ[calMonth];
-  document.getElementById('cal-year-title').textContent = calYear + ' yil';
+  const monthsArr = (currentLang === 'ru') ? MONTHS_RU : MONTHS_UZ;
+  document.getElementById('cal-month-title').textContent = monthsArr[calMonth];
+  document.getElementById('cal-year-title').textContent = calYear + (currentLang === 'ru' ? ' год' : ' yil');
 
   const prefix = `${calYear}-${String(calMonth + 1).padStart(2, '0')}`;
   const monthTrades = trades.filter(t => t.sana && t.sana.startsWith(prefix));
@@ -5039,7 +5827,7 @@ function renderYearSummary() {
     const col = mPnl > 0 ? 'var(--green)' : mPnl < 0 ? 'var(--red)' : 'var(--muted)';
     const isCur = m === calMonth;
     html += `<div class="ym-card" style="${isCur ? 'border-color:var(--green);' : ''}">
-      <div class="ym-name">${MONTHS_UZ[m].substring(0, 3)}</div>
+      <div class="ym-name">${((currentLang === 'ru') ? MONTHS_RU : MONTHS_UZ)[m].substring(0, 3)}</div>
       <div class="ym-val" style="color:${col}">${mTrades.length ? (mPnl >= 0 ? '+' : '') + '$' + mPnl.toFixed(0) : '—'}</div>
     </div>`;
   }
@@ -5457,6 +6245,7 @@ function _tjIsOpen(id) {
 function _tjGetOpenOverlayId() {
   // Eng ustida (oxirgi ochilgan) turgan oynani birinchi tekshiramiz
   if (_tjIsOpen('exit-overlay')) return 'exit-overlay';
+  if (_tjIsOpen('replay-overlay')) return 'replay-overlay';
   if (_tjIsOpen('sabab-overlay')) return 'sabab-overlay';
   if (_tjIsOpen('confirm-overlay')) return 'confirm-overlay';
   if (_tjIsOpen('del-overlay')) return 'del-overlay';
@@ -5472,6 +6261,7 @@ function _tjGetOpenOverlayId() {
 
 function _tjCloseOverlay(id) {
   if (id === 'exit-overlay') document.getElementById('exit-overlay').classList.remove('open');
+  else if (id === 'replay-overlay') closeTradeReplay();
   else if (id === 'sabab-overlay') closeSababModal();
   else if (id === 'confirm-overlay') closeConfirmModal();
   else if (id === 'del-overlay') closeDelModal();
