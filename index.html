@@ -3476,7 +3476,16 @@ function handleMT5Event(eventId, ev) {
       // qayd etilgan bo'lsa (t.partialLot > 0), yangi hodisaning profiti
       // ESKI (allaqachon real MT5'dan tasdiqlangan) profit ustiga QO'SHILADI.
       const hadPriorPartial = t.partialLot && t.partialLot > 0;
-      const priorRealizedPnl = hadPriorPartial ? (t.pnl || 0) : 0;
+      // TUZATISH (2-marta): agar bu savdo "Hammasini yop" tugmasi orqali
+      // TAXMINIY yopilgan bo'lsa (mt5PendingBulkClose), t.pnl hozircha
+      // taxminiy (jonli narx asosidagi) qiymatni o'z ichiga oladi — buni
+      // "avvalgi tasdiqlangan" pnl sifatida ishlatib bo'lmaydi, aks holda
+      // haqiqiy profit ustiga qo'shilib, ikki marta hisoblanib ketadi.
+      // Shu holatda haqiqiy "avvalgi tasdiqlangan" qiymat sifatida
+      // mt5PreBulkPnl (taxminiy yozuvdan OLDINGI, haqiqiy qiymat) olinadi.
+      const priorRealizedPnl = t.mt5PendingBulkClose
+        ? (t.mt5PreBulkPnl || 0)
+        : (hadPriorPartial ? (t.pnl || 0) : 0);
       const closedSoFar = (hadPriorPartial ? t.partialLot : 0) + evLot;
       // Kichik son xatoliklariga (masalan 0.0999999) tolerantlik
       const isFullyClosedNow = totalLot > 0 ? (closedSoFar >= totalLot - 0.0001) : true;
@@ -3494,6 +3503,11 @@ function handleMT5Event(eventId, ev) {
       // AI Analyst uchun: savdo to'liq yopilganda yopilish vaqtini qayd etamiz
       // (davomiylikni hisoblash uchun kerak).
       if (isFullyClosedNow) t.closedAtMs = ev.closeTime ? Number(ev.closeTime) : Date.now();
+      // Endi HAQIQIY (MT5 tomonidan tasdiqlangan) qiymat yozildi — taxminiy
+      // ("Hammasini yop" tugmasidan qolgan) belgi va vaqtinchalik qiymat
+      // endi kerak emas, tozalaymiz.
+      delete t.mt5PendingBulkClose;
+      delete t.mt5PreBulkPnl;
     } else {
       trades.unshift({
         id: Date.now() + Math.floor(Math.random()*1000),
@@ -3764,14 +3778,14 @@ function isTradeStillOpen(t) {
   const hasPartial = t.partialLot && t.partialLot > 0 && t.partialLot < t.lot;
   if (t.buStopSaved) return false;
   if (t.isBU && !hasPartial) return false;
-  // TUZATISH: qisman (partial) yopilgan savdoda — lotning bir qismi
-  // allaqachon chiqish narxida yopilgan bo'lsa ham (t.chiqish bor), QOLGAN
-  // qism MT5'da hali ochiq turadi. Avval bu yerda "hasPartial && chiqish>0"
-  // bo'lsa "yopilgan" deb qaytarilar edi — shu sabab "Barcha ochiq
-  // savdolarni yopish" tugmasi bosilganda bunday savdolar ro'yxatga
-  // umuman kirmay, qolgan qismi MT5'da ham, jurnalda ham OCHIQ bo'lib
-  // qolaverar edi. Endi hasPartial bo'lsa — trade to'liq yopilguncha
-  // (ya'ni partialLot lotga tenglashtirilguncha) doim OCHIQ hisoblanadi.
+  // TUZATISH (2-marta): "Hammasini yop" endi barcha savdolarga (shu jumladan
+  // MT5'ga bog'langanlariga ham) DARHOL chiqish narxi/pnl yozadi (pastga
+  // qarang — executeCloseAllOpenTrades). Shu sabab bu yerda ham: qisman
+  // (partial) yopilgan savdoda chiqish narxi allaqachon qo'yilgan bo'lsa —
+  // savdo jurnalda YOPILGAN deb hisoblanishi kerak, aks holda "Hammasini
+  // yop" bosilgandan keyin ham savdo qayta-qayta "ochiq" ro'yxatida
+  // qolaverib, tugma qayta bosilganda MT5'ga takroriy buyruq yuborilaveradi.
+  if (hasPartial && t.chiqish && t.chiqish > 0) return false;
   if (hasPartial) return true;
   if (t.chiqish && t.chiqish > 0) return false;
   return true;
@@ -3828,25 +3842,33 @@ async function executeCloseAllOpenTrades(openList) {
     const alreadyRealizedPnl = hasPartial ? (t.pnl || 0) : 0;
     const remainingPnl = calcPnL(t.instrument, t.turi, t.kirish, closePrice, remainingLot);
 
-    // TUZATISH: agar bu savdo MT5'ga bog'langan (t.mt5Ticket bor) bo'lsa —
-    // yakuniy chiqish narxi/PnL ni bu yerda OLDINDAN yozib QO'YMAYMIZ.
-    // Buyruq yuborilgach, MT5'dan haqiqiy "close" hodisasi keladi (endi EA
-    // qisman yopishni ham to'g'ri qo'llab-quvvatlaydi) va handleMT5Event()
-    // uni AVTOMATIK, ANIQ hisoblab yozadi — shu jumladan avval qisman
-    // yopilgan qismning profitini yangi qism bilan to'g'ri qo'shib.
-    // Bu yerda oldindan taxminiy (live narx asosidagi) qiymat yozib
-    // qo'yilsa, keyin haqiqiy hodisa kelganda ikki marta qo'shilib,
-    // PnL noto'g'ri chiqishi mumkin edi. MT5'ga bog'lanmagan (qo'lda
-    // kiritilgan, ticketsiz) savdolar uchun esa — avvalgidek, joriy
-    // narx asosida darhol hisoblab yozamiz (chunki ularda hech qanday
-    // MT5 hodisasi kelmaydi, tuzatib beradigan hech narsa yo'q).
-    if (!t.mt5Ticket) {
-      t.chiqish = closePrice;
-      t.partialChiqish = hasPartial ? t.partialChiqish : closePrice;
-      t.pnl = parseFloat((alreadyRealizedPnl + remainingPnl).toFixed(2));
-      t.natija = t.pnl > 0 ? 'Win' : t.pnl < 0 ? 'Loss' : 'BU';
-      if (hasPartial) { t.partialLot = t.lot; t.isBU = false; }
+    // TUZATISH (2-marta): avvalgi versiyada MT5'ga bog'langan (t.mt5Ticket
+    // bor) savdolar uchun chiqish narxi/PnL bu yerda OLDINDAN yozilmas edi —
+    // faqat MT5'dan haqiqiy "close" hodisasi kelgach yozilar edi. Agar MT5
+    // terminal o'chiq bo'lsa, EA ishlamasa yoki ticket "yetim"/dublikat
+    // bo'lsa (haqiqatda MT5'da mavjud bo'lmasa) — bunday hodisa HECH QACHON
+    // kelmaydi va savdo jurnalda abadiy "OCHIQ" bo'lib qolib ketardi (aynan
+    // shu sabab "Hammasini yop" tugmasi ba'zi savdolarni yopmasdi).
+    //
+    // Endi: tugma bosilganda BARCHA savdolar (mt5Ticket bor-yo'qligidan
+    // qat'i nazar) darhol joriy narxda jurnalda YOPILADI. MT5'ga bog'langan
+    // savdolar uchun bu qiymat — TAXMINIY (joriy bozor narxiga asoslangan).
+    // Buyruq baribir MT5'ga yuboriladi; agar MT5 keyinchalik haqiqiy "close"
+    // hodisasi bilan javob bersa, handleMT5Event() taxminiy qiymatlarni
+    // ANIQ (real) qiymatlar bilan avtomatik almashtiradi. Ikki marta
+    // qo'shilib PnL noto'g'ri chiqib ketmasligi uchun — haqiqiy hodisa
+    // kelgunga qadar "avvalgi tasdiqlangan" pnl alohida (mt5PreBulkPnl)
+    // saqlanadi va handleMT5Event xuddi shundan foydalanadi (t.pnl'dagi
+    // taxminiy qiymatdan emas).
+    if (t.mt5Ticket) {
+      t.mt5PreBulkPnl = alreadyRealizedPnl;
+      t.mt5PendingBulkClose = true;
     }
+    t.chiqish = closePrice;
+    t.partialChiqish = hasPartial ? t.partialChiqish : closePrice;
+    t.pnl = parseFloat((alreadyRealizedPnl + remainingPnl).toFixed(2));
+    t.natija = t.pnl > 0 ? 'Win' : t.pnl < 0 ? 'Loss' : 'BU';
+    if (!t.mt5Ticket && hasPartial) { t.partialLot = t.lot; t.isBU = false; }
     // MT5'da haqiqiy ochiq pozitsiya bo'lsa — yopish buyrug'ini yuboramiz.
     // Faqat haqiqatda hali ochiq turgan (qolgan) lot miqdorida.
     if (t.mt5Ticket && remainingLot > 0) {
@@ -3866,9 +3888,9 @@ async function executeCloseAllOpenTrades(openList) {
       box.style.display = 'block';
       box.style.background = 'rgba(251,191,36,0.1)';
       box.style.color = 'var(--gold)';
-      let msg = '📡 MT5\'ga ' + mt5SentCount + ' ta yopish buyrug\'i yuborildi. Terminaldan tekshiring.';
+      let msg = '✅ Jurnalda yopildi. 📡 MT5\'ga ' + mt5SentCount + ' ta yopish buyrug\'i ham yuborildi — tasdiq kelsa, raqamlar avtomatik aniqlashtiriladi.';
       if (missingPriceCount > 0) {
-        msg += ' (' + missingPriceCount + ' tasi uchun jonli narx topilmadi — MT5 tasdiqlagach avtomatik to\'g\'rilanadi.)';
+        msg += ' (' + missingPriceCount + ' tasi uchun jonli narx topilmadi — taxminiy narx ishlatildi, MT5 tasdiqlagach avtomatik to\'g\'rilanadi.)';
       }
       box.textContent = msg;
     }
