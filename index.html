@@ -6763,30 +6763,64 @@ function latinToCyrillic(text) {
   return out;
 }
 
-// ========== TTS (OVoz Chiqarish) — SIFATLI RU OVozi + Transliteratsiya ==========
+// ========== TTS (OVoz Chiqarish) — O'ZBEKCHA ovozni qidirish ==========
 let _vaVoices = [];
+let _vaUzbekVoice = null;
+let _vaRussianVoice = null;
+
 function _vaLoadVoices() {
   if (!('speechSynthesis' in window)) return;
   _vaVoices = window.speechSynthesis.getVoices();
+
+  // 1) O'zbekcha ovozni qidirish (eng yaxshi variant!)
+  const uzVoices = _vaVoices.filter(v => v.lang && v.lang.toLowerCase().startsWith('uz'));
+  if (uzVoices.length > 0) {
+    _vaUzbekVoice = uzVoices[0]; // Birinchi o'zbekcha ovozni olamiz
+    console.log('✅ O'zbekcha TTS ovozi topildi:', _vaUzbekVoice.name);
+  } else {
+    _vaUzbekVoice = null;
+    console.log('⚠️ O'zbekcha TTS ovozi topilmadi. Telefon sozlamalarida o'zbekcha TTS tilini o'rnating.');
+  }
+
+  // 2) Ruscha ovozni zaxiraga olish
+  const ruVoices = _vaVoices.filter(v => v.lang && v.lang.toLowerCase().startsWith('ru'));
+  if (ruVoices.length > 0) {
+    _vaRussianVoice = ruVoices[0];
+  }
 }
+
 if ('speechSynthesis' in window) {
   if (speechSynthesis.onvoiceschanged !== undefined) {
     speechSynthesis.onvoiceschanged = _vaLoadVoices;
   }
-  // Brauzer ovozlarini yuklash uchun biroz kutamiz (ba'zi brauzerlarda kechikadi)
   setTimeout(_vaLoadVoices, 500);
-  setTimeout(_vaLoadVoices, 1500);
+  setTimeout(_vaLoadVoices, 2000);
+}
+
+// TTS yoqilgan/o'chirilgan holati
+let _vaTtsEnabled = true;
+
+function vaToggleTts() {
+  _vaTtsEnabled = !_vaTtsEnabled;
+  const btn = document.getElementById('va-tts-toggle');
+  if (btn) {
+    btn.textContent = _vaTtsEnabled ? '🔊' : '🔇';
+    btn.title = _vaTtsEnabled ? 'Ovozni o'chirish' : 'Ovozni yoqish';
+  }
+  if (!_vaTtsEnabled) {
+    speechSynthesis.cancel();
+  }
 }
 
 function vaSpeak(text) {
   try {
-    if (!('speechSynthesis' in window) || !text) return;
+    if (!('speechSynthesis' in window) || !text || !_vaTtsEnabled) return;
     speechSynthesis.cancel();
 
-    // Matnni kirillga o'tkazamiz (ru-RU ovozi lotincha o'qimaydi)
+    // Matnni kirillga o'tkazamiz
     const cyrillicText = latinToCyrillic(text);
 
-    // Uzun matnlarni qismlarga bo'lamiz (har bir qism ~120 ta belgi)
+    // Uzun matnlarni qismlarga bo'lish
     const chunks = [];
     const sentences = cyrillicText.match(/[^\.\!\?]+[\.\!\?]+|[^\.\!\?]+/g) || [cyrillicText];
     let current = '';
@@ -6801,26 +6835,45 @@ function vaSpeak(text) {
     if (current) chunks.push(current.trim());
     if (chunks.length === 0) chunks.push(cyrillicText);
 
-    // Eng sifatli ru-RU ovozini tanlaymiz
-    let voice = null;
-    const preferred = ['Google русский', 'Microsoft Irina', 'Microsoft Pavel', 'ru-RU', 'Russian'];
-    for (const p of preferred) {
-      voice = _vaVoices.find(v => v.name.includes(p) || v.lang === p);
-      if (voice) break;
-    }
+    // === AYOL OVOZI TANLASH (Female + Sokin) ===
+    let voice = _vaUzbekVoice || null;
+    let lang = 'uz-UZ';
+
+    // Agar o'zbekcha ovoz bo'lmasa — ayol rus ovozini qidirish
     if (!voice) {
-      voice = _vaVoices.find(v => v.lang && v.lang.toLowerCase().startsWith('ru'));
+      // Ayol ismlari va "Female" kalit so'zlari
+      const femaleNames = ['Irina','Milena','Tatiana','Elena','Maria','Zira','Female','Woman','Girl','Ayol','Женский'];
+      const ruVoices = _vaVoices.filter(v => v.lang && v.lang.toLowerCase().startsWith('ru'));
+
+      // Avval ayol ovozini qidiramiz
+      for (const name of femaleNames) {
+        voice = ruVoices.find(v => v.name.toLowerCase().includes(name.toLowerCase()));
+        if (voice) break;
+      }
+
+      // Ayol ovozi topilmasa — istalgan rus ovozi
+      if (!voice && ruVoices.length > 0) {
+        voice = ruVoices[0];
+      }
+
+      lang = 'ru-RU';
+
+      if (!_vaWarnedNoUzbek) {
+        _vaWarnedNoUzbek = true;
+        console.warn('O'zbekcha TTS topilmadi. Ayol (rus) ovozi ishlatilmoqda.');
+      }
     }
+
+    const isUzbek = lang === 'uz-UZ';
 
     chunks.forEach((chunk, idx) => {
       const u = new SpeechSynthesisUtterance(chunk);
-      u.lang = 'ru-RU';
-      u.rate = 0.92; // biroz sekinroq — tushunarliroq
-      u.pitch = 1.0;
+      u.lang = lang;
+      u.rate = isUzbek ? 0.95 : 0.85;   // Sokin, sekin
+      u.pitch = isUzbek ? 1.15 : 1.25;  // Ayol ovozi uchun yuqoriroq pitch
       if (voice) u.voice = voice;
-      u.volume = 1.0;
+      u.volume = 0.9;  // Biroz pastroq — sokinroq
 
-      // Oxirgi qism bo'lganda panelni yashirish
       if (idx === chunks.length - 1) {
         u.onend = () => {
           setTimeout(() => {
@@ -6833,6 +6886,8 @@ function vaSpeak(text) {
     });
   } catch (e) { console.error('TTS xato:', e); }
 }
+
+let _vaWarnedNoUzbek = false;
 
 function vaStart() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
