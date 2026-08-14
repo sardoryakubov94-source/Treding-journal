@@ -6719,29 +6719,42 @@ function vaClosePanel() {
   } catch (e) {}
 }
 
-// ========== LOTIN → KIRILL TRANSLITERATSIYA (O'ZBEKCHA) ==========
+// ========== LOTIN → RUS KIRILL (FONETIK, TTS uchun) ==========
+// O'zbekcha matnni faqat rus ovozi tushunadigan harflarga o'tkazadi
 function latinToCyrillic(text) {
   if (!text) return '';
   let r = text;
-  // Ikki harflilarni avval almashtirish (muhim!)
+
+  // === Ikki harflilar (avval almashtirish - muhim!) ===
   const doubles = [
-    ['sh','ш'],['ch','ч'],['yo','ё'],['yu','ю'],['ya','я'],['ye','е'],
-    ["o'","ў"],["g'","ғ"],['ng','нг'],['Sh','Ш'],['Ch','Ч'],['Yo','Ё'],
-    ['Yu','Ю'],['Ya','Я'],['Ye','Е'],["O'","Ў"],["G'","Ғ"],['Ng','Нг']
+    // O'zbekcha maxsus harflar → ruscha ekvivalent
+    ["o'","у"],["g'","г"],['sh','ш'],['ch','ч'],
+    ['yo','ё'],['yu','ю'],['ya','я'],['ye','е'],['ng','нг'],
+    ["O'","У"],["G'","Г"],['Sh','Ш'],['Ch','Ч'],
+    ['Yo','Ё'],['Yu','Ю'],['Ya','Я'],['Ye','Е'],['Ng','Нг']
   ];
   for (const [l,c] of doubles) {
     r = r.split(l).join(c);
   }
-  // Bir harflilar
+
+  // === Bir harflilar (faqat rus ovozi tushunadigan harflar) ===
   const singles = {
-    'a':'а','b':'б','d':'д','e':'е','f':'ф','g':'г','h':'ҳ','i':'и',
-    'j':'ж','k':'к','l':'л','m':'м','n':'н','o':'о','p':'п','q':'қ',
-    'r':'р','s':'с','t':'т','u':'у','v':'в','x':'х','y':'й','z':'з',
-    "'":"ъ",
-    'A':'А','B':'Б','D':'Д','E':'Е','F':'Ф','G':'Г','H':'Ҳ','I':'И',
-    'J':'Ж','K':'К','L':'Л','M':'М','N':'Н','O':'О','P':'П','Q':'Қ',
-    'R':'Р','S':'С','T':'Т','U':'У','V':'В','X':'Х','Y':'Й','Z':'З'
+    // O'zbekcha → Ruscha (fonetik)
+    'a':'а', 'b':'б', 'd':'д', 'e':'е', 'f':'ф', 'g':'г', 
+    'h':'х', // ҳ → х (rus ovozi "х" ni tushunadi)
+    'i':'и', 'j':'ж', 'k':'к', 'l':'л', 'm':'м', 'n':'н', 
+    'o':'о', 'p':'п', 
+    'q':'к', // қ → к (rus ovozi "к" ni tushunadi)
+    'r':'р', 's':'с', 't':'т', 'u':'у', 'v':'в', 
+    'x':'кс', // x → кс (ruscha "кс" tovushi)
+    'y':'й', 'z':'з',
+    // Katta harflar
+    'A':'А', 'B':'Б', 'D':'Д', 'E':'Е', 'F':'Ф', 'G':'Г',
+    'H':'Х', 'I':'И', 'J':'Ж', 'K':'К', 'L':'Л', 'M':'М',
+    'N':'Н', 'O':'О', 'P':'П', 'Q':'К', 'R':'Р', 'S':'С',
+    'T':'Т', 'U':'У', 'V':'В', 'X':'КС', 'Y':'Й', 'Z':'З'
   };
+
   let out = '';
   for (let i = 0; i < r.length; i++) {
     const ch = r[i];
