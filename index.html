@@ -107,7 +107,8 @@
   .filter-row{display:flex;gap:8px;margin-bottom:12px}
   .filter-select{background:var(--bg4);border:1.5px solid rgba(34,211,165,0.45);color:var(--text2);border-radius:8px;padding:7px 10px;font-size:12px;flex:1;outline:none}
 
-  .trade-card{background:linear-gradient(145deg,#22334a,#1a2635);border:1.5px solid rgba(34,211,165,0.45);box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+  .trade-card{background:linear-gradient(145deg,#22334a,#1a2635);border:1.5px solid rgba(34,211,165,0.45);box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);border-radius:12px;padding:10px 12px;margin-bottom:8px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  .trade-card-selected{border:1.5px solid var(--green) !important;box-shadow:0 0 0 2px rgba(34,211,165,0.28) !important}
   @keyframes pulseLive{0%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.75)}100%{opacity:1;transform:scale(1)}}
   @keyframes pnlFlash{0%{filter:brightness(2)}100%{filter:brightness(1)}}
   .pnl-live-flash{animation:pnlFlash 0.6s ease-out}
@@ -125,7 +126,7 @@
   .nat-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
   .nat-win{background:rgba(34,211,165,0.1);color:var(--green)}
   .nat-loss{background:rgba(248,113,113,0.1);color:var(--red)}
-  .trade-actions{display:flex;gap:4px}
+  .trade-actions{display:flex;gap:3px}
   .action-btn{background:var(--bg4);border:1px solid var(--border);border-radius:6px;padding:3px 6px;font-size:11px;cursor:pointer}
 
   .empty{text-align:center;padding:50px 20px;color:var(--muted)}
@@ -1620,6 +1621,14 @@
     </select>
   </div>
   <button id="close-all-btn" onclick="closeAllOpenTrades()" style="display:none;width:100%;margin:0 0 10px;background:rgba(248,113,113,0.1);border:1px solid rgba(248,113,113,0.4);color:var(--red);border-radius:9px;padding:9px;font-size:12px;font-weight:700;cursor:pointer"><span data-i18n="jurnal_close_all">🔒 Barcha ochiq savdolarni yopish</span> (<span id="close-all-count">0</span>)<span data-i18n="jurnal_close_all_mt5"> — MT5'da ham</span></button>
+  <!-- Bir nechta savdoni belgilab, birgalikda o'chirish uchun paydo bo'ladigan panel -->
+  <div id="select-toolbar" style="display:none;align-items:center;justify-content:space-between;background:rgba(34,211,165,0.08);border:1px solid rgba(34,211,165,0.35);border-radius:10px;padding:8px 12px;margin-bottom:10px">
+    <span id="select-toolbar-count" style="font-size:12px;font-weight:700;color:var(--text2)">0 ta tanlandi</span>
+    <div style="display:flex;gap:8px">
+      <button onclick="exitSelectMode()" style="background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer">Bekor</button>
+      <button onclick="askBulkDelete()" style="background:#7f1d1d;border:none;color:#fca5a5;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer">🗑 O'chirish</button>
+    </div>
+  </div>
   <div id="trades-list"></div>
 </div>
 
@@ -2204,20 +2213,20 @@
       <div class="modal-title" style="margin-bottom:0">📷 Qo'lda screenshot qo'shish</div>
       <button class="sabab-fs-close" onclick="closeManualShotModal()">✕</button>
     </div>
-    <div style="font-size:11px;color:var(--muted);margin-bottom:10px;line-height:1.5">
+    <div style="font-size:11.5px;color:var(--text3);margin-bottom:10px;line-height:1.55;font-weight:500">
       Kompyuter/VPS o'chiq bo'lganda EA screenshot ololmaydi. Bunday holda grafikni
       (Chart bo'limi yoki MT5 ilovasi) o'zingiz skrinshot qilib galereyaga saqlang,
       so'ng shu yerdan tanlang — u Trade Replay'ga EA'nikidek qo'shiladi.
     </div>
 
     <div style="display:flex;gap:6px;margin-bottom:10px" id="manual-shot-stage-btns">
-      <button type="button" class="action-btn manual-stage-btn" data-stage="open" onclick="selectManualShotStage('open')" style="flex:1;padding:8px 4px;font-size:11px">🟢 Ochilganda</button>
-      <button type="button" class="action-btn manual-stage-btn" data-stage="during" onclick="selectManualShotStage('during')" style="flex:1;padding:8px 4px;font-size:11px">🟡 Davomida</button>
-      <button type="button" class="action-btn manual-stage-btn" data-stage="exit" onclick="selectManualShotStage('exit')" style="flex:1;padding:8px 4px;font-size:11px">🔴 Yopilganda</button>
+      <button type="button" class="action-btn manual-stage-btn" data-stage="open" onclick="selectManualShotStage('open')" style="flex:1;padding:8px 4px;font-size:11.5px;font-weight:600">🟢 Ochilganda</button>
+      <button type="button" class="action-btn manual-stage-btn" data-stage="during" onclick="selectManualShotStage('during')" style="flex:1;padding:8px 4px;font-size:11.5px;font-weight:600">🟡 Davomida</button>
+      <button type="button" class="action-btn manual-stage-btn" data-stage="exit" onclick="selectManualShotStage('exit')" style="flex:1;padding:8px 4px;font-size:11.5px;font-weight:600">🔴 Yopilganda</button>
     </div>
 
     <div id="manual-shot-preview" style="position:relative;background:#000;border-radius:10px;overflow:hidden;min-height:120px;display:flex;align-items:center;justify-content:center;margin-bottom:10px">
-      <span style="color:var(--muted);font-size:12px">Rasm tanlanmagan</span>
+      <span style="color:#cbd5e1;font-size:12px">Rasm tanlanmagan</span>
     </div>
 
     <input type="file" id="manual-shot-file" accept="image/*" style="display:none" onchange="handleManualShotFile(event)">
@@ -2273,8 +2282,8 @@
     <div class="modal-handle"></div>
     <div class="del-modal">
       <div class="del-icon">&#128465;&#65039;</div>
-      <h3 style="font-size:15px;margin-bottom:6px">Savdoni o'chirmoqchimisiz?</h3>
-      <p style="color:var(--muted);font-size:12px;margin-bottom:18px">Bu amalni qaytarib bo'lmaydi.</p>
+      <h3 id="del-modal-title" style="font-size:15px;margin-bottom:6px">Savdoni o'chirmoqchimisiz?</h3>
+      <p id="del-modal-sub" style="color:var(--muted);font-size:12px;margin-bottom:18px">Bu amalni qaytarib bo'lmaydi.</p>
       <div class="modal-btns">
         <button class="btn-cancel" onclick="closeDelModal()">Bekor</button>
         <button style="flex:1;background:#7f1d1d;color:#fca5a5;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:14px;cursor:pointer" onclick="confirmDelete()">O'chirish</button>
@@ -2505,6 +2514,10 @@ let mt5Unsub = null;
 // bosib savdoni jurnalga qo'shganda, shu ro'yxat qayta tekshirilib bog'lanadi —
 // shu bilan "MT5 javobi jurnal yozuvidan tezroq kelib qolish" muammosi hal bo'ladi.
 let unmatchedMt5OpenEvents = {};
+// Integratsiya uzoq vaqt o'chiq/aloqasiz bo'lgach qayta ulanganda, shu
+// vaqtdan ESKI "open" hodisalari endi avtomatik jurnalga QO'SHILMAYDI
+// (faqat "processed:true" qilib e'tiborsiz qoldiriladi) — flood'ning oldini olish uchun.
+const MT5_AUTOADD_STALE_MS = 90 * 1000; // 90 soniya
 
 // ============================================================
 // MT5 SCREENSHOT + TRADE REPLAY
@@ -2821,9 +2834,20 @@ function watchCommandResult(cmdId, statusBox) {
         statusBox.style.background = 'rgba(248,113,113,0.15)';
         statusBox.style.color = 'var(--red)';
         statusBox.textContent = '✗ MT5 xatosi: ' + (d.errorMsg || 'noma\'lum');
+        // TUZATISH: buyruq xato bilan tugaganda ham pendingMt5CmdId tozalanishi kerak —
+        // aks holda bu bayroq "band" holida abadiy qolib ketib, keyinchalik MT5
+        // terminalining o'zida ochilgan har qanday savdo avtomatik jurnalga
+        // yozilmay, faqat xotirada "unmatched" holida kutib qolaveradi.
+        if (pendingMt5CmdId === cmdId) pendingMt5CmdId = null;
         unsub();
       }
     });
+  // TUZATISH: MT5'dan umuman javob kelmasa (masalan EA o'chib qolgan yoki
+  // internetda uzilish bo'lgan) ham pendingMt5CmdId abadiy "band" bo'lib
+  // qolmasligi uchun 25 soniyadan keyin avtomatik bo'shatib yuboramiz.
+  setTimeout(() => {
+    if (pendingMt5CmdId === cmdId) pendingMt5CmdId = null;
+  }, 25000);
 }
 
 // MT5'dan kelayotgan hodisalarni (order ochildi/yopildi) tinglash
@@ -2962,7 +2986,7 @@ function openManualShotModal(ticket) {
   const key = String(ticket);
   const trade = trades.find(t => String(t.mt5Ticket || t.id) === key);
   manualShotState = { ticket: key, trade: trade || null, stage: 'during', base64: null };
-  document.getElementById('manual-shot-preview').innerHTML = '<span style="color:var(--muted);font-size:12px">Rasm tanlanmagan</span>';
+  document.getElementById('manual-shot-preview').innerHTML = '<span style="color:#cbd5e1;font-size:12px">Rasm tanlanmagan</span>';
   document.getElementById('manual-shot-file').value = '';
   document.getElementById('manual-shot-status').textContent = '';
   document.getElementById('manual-shot-tf').value = 'M15';
@@ -3450,6 +3474,20 @@ function handleMT5Event(eventId, ev) {
     //    eslatiladi.
     if (pendingMt5CmdId) {
       unmatchedMt5OpenEvents[eventId] = ev;
+      return;
+    }
+
+    // TUZATISH: agar bu hodisa juda "eski" bo'lsa (masalan integratsiya
+    // uzoq vaqt O'CHIRILGAN turgan, yoki EA/internet uzoq vaqt aloqasiz
+    // bo'lgan, keyin qayta ulanganda ReconcileMissedDeals orqali orqadan
+    // qolgan ko'p savdolar birdan kelib qoladi) — bunday "orqadan qolgan"
+    // hodisalarni AVTOMATIK ravishda jurnalga qo'shmaymiz, aks holda jurnal
+    // birdan o'nlab keraksiz yozuv bilan "to'lib" ketishi mumkin edi. Faqat
+    // OQIMI (openTime hozirgi vaqtdan MT5_AUTOADD_STALE_MS dan yaqin) bo'lgan
+    // "yangi" hodisalar avtomatik qo'shiladi.
+    const evAgeMs = ev.openTime ? (Date.now() - Number(ev.openTime)) : 0;
+    if (evAgeMs > MT5_AUTOADD_STALE_MS) {
+      mt5db.collection('users').doc(userCode).collection('mt5_events').doc(eventId).update({ processed: true }).catch(()=>{});
       return;
     }
     trades.unshift({
@@ -5344,9 +5382,80 @@ function saveTrade() {
   document.getElementById('modal-overlay').classList.remove('open');
 }
 
-function askDelete(id) { deleteId = id; document.getElementById('del-overlay').classList.add('open'); }
+function askDelete(id) {
+  deleteId = id;
+  deleteIds = null;
+  const titleEl = document.getElementById('del-modal-title');
+  const subEl = document.getElementById('del-modal-sub');
+  if (titleEl) titleEl.textContent = "Savdoni o'chirmoqchimisiz?";
+  if (subEl) subEl.textContent = "Bu amalni qaytarib bo'lmaydi.";
+  document.getElementById('del-overlay').classList.add('open');
+}
 function closeDelModal(e) { if (e && e.target !== document.getElementById('del-overlay')) return; document.getElementById('del-overlay').classList.remove('open'); }
-function confirmDelete() { trades = trades.filter(t => t.id !== deleteId); save(); renderAll(); document.getElementById('del-overlay').classList.remove('open'); }
+function confirmDelete() {
+  if (deleteIds && deleteIds.length) {
+    const idsSet = new Set(deleteIds);
+    trades = trades.filter(t => !idsSet.has(t.id));
+    deleteIds = null;
+    selectMode = false;
+    selectedTradeIds.clear();
+  } else {
+    trades = trades.filter(t => t.id !== deleteId);
+  }
+  save(); renderAll();
+  document.getElementById('del-overlay').classList.remove('open');
+}
+
+// ============================================================
+// KO'P SAVDONI BELGILAB, BIRGALIKDA O'CHIRISH
+// Savdo kartasini bosib turish (long-press) belgilash rejimini
+// ochadi; keyin har bir kartaga bir marta bosish uni belgilaydi/
+// belgisini olib tashlaydi. Yuqorida chiqadigan panel orqali
+// belgilangan hammasi bitta bosishda o'chiriladi.
+// ============================================================
+let selectMode = false;
+let selectedTradeIds = new Set();
+let deleteIds = null; // bulk o'chirish uchun (deleteId — bitta savdo uchun, yuqorida allaqachon e'lon qilingan)
+let longPressTimer = null;
+let longPressTriggered = false;
+
+function cardPressStart(id) {
+  longPressTriggered = false;
+  clearTimeout(longPressTimer);
+  longPressTimer = setTimeout(() => {
+    longPressTriggered = true;
+    if (!selectMode) { selectMode = true; selectedTradeIds.clear(); selectedTradeIds.add(id); }
+    else { toggleSelectTrade(id); }
+    if (navigator.vibrate) navigator.vibrate(15);
+    renderTrades();
+  }, 450);
+}
+function cardPressEnd() { clearTimeout(longPressTimer); }
+function cardClick(id) {
+  if (longPressTriggered) { longPressTriggered = false; return; } // long-press'dan keyingi "click"ni e'tiborsiz qoldiramiz
+  if (selectMode) { toggleSelectTrade(id); }
+}
+function toggleSelectTrade(id) {
+  if (selectedTradeIds.has(id)) selectedTradeIds.delete(id);
+  else selectedTradeIds.add(id);
+  if (selectedTradeIds.size === 0) selectMode = false;
+  renderTrades();
+}
+function exitSelectMode() {
+  selectMode = false;
+  selectedTradeIds.clear();
+  renderTrades();
+}
+function askBulkDelete() {
+  if (!selectedTradeIds.size) return;
+  deleteIds = Array.from(selectedTradeIds);
+  deleteId = null;
+  const titleEl = document.getElementById('del-modal-title');
+  const subEl = document.getElementById('del-modal-sub');
+  if (titleEl) titleEl.textContent = deleteIds.length + " ta savdoni o'chirmoqchimisiz?";
+  if (subEl) subEl.textContent = "Bu amalni qaytarib bo'lmaydi.";
+  document.getElementById('del-overlay').classList.add('open');
+}
 
 // ============================================================
 // UMUMIY TASDIQLASH MODALI (window.confirm() o'rniga)
@@ -5598,6 +5707,17 @@ function renderTrades() {
   const fi = document.getElementById('filter-inst').value;
   const fn = document.getElementById('filter-nat').value;
 
+  // Belgilash rejimi paneli (yuqoridagi "N ta tanlandi / O'chirish" panel)
+  const selectToolbar = document.getElementById('select-toolbar');
+  if (selectToolbar) {
+    if (selectMode && selectedTradeIds.size > 0) {
+      selectToolbar.style.display = 'flex';
+      document.getElementById('select-toolbar-count').textContent = selectedTradeIds.size + " ta tanlandi";
+    } else {
+      selectToolbar.style.display = 'none';
+    }
+  }
+
   // "Barchasini yopish" tugmasi — ochiq savdolar bo'lsa ko'rsatiladi
   const closeAllBtn = document.getElementById('close-all-btn');
   if (closeAllBtn) {
@@ -5753,12 +5873,21 @@ function renderTrades() {
     const screenshotBlock = shotsForTrade.length ? `
       <div style="display:flex;align-items:center;gap:6px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
         <div style="display:flex;gap:4px;overflow-x:auto;flex:1">
-          ${shotsForTrade.slice(0, 6).map(s => `<img src="data:image/png;base64,${s.imageBase64}" style="width:34px;height:24px;object-fit:cover;border-radius:4px;border:1px solid ${s.source === 'manual' ? 'var(--gold)' : 'var(--border2)'};cursor:pointer;flex-shrink:0" onclick="openTradeReplay('${shotKey}')" />`).join('')}
+          ${shotsForTrade.slice(0, 6).map(s => `<img src="data:image/png;base64,${s.imageBase64}" style="width:34px;height:24px;object-fit:cover;border-radius:4px;border:1px solid ${s.source === 'manual' ? 'var(--gold)' : 'var(--border2)'};cursor:pointer;flex-shrink:0" onclick="event.stopPropagation();openTradeReplay('${shotKey}')" />`).join('')}
         </div>
-        <button class="action-btn" style="font-size:10px;white-space:nowrap;padding:3px 8px" onclick="openTradeReplay('${shotKey}')">🎬 Replay (${shotsForTrade.length})</button>
+        <button class="action-btn" style="font-size:10px;white-space:nowrap;padding:3px 8px" onclick="event.stopPropagation();openTradeReplay('${shotKey}')">🎬 Replay (${shotsForTrade.length})</button>
       </div>` : '';
 
-    return `<div class="trade-card" style="padding:8px 10px;margin-bottom:6px;${cardBg}">
+    const isSelected = selectedTradeIds.has(t.id);
+    const selectCheckHtml = selectMode
+      ? `<div style="position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;border:2px solid ${isSelected ? 'var(--green)' : 'var(--muted)'};background:${isSelected ? 'var(--green)' : 'transparent'};display:flex;align-items:center;justify-content:center;font-size:12px;color:#04140d;font-weight:900;z-index:2">${isSelected ? '✓' : ''}</div>`
+      : '';
+
+    return `<div class="trade-card${isSelected ? ' trade-card-selected' : ''}" style="padding:8px 10px;margin-bottom:6px;${cardBg}position:relative"
+      onmousedown="cardPressStart(${t.id})" onmouseup="cardPressEnd()" onmouseleave="cardPressEnd()"
+      ontouchstart="cardPressStart(${t.id})" ontouchend="cardPressEnd()" ontouchmove="cardPressEnd()"
+      onclick="cardClick(${t.id})">
+      ${selectCheckHtml}
       <div style="display:flex;align-items:center;margin-bottom:5px;flex-wrap:wrap;gap:3px">
         <span class="trade-inst" style="font-size:11px">${t.instrument}</span>
         ${reviewBadge}
@@ -5778,12 +5907,12 @@ function renderTrades() {
           ${natBadge}
           ${partialBadge}
         </div>
-        <div class="trade-actions">
-          <button class="action-btn" onclick="analyzeSingleTrade('${shotKey}', ${t.id})" title="AI orqali shu savdoni tahlil qilish" style="display:inline-flex;align-items:center;justify-content:center;color:#f97316"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="8" width="14" height="11" rx="2.5"/><path d="M12 8V5"/><circle cx="12" cy="3.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"/><path d="M9 16.3h6"/><line x1="2.2" y1="11.5" x2="5" y2="11.5"/><line x1="19" y1="11.5" x2="21.8" y2="11.5"/></svg></button>
-          <button class="action-btn" onclick="openManualShotModal('${shotKey}')" title="Kompyuter/EA o'chiq bo'lganda grafikni qo'lda skrinshot qilib biriktirish" style="display:inline-flex;align-items:center;justify-content:center;color:#f97316"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.4"/></svg></button>
-          <button class="action-btn" onclick="openModal(${t.id})">✏️</button>
-          <button class="action-btn" onclick="askDelete(${t.id})">🗑</button>
-        </div>
+        ${selectMode ? '' : `<div class="trade-actions">
+          <button class="action-btn" onclick="event.stopPropagation();analyzeSingleTrade('${shotKey}', ${t.id})" title="AI orqali shu savdoni tahlil qilish" style="display:inline-flex;align-items:center;justify-content:center;color:#f97316;padding:4px 5px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="8" width="14" height="11" rx="2.5"/><path d="M12 8V5"/><circle cx="12" cy="3.3" r="1.1" fill="currentColor" stroke="none"/><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"/><path d="M9 16.3h6"/><line x1="2.2" y1="11.5" x2="5" y2="11.5"/><line x1="19" y1="11.5" x2="21.8" y2="11.5"/></svg></button>
+          <button class="action-btn" onclick="event.stopPropagation();openManualShotModal('${shotKey}')" title="Kompyuter/EA o'chiq bo'lganda grafikni qo'lda skrinshot qilib biriktirish" style="display:inline-flex;align-items:center;justify-content:center;color:#f97316;padding:4px 5px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3.4"/></svg></button>
+          <button class="action-btn" onclick="event.stopPropagation();openModal(${t.id})">✏️</button>
+          <button class="action-btn" onclick="event.stopPropagation();askDelete(${t.id})">🗑</button>
+        </div>`}
       </div>
       ${t.izoh ? `<div style="display:flex;align-items:flex-start;gap:4px;margin-top:4px;padding-top:4px;border-top:1px solid var(--border)"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg><span style="font-size:10px;color:var(--muted);font-style:italic;flex:1;white-space:pre-wrap;word-break:break-word;line-height:1.4">izoh: ${t.izoh}</span></div>` : ''}
       ${screenshotBlock}
