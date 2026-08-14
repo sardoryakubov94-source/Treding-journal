@@ -6719,15 +6719,106 @@ function vaClosePanel() {
   } catch (e) {}
 }
 
+// ========== LOTIN → KIRILL TRANSLITERATSIYA (O'ZBEKCHA) ==========
+function latinToCyrillic(text) {
+  if (!text) return '';
+  let r = text;
+  // Ikki harflilarni avval almashtirish (muhim!)
+  const doubles = [
+    ['sh','ш'],['ch','ч'],['yo','ё'],['yu','ю'],['ya','я'],['ye','е'],
+    ["o'","ў"],["g'","ғ"],['ng','нг'],['Sh','Ш'],['Ch','Ч'],['Yo','Ё'],
+    ['Yu','Ю'],['Ya','Я'],['Ye','Е'],["O'","Ў"],["G'","Ғ"],['Ng','Нг']
+  ];
+  for (const [l,c] of doubles) {
+    r = r.split(l).join(c);
+  }
+  // Bir harflilar
+  const singles = {
+    'a':'а','b':'б','d':'д','e':'е','f':'ф','g':'г','h':'ҳ','i':'и',
+    'j':'ж','k':'к','l':'л','m':'м','n':'н','o':'о','p':'п','q':'қ',
+    'r':'р','s':'с','t':'т','u':'у','v':'в','x':'х','y':'й','z':'з',
+    "'":"ъ",
+    'A':'А','B':'Б','D':'Д','E':'Е','F':'Ф','G':'Г','H':'Ҳ','I':'И',
+    'J':'Ж','K':'К','L':'Л','M':'М','N':'Н','O':'О','P':'П','Q':'Қ',
+    'R':'Р','S':'С','T':'Т','U':'У','V':'В','X':'Х','Y':'Й','Z':'З'
+  };
+  let out = '';
+  for (let i = 0; i < r.length; i++) {
+    const ch = r[i];
+    out += singles[ch] !== undefined ? singles[ch] : ch;
+  }
+  return out;
+}
+
+// ========== TTS (OVoz Chiqarish) — SIFATLI RU OVozi + Transliteratsiya ==========
+let _vaVoices = [];
+function _vaLoadVoices() {
+  if (!('speechSynthesis' in window)) return;
+  _vaVoices = window.speechSynthesis.getVoices();
+}
+if ('speechSynthesis' in window) {
+  if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = _vaLoadVoices;
+  }
+  // Brauzer ovozlarini yuklash uchun biroz kutamiz (ba'zi brauzerlarda kechikadi)
+  setTimeout(_vaLoadVoices, 500);
+  setTimeout(_vaLoadVoices, 1500);
+}
+
 function vaSpeak(text) {
   try {
-    if (!('speechSynthesis' in window)) return;
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ru-RU'; // telefonda ko'pincha faqat ru/en ovozlari o'rnatilgan bo'ladi
-    u.rate = 1.05;
+    if (!('speechSynthesis' in window) || !text) return;
     speechSynthesis.cancel();
-    speechSynthesis.speak(u);
-  } catch (e) { /* TTS mavjud bo'lmasa jim o'tkazamiz */ }
+
+    // Matnni kirillga o'tkazamiz (ru-RU ovozi lotincha o'qimaydi)
+    const cyrillicText = latinToCyrillic(text);
+
+    // Uzun matnlarni qismlarga bo'lamiz (har bir qism ~120 ta belgi)
+    const chunks = [];
+    const sentences = cyrillicText.match(/[^\.\!\?]+[\.\!\?]+|[^\.\!\?]+/g) || [cyrillicText];
+    let current = '';
+    for (const s of sentences) {
+      if ((current + s).length > 120) {
+        if (current) chunks.push(current.trim());
+        current = s;
+      } else {
+        current += s;
+      }
+    }
+    if (current) chunks.push(current.trim());
+    if (chunks.length === 0) chunks.push(cyrillicText);
+
+    // Eng sifatli ru-RU ovozini tanlaymiz
+    let voice = null;
+    const preferred = ['Google русский', 'Microsoft Irina', 'Microsoft Pavel', 'ru-RU', 'Russian'];
+    for (const p of preferred) {
+      voice = _vaVoices.find(v => v.name.includes(p) || v.lang === p);
+      if (voice) break;
+    }
+    if (!voice) {
+      voice = _vaVoices.find(v => v.lang && v.lang.toLowerCase().startsWith('ru'));
+    }
+
+    chunks.forEach((chunk, idx) => {
+      const u = new SpeechSynthesisUtterance(chunk);
+      u.lang = 'ru-RU';
+      u.rate = 0.92; // biroz sekinroq — tushunarliroq
+      u.pitch = 1.0;
+      if (voice) u.voice = voice;
+      u.volume = 1.0;
+
+      // Oxirgi qism bo'lganda panelni yashirish
+      if (idx === chunks.length - 1) {
+        u.onend = () => {
+          setTimeout(() => {
+            if (!vaListening) vaClosePanel();
+          }, 2500);
+        };
+      }
+
+      speechSynthesis.speak(u);
+    });
+  } catch (e) { console.error('TTS xato:', e); }
 }
 
 function vaStart() {
