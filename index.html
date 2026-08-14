@@ -6604,7 +6604,15 @@ updateSababCounter();
     style="position:absolute;top:8px;right:10px;width:24px;height:24px;border-radius:50%;border:none;
     background:rgba(255,255,255,0.08);color:var(--text2);font-size:14px;line-height:1;cursor:pointer;
     display:flex;align-items:center;justify-content:center;padding:0">✕</button>
-  <div id="va-status" style="font-weight:700;margin-bottom:6px;margin-right:24px;color:var(--gold)">Tinglanmoqda...</div>
+  <button id="va-lang-toggle" onclick="vaToggleDisplayLang()" title="Chat matni tili: O'zbek/Rus"
+    style="position:absolute;top:8px;right:40px;height:24px;padding:0 8px;border-radius:12px;border:none;
+    background:rgba(255,255,255,0.08);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;
+    display:flex;align-items:center;justify-content:center">UZ</button>
+  <button id="va-tts-toggle" onclick="vaToggleTts()" title="Ovozni o'chirish"
+    style="position:absolute;top:8px;right:72px;width:24px;height:24px;border-radius:50%;border:none;
+    background:rgba(255,255,255,0.08);color:var(--text2);font-size:13px;line-height:1;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;padding:0">🔊</button>
+  <div id="va-status" style="font-weight:700;margin-bottom:6px;margin-right:90px;color:var(--gold)">Tinglanmoqda...</div>
   <div id="va-transcript" style="color:var(--text2);min-height:18px"></div>
   <div id="va-result" style="margin-top:8px;font-weight:600"></div>
 </div>
@@ -6699,8 +6707,67 @@ let vaListening = false;
 function vaSetPanel(status, transcript, result) {
   document.getElementById('va-panel').style.display = 'block';
   if (status !== undefined) document.getElementById('va-status').textContent = status;
-  if (transcript !== undefined) document.getElementById('va-transcript').textContent = transcript;
-  if (result !== undefined) document.getElementById('va-result').textContent = result;
+  if (transcript !== undefined) vaSetDisplayText('va-transcript', transcript);
+  if (result !== undefined) vaSetDisplayText('va-result', result);
+}
+
+// ========== CHAT MATNI TILI: O'ZBEK / RUS (faqat ko'rinish uchun) ==========
+// Ovoz (TTS) har doim ruscha gapiradi (pastda vaSpeak'da) — chunki o'zbekcha
+// sintez sifatsiz. Lekin ekrandagi YOZUV rus tilini bilmagan foydalanuvchi
+// uchun o'zbekcha (asl) holida qoladi — xohlasa "RU" tugmasi bilan haqiqiy
+// tarjimaga o'tkazib ko'rishi mumkin. Bu faqat vizual — orqa fon (backend)
+// buyruq/transkript logikasi har doim asl (o'zbekcha) matndan foydalanadi,
+// chunki u dataset.raw'da alohida saqlanadi.
+let _vaDisplayLang = localStorage.getItem('va-display-lang') || 'uz';
+(function () {
+  const btn = document.getElementById('va-lang-toggle');
+  if (btn) btn.textContent = _vaDisplayLang.toUpperCase();
+})();
+
+function vaToggleDisplayLang() {
+  _vaDisplayLang = (_vaDisplayLang === 'uz') ? 'ru' : 'uz';
+  localStorage.setItem('va-display-lang', _vaDisplayLang);
+  const btn = document.getElementById('va-lang-toggle');
+  if (btn) btn.textContent = _vaDisplayLang.toUpperCase();
+  // Ekranda hozir turgan matnlarni yangi tilga qayta chizamiz
+  const tEl = document.getElementById('va-transcript');
+  const rEl = document.getElementById('va-result');
+  if (tEl && tEl.dataset.raw !== undefined) vaSetDisplayText('va-transcript', tEl.dataset.raw);
+  if (rEl && rEl.dataset.raw !== undefined) vaSetDisplayText('va-result', rEl.dataset.raw);
+}
+
+// Matnni ekranga chiqaradi. Asl matn har doim el.dataset.raw'da saqlanadi
+// (backend shundan foydalanadi). _vaDisplayLang === 'ru' bo'lsa, ko'rinish
+// uchun ruschaga tarjima qilinadi (AI orqali), lekin dataset.raw o'zgarmaydi.
+let _vaTranslateSeq = 0;
+function vaSetDisplayText(elId, text) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.dataset.raw = text;
+  if (_vaDisplayLang !== 'ru' || !text || !text.trim()) {
+    el.textContent = text;
+    return;
+  }
+  el.textContent = text; // tarjima tayyor bo'lgunча asl matn ko'rinib tursin
+  const seq = ++_vaTranslateSeq;
+  vaTranslateToRussian(text).then(ru => {
+    if (seq !== _vaTranslateSeq) return;        // eskirgan so'rov — e'tibor bermaymiz
+    if (el.dataset.raw === text) el.textContent = ru; // matn shu vaqtgacha o'zgarmagan bo'lsa yangilaymiz
+  }).catch(() => {});
+}
+
+// AI orqali o'zbekcha matnni haqiqiy ruscha tarjimaga o'giradi (faqat ko'rinish uchun)
+async function vaTranslateToRussian(text) {
+  try {
+    const raw = await callAIAnalyst(
+      "Sen tarjimonsan. Foydalanuvchi yuborgan o'zbekcha matnni ruscha tilga tarjima qil. " +
+      "Faqat tarjima qilingan matnni qaytar — boshqa hech qanday izoh, tirnoq belgisi yoki matn qo'shma.",
+      text, []
+    );
+    return (raw || text).trim();
+  } catch (e) {
+    return text; // tarjima muvaffaqiyatsiz bo'lsa asl matnni ko'rsatamiz
+  }
 }
 
 // Foydalanuvchi ✕ tugmasini bosganda: panelni darhol yashiradi (AI javobini
@@ -6719,63 +6786,170 @@ function vaClosePanel() {
   } catch (e) {}
 }
 
-// Qurilmada o'rnatilgan ovozlar orasidan "erkak" ovozini topishga harakat qiladi.
-// Aniq gender-metadata har doim ham mavjud emas, shuning uchun nom bo'yicha
-// taxminiy qidiruv qilinadi (ko'plab tizimlarda ovoz nomlarida "Male"/"Man"
-// yoki mashhur erkak ovoz nomlari bo'ladi). Topilmasa — null qaytadi va
-// pastroq pitch bilan standart ovoz ishlatiladi.
-let vaCachedVoices = null;
-function vaGetMaleVoice(lang) {
-  try {
-    let voices = vaCachedVoices || speechSynthesis.getVoices();
-    if (voices && voices.length) vaCachedVoices = voices;
-    if (!voices || !voices.length) return null;
+// ========== LOTIN → RUS KIRILL (FONETIK, TTS uchun) ==========
+// O'zbekcha matnni faqat rus ovozi tushunadigan harflarga o'tkazadi
+function latinToCyrillic(text) {
+  if (!text) return '';
+  let r = text;
 
-    const langPrefix = lang.split('-')[0].toLowerCase();
-    const sameLang = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith(langPrefix));
-    const pool = sameLang.length ? sameLang : voices;
+  // === Ikki harflilar (avval almashtirish - muhim!) ===
+  const doubles = [
+    // O'zbekcha maxsus harflar → ruscha ekvivalent
+    ["o'","у"],["g'","г"],['sh','ш'],['ch','ч'],
+    ['yo','ё'],['yu','ю'],['ya','я'],['ye','е'],['ng','нг'],
+    ["O'","У"],["G'","Г"],['Sh','Ш'],['Ch','Ч'],
+    ['Yo','Ё'],['Yu','Ю'],['Ya','Я'],['Ye','Е'],['Ng','Нг']
+  ];
+  for (const [l,c] of doubles) {
+    r = r.split(l).join(c);
+  }
 
-    // Ma'lum platformalarda ko'p uchraydigan erkak ovoz nomlari
-    const maleHints = ['male', 'man', 'yuriy', 'pavel', 'dmitry', 'dmitri', 'nikolai',
-      'aleksandr', 'alexander', 'maxim', 'ivan', 'george', 'daniel', 'david', 'fred', 'guy'];
-    const femaleHints = ['female', 'woman', 'milena', 'katya', 'ekaterina', 'olga', 'irina',
-      'anna', 'elena', 'tatyana', 'victoria', 'samantha', 'karen', 'moira', 'tessa'];
+  // === Bir harflilar (faqat rus ovozi tushunadigan harflar) ===
+  const singles = {
+    // O'zbekcha → Ruscha (fonetik)
+    'a':'а', 'b':'б', 'd':'д', 'e':'е', 'f':'ф', 'g':'г', 
+    'h':'х', // ҳ → х (rus ovozi "х" ni tushunadi)
+    'i':'и', 'j':'ж', 'k':'к', 'l':'л', 'm':'м', 'n':'н', 
+    'o':'о', 'p':'п', 
+    'q':'к', // қ → к (rus ovozi "к" ni tushunadi)
+    'r':'р', 's':'с', 't':'т', 'u':'у', 'v':'в', 
+    'x':'кс', // x → кс (ruscha "кс" tovushi)
+    'y':'й', 'z':'з',
+    // Katta harflar
+    'A':'А', 'B':'Б', 'D':'Д', 'E':'Е', 'F':'Ф', 'G':'Г',
+    'H':'Х', 'I':'И', 'J':'Ж', 'K':'К', 'L':'Л', 'M':'М',
+    'N':'Н', 'O':'О', 'P':'П', 'Q':'К', 'R':'Р', 'S':'С',
+    'T':'Т', 'U':'У', 'V':'В', 'X':'КС', 'Y':'Й', 'Z':'З'
+  };
 
-    let found = pool.find(v => {
-      const n = v.name.toLowerCase();
-      return maleHints.some(h => n.includes(h)) && !femaleHints.some(h => n.includes(h));
-    });
-    if (found) return found;
+  let out = '';
+  for (let i = 0; i < r.length; i++) {
+    const ch = r[i];
+    out += singles[ch] !== undefined ? singles[ch] : ch;
+  }
+  return out;
+}
 
-    return null;
-  } catch (e) { return null; }
+// ========== TTS (OVoz Chiqarish) — O'ZBEKCHA ovozni qidirish ==========
+let _vaVoices = [];
+let _vaUzbekVoice = null;
+let _vaRussianVoice = null;
+
+function _vaLoadVoices() {
+  if (!('speechSynthesis' in window)) return;
+  _vaVoices = window.speechSynthesis.getVoices();
+
+  // 1) O'zbekcha ovozni qidirish (eng yaxshi variant!)
+  const uzVoices = _vaVoices.filter(v => v.lang && v.lang.toLowerCase().startsWith('uz'));
+  if (uzVoices.length > 0) {
+    _vaUzbekVoice = uzVoices[0]; // Birinchi o'zbekcha ovozni olamiz
+    console.log("✅ O'zbekcha TTS ovozi topildi:", _vaUzbekVoice.name);
+  } else {
+    _vaUzbekVoice = null;
+    console.log("⚠️ O'zbekcha TTS ovozi topilmadi. Telefon sozlamalarida o'zbekcha TTS tilini o'rnating.");
+  }
+
+  // 2) Ruscha ovozni zaxiraga olish
+  const ruVoices = _vaVoices.filter(v => v.lang && v.lang.toLowerCase().startsWith('ru'));
+  if (ruVoices.length > 0) {
+    _vaRussianVoice = ruVoices[0];
+  }
+}
+
+if ('speechSynthesis' in window) {
+  if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = _vaLoadVoices;
+  }
+  setTimeout(_vaLoadVoices, 500);
+  setTimeout(_vaLoadVoices, 2000);
+}
+
+// TTS yoqilgan/o'chirilgan holati
+let _vaTtsEnabled = true;
+
+function vaToggleTts() {
+  _vaTtsEnabled = !_vaTtsEnabled;
+  const btn = document.getElementById('va-tts-toggle');
+  if (btn) {
+    btn.textContent = _vaTtsEnabled ? '🔊' : '🔇';
+    btn.title = _vaTtsEnabled ? "Ovozni o'chirish" : 'Ovozni yoqish';
+  }
+  if (!_vaTtsEnabled) {
+    speechSynthesis.cancel();
+  }
 }
 
 function vaSpeak(text) {
   try {
-    if (!('speechSynthesis' in window)) return;
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'ru-RU'; // telefonda ko'pincha faqat ru/en ovozlari o'rnatilgan bo'ladi
-    u.rate = 1.05;
+    if (!('speechSynthesis' in window) || !text || !_vaTtsEnabled) return;
+    speechSynthesis.cancel();
 
-    const maleVoice = vaGetMaleVoice(u.lang);
-    if (maleVoice) {
-      u.voice = maleVoice;
-    } else {
-      // Mos erkak ovozi topilmasa — pitch'ni pasaytirib, erkak ovoziga yaqinlashtiramiz
-      u.pitch = 0.6;
+    // Matnni kirillga o'tkazamiz
+    const cyrillicText = latinToCyrillic(text);
+
+    // Uzun matnlarni qismlarga bo'lish
+    const chunks = [];
+    const sentences = cyrillicText.match(/[^\.\!\?]+[\.\!\?]+|[^\.\!\?]+/g) || [cyrillicText];
+    let current = '';
+    for (const s of sentences) {
+      if ((current + s).length > 120) {
+        if (current) chunks.push(current.trim());
+        current = s;
+      } else {
+        current += s;
+      }
+    }
+    if (current) chunks.push(current.trim());
+    if (chunks.length === 0) chunks.push(cyrillicText);
+
+    // === HAR DOIM RUSCHA OVOZ (Female + Sokin) ===
+    // O'zbekcha sintez tovushi tushunarsiz chiqqani uchun endi o'zbekcha ovoz
+    // qidirilmaydi — matn kirillga o'girilgan holda doim rus ovozida o'qiladi.
+    let voice = null;
+    const lang = 'ru-RU';
+
+    // Ayol ismlari va "Female" kalit so'zlari
+    const femaleNames = ['Irina','Milena','Tatiana','Elena','Maria','Zira','Female','Woman','Girl','Ayol','Женский'];
+    const ruVoices = _vaVoices.filter(v => v.lang && v.lang.toLowerCase().startsWith('ru'));
+
+    // Avval ayol ovozini qidiramiz
+    for (const name of femaleNames) {
+      voice = ruVoices.find(v => v.name.toLowerCase().includes(name.toLowerCase()));
+      if (voice) break;
     }
 
-    speechSynthesis.cancel();
-    speechSynthesis.speak(u);
-  } catch (e) { /* TTS mavjud bo'lmasa jim o'tkazamiz */ }
+    // Ayol ovozi topilmasa — istalgan rus ovozi
+    if (!voice && ruVoices.length > 0) {
+      voice = ruVoices[0];
+    }
+
+    if (!voice && !_vaWarnedNoUzbek) {
+      _vaWarnedNoUzbek = true;
+      console.warn('Ruscha TTS ovozi topilmadi. Telefon sozlamalaridan ruscha TTS tilini o\'rnating.');
+    }
+
+    chunks.forEach((chunk, idx) => {
+      const u = new SpeechSynthesisUtterance(chunk);
+      u.lang = lang;
+      u.rate = 0.85;   // Sokin, sekin
+      u.pitch = 1.25;  // Ayol ovozi uchun yuqoriroq pitch
+      if (voice) u.voice = voice;
+      u.volume = 0.9;  // Biroz pastroq — sokinroq
+
+      if (idx === chunks.length - 1) {
+        u.onend = () => {
+          setTimeout(() => {
+            if (!vaListening) vaClosePanel();
+          }, 2500);
+        };
+      }
+
+      speechSynthesis.speak(u);
+    });
+  } catch (e) { console.error('TTS xato:', e); }
 }
 
-// Ba'zi brauzerlarda (Chrome) ovozlar ro'yxati asinxron yuklanadi —
-// birinchi chaqiruvda bo'sh bo'lishi mumkin, shu sabab oldindan keshlab qo'yamiz.
-if ('speechSynthesis' in window) {
-  speechSynthesis.onvoiceschanged = () => { vaCachedVoices = speechSynthesis.getVoices(); };
-}
+let _vaWarnedNoUzbek = false;
 
 function vaStart() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -6821,7 +6995,8 @@ function vaStart() {
   vaRecognition.onend = async () => {
     vaListening = false;
     document.getElementById('va-fab').style.background = 'linear-gradient(135deg,#1e3a5f,#3b82f6)';
-    const transcript = document.getElementById('va-transcript').textContent.trim();
+    const transcriptEl = document.getElementById('va-transcript');
+    const transcript = (transcriptEl.dataset.raw || transcriptEl.textContent || '').trim();
     if (!transcript) return;
     vaSetPanel('🤖 AI tahlil qilmoqda...', transcript, '');
     try {
