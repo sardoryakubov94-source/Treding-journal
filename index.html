@@ -49,6 +49,11 @@
       linear-gradient(180deg,#f7f9fb 0%,#f1f4f8 55%,#eef1f6 100%);
   }
   .theme-toggle-btn{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:20px;background:var(--bg3);border:1px solid var(--border2);color:var(--text3);cursor:pointer;flex-shrink:0;padding:0}
+  .ai-fab-toggle-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;width:52px;height:40px;border-radius:14px;background:var(--bg3);border:1.5px solid var(--border2);color:var(--text3);cursor:pointer;flex-shrink:0;padding:0;line-height:1;gap:2px;transition:background 0.2s,border-color 0.2s,color 0.2s}
+  .ai-fab-toggle-btn .ai-fab-toggle-line1{font-size:12px;font-weight:800;letter-spacing:0.3px}
+  .ai-fab-toggle-btn .ai-fab-toggle-line2{font-size:8.5px;font-weight:700;letter-spacing:0.5px;opacity:0.85}
+  .ai-fab-toggle-btn.is-on{background:rgba(34,211,165,0.14);border-color:var(--green,#22d3a5);color:var(--green,#22d3a5)}
+  .ai-fab-toggle-btn.is-off{opacity:0.55}
   #theme-toggle-btn .icon-sun{display:none}
   body.light-theme #theme-toggle-btn .icon-moon{display:none}
   body.light-theme #theme-toggle-btn .icon-sun{display:block}
@@ -439,6 +444,22 @@
   // shu tayyor 'firebase.firestore()'dan oladi, qayta initializeApp qilmaydi.
   if (firebaseConfig.apiKey !== "SIZNING_API_KEY") {
     firebase.initializeApp(firebaseConfig);
+
+    // Firestore offline-persistence: oldin yuklangan ma'lumotlar
+    // brauzer xotirasida (IndexedDB) saqlanadi — internet sekin yoki
+    // vaqtincha yo'q bo'lganda ham avval ko'rilgan ma'lumotlar darrov
+    // ko'rinadi. Yangi ma'lumot yozish/olish uchun baribir internet kerak.
+    firebase.firestore().enablePersistence({ synchronizeTabs: true })
+      .catch(function (err) {
+        if (err.code === 'failed-precondition') {
+          // Bir nechta tab ochiq bo'lsa va synchronizeTabs ishlamasa
+          console.warn('Offline-persistence: bir nechta tab ochiq, faqat bittasida ishlaydi.');
+        } else if (err.code === 'unimplemented') {
+          console.warn('Offline-persistence: bu brauzer qo\'llab-quvvatlamaydi.');
+        } else {
+          console.warn('Offline-persistence xatosi:', err);
+        }
+      });
   }
 
   // Qurilmani "eslab qolish": sessiya browser/PWA xotirasida (IndexedDB)
@@ -1891,7 +1912,10 @@
         <span id="til-toggle-icon" style="font-size:15px;color:var(--muted);font-weight:700;line-height:1;padding:0 2px;transition:transform 0.2s">▾</span>
       </span>
       <div style="display:flex;align-items:center;gap:8px">
-        <button id="ai-fab-toggle-btn" class="theme-toggle-btn" onclick="event.stopPropagation();toggleAiFabVisibility()" title="AI tugmasini yashirish/ko'rsatish">🤖</button>
+        <button id="ai-fab-toggle-btn" class="ai-fab-toggle-btn" onclick="event.stopPropagation();toggleAiFabVisibility()" title="AI ovoz tugmasini yashirish/ko'rsatish">
+          <span class="ai-fab-toggle-line1">AI</span>
+          <span class="ai-fab-toggle-line2">OVOZ</span>
+        </button>
         <button id="theme-toggle-btn" class="theme-toggle-btn" onclick="event.stopPropagation();toggleTheme()" title="Tema almashtirish">🌙</button>
       </div>
     </div>
@@ -2621,8 +2645,8 @@ function updateAiFabToggleIcon(){
   if (!btn) return;
   let hidden = false;
   try{ hidden = localStorage.getItem('tj_ai_fab_hidden') === '1'; }catch(e){}
-  btn.textContent = hidden ? '🚫' : '🤖';
-  btn.style.opacity = hidden ? '0.55' : '1';
+  btn.classList.toggle('is-on', !hidden);
+  btn.classList.toggle('is-off', hidden);
 }
 function applyAiFabVisibility(){
   const fab = document.getElementById('va-fab');
