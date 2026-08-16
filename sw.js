@@ -3,7 +3,7 @@
 // Diqqat: Firebase/Firestore ma'lumotlari baribir internet talab qiladi,
 // bu SW faqat ilova qobig'ini (HTML/CSS/JS/rasm) tezroq yuklaydi.
 
-const CACHE_VERSION = 'tj-cache-v14';
+const CACHE_VERSION = 'tj-cache-v15';
 const APP_SHELL = [
   './',
   './index.html',
