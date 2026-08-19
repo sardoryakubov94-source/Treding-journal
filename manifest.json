@@ -1,6 +1,6 @@
 {
-  "name": "Sardor Trading Journal",
-  "short_name": "Sardor TJ",
+  "name": "Trading Journal",
+  "short_name": "T.Jurnal",
   "description": "Professional Trading Journal",
   "start_url": ".",
   "display": "standalone",
