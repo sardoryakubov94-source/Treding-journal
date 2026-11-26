@@ -11702,7 +11702,9 @@ function blaknotExportWord(){
 function blaknotExportPdf(){
   const d=blaknotExportData(),html=blaknotExportHtml(d),w=window.open('','_blank');
   if(!w){showAlertModal('PDF saqlash oynasi bloklandi. Brauzerda qalqib chiquvchi oynalarga ruxsat bering.');return;}
-  w.document.open();w.document.write(html.replace('</body>','<script>window.onload=function(){setTimeout(function(){window.print()},300)};<\\/script></body>'));w.document.close();blaknotCloseExportMenu();
+  w.document.open();w.document.write(html);w.document.close();
+  setTimeout(()=>{try{w.focus();w.print();}catch(e){}},600);
+  blaknotCloseExportMenu();
 }
 function blaknotExportExcel(){
   const d=blaknotExportData();
