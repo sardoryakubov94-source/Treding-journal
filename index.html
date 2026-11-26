@@ -78,6 +78,7 @@
   }, { passive: false });
 </script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"><\/script>
 <style>
   :root {
     --bg:#0d1520;--bg2:#101a26;--bg3:#1a2635;--bg4:#182333;
@@ -2677,6 +2678,7 @@
 <div class="overlay" id="blaknot-editor-overlay">
   <div class="modal" style="height:100vh;max-height:100vh;border-radius:0;border-top:none;display:flex;flex-direction:column;padding:0">
     <div class="sabab-fs-head" style="border-bottom:1px solid var(--border)">
+      <button class="sabab-fs-close" onclick="blaknotToggleExportMenu()" title="Fayl sifatida saqlash" aria-label="Fayl sifatida saqlash">⇩</button>
       <button class="sabab-fs-close" onclick="closeBlaknotEditor()">✕</button>
       <div class="modal-title" style="margin-bottom:0" data-i18n="blaknot_editor_title">Yozuv</div>
       <div style="display:flex;align-items:center;gap:4px">
@@ -2684,7 +2686,12 @@
         <button class="sabab-fs-close" id="blaknot-delete-btn" onclick="deleteBlaknotNoteConfirm()" style="color:var(--red);visibility:hidden">🗑</button>
       </div>
     </div>
-    <div class="sabab-fs-scroll" style="padding-top:12px">
+    <div id="blaknot-export-menu" style="display:none;gap:7px;padding:9px 14px;border-bottom:1px solid var(--border);background:var(--bg)">
+      <button class="btn g" style="flex:1" onclick="blaknotExportPdf()">PDF saqlash</button>
+      <button class="btn g" style="flex:1" onclick="blaknotExportWord()">Word saqlash</button>
+      <button class="btn g" style="flex:1" onclick="blaknotExportExcel()">Excel saqlash</button>
+    </div>
+    <div class="sabab-fs-scroll" style="padding-top:12px>
       <div id="blaknot-viewmode-hint">👁 Ko'rish rejimi — tahrirlash uchun ✏️ tugmasini bosing</div>
       <input type="text" id="blaknot-input-title" class="form-input" placeholder="Sarlavha..." data-i18n-placeholder="blaknot_title_placeholder" style="font-size:16px;font-weight:700;margin-bottom:10px">
       <div id="blaknot-cat-chips" style="display:none;gap:6px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px">
@@ -11667,6 +11674,45 @@ function closeBlaknotEditor() {
   const activePage = document.querySelector('.page.active');
   if (fab) fab.style.display = (activePage && activePage.id === 'page-blaknot') ? 'flex' : 'none';
 }
+
+
+function blaknotExportData() {
+  try { blaknotCaptureAllPages(); } catch (e) {}
+  const saved = _blaknotEditingId ? _blaknotNotes.find(n => n.id === _blaknotEditingId) : null;
+  const titleEl = document.getElementById('blaknot-input-title');
+  const title = (titleEl && titleEl.value.trim()) || (saved && saved.title) || 'Yangi yozuv';
+  const pages = (_blaknotPages && _blaknotPages.length ? _blaknotPages : [{text:'',drawing:null}]).map(p => ({text:p.text || '', drawing:p.drawing || null}));
+  return {title, pages, category:(saved && saved.category) || _blaknotEditorCat || '', date:new Date().toLocaleString('uz-UZ')};
+}
+function blaknotExportFilename(title, ext) {
+  const safe=(title||'Blaknot').replace(/[\\\\/:*?"<>|]+/g,' ').replace(/\\s+/g,' ').trim().slice(0,70)||'Blaknot';
+  return safe+'.'+ext;
+}
+function blaknotExportHtml(data) {
+  const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  return '<!doctype html><html lang="uz"><head><meta charset="utf-8"><title>'+esc(data.title)+'</title><style>body{font-family:Arial,sans-serif;color:#172033;line-height:1.6;margin:32px}h1{font-size:24px;margin:0 0 8px}.meta{color:#667085;font-size:12px;margin-bottom:24px}.page{page-break-after:always;break-after:page;min-height:80vh;padding:8px 0}.page:last-child{page-break-after:auto;break-after:auto}.txt{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px}.drawing{display:block;max-width:100%;max-height:900px;object-fit:contain;margin:14px auto;border:1px solid #ddd}</style></head><body><h1>'+esc(data.title)+'</h1><div class="meta">'+esc(data.category)+' · '+esc(data.date)+'</div>'+data.pages.map((p,i)=>'<section class="page"><div class="meta">Sahifa '+(i+1)+' / '+data.pages.length+'</div>'+(p.text?'<div class="txt">'+esc(p.text)+'</div>':'')+(p.drawing?'<img class="drawing" src="'+p.drawing+'" alt="Qo‘lyozma chizmasi">':'')+'</section>').join('')+'</body></html>';
+}
+function blaknotDownloadBlob(blob,filename){
+  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),2500);
+}
+function blaknotExportWord(){
+  const d=blaknotExportData(),html=blaknotExportHtml(d);
+  blaknotDownloadBlob(new Blob(['\ufeff',html],{type:'application/msword;charset=utf-8'}),blaknotExportFilename(d.title,'doc'));blaknotCloseExportMenu();
+}
+function blaknotExportPdf(){
+  const d=blaknotExportData(),html=blaknotExportHtml(d),w=window.open('','_blank');
+  if(!w){showAlertModal('PDF saqlash oynasi bloklandi. Brauzerda qalqib chiquvchi oynalarga ruxsat bering.');return;}
+  w.document.open();w.document.write(html.replace('</body>','<script>window.onload=function(){setTimeout(function(){window.print()},300)};<\\/script></body>'));w.document.close();blaknotCloseExportMenu();
+}
+function blaknotExportExcel(){
+  const d=blaknotExportData();
+  if(typeof XLSX==='undefined'){showAlertModal('Excel eksport kutubxonasi yuklanmadi. Internetga ulanib qayta urinib ko‘ring.');return;}
+  const rows=[['Yozuv',d.title],['Bo‘lim',d.category],['Sana',d.date],[],['Sahifa','Matn','Chizma']];
+  d.pages.forEach((p,i)=>rows.push([i+1,p.text,p.drawing?'Chizma mavjud (PDF yoki Word faylida to‘liq saqlanadi)':'']));
+  const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:12},{wch:70},{wch:48}];XLSX.utils.book_append_sheet(wb,ws,'Blaknot');XLSX.writeFile(wb,blaknotExportFilename(d.title,'xlsx'));blaknotCloseExportMenu();
+}
+function blaknotToggleExportMenu(){const m=document.getElementById('blaknot-export-menu');if(m)m.style.display=m.style.display==='flex'?'none':'flex';}
+function blaknotCloseExportMenu(){const m=document.getElementById('blaknot-export-menu');if(m)m.style.display='none';}
 
 function saveBlaknotNote() {
   const titleInput = document.getElementById('blaknot-input-title');
